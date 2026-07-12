@@ -267,6 +267,17 @@ Catnu.MILESTONE_META = {
   'streak-7': { emoji: '🔥', label: '連續 7 日' },
   'streak-30': { emoji: '🔥', label: '連續 30 日' },
 };
+
+Catnu.UNIVERSAL_QUEST_POOL = [
+  '慢眨眼 3 次',
+  '坐喺佢附近 5 分鐘唔掂佢',
+  '用玩具代替手玩',
+  '講嘢調低聲線',
+  '等佢主動埋身先摸佢',
+  '摸完佢即刻俾返小食獎勵',
+  '留意佢今日嘅尾巴狀態',
+  '同佢對視慢慢眨眼 2 次',
+];
 /* @LOGIC:ENGINE */
 const DAY_MS = 86400000;
 const DECAY = 0.85;
@@ -441,6 +452,51 @@ Catnu.checkNewMilestones = function checkNewMilestones(state, nowTs) {
   if (state.streak.best >= 30 && !unlocked.has('streak-30:')) found.push({ id: 'streak-30', catId: null, unlockedAt: nowTs });
 
   return found;
+};
+
+function seedFromDate(dateStr) {
+  let h = 0;
+  for (let i = 0; i < dateStr.length; i++) h = (h * 31 + dateStr.charCodeAt(i)) >>> 0;
+  return h;
+}
+function pick(arr, seed) { return arr[seed % arr.length]; }
+
+function buildQuestForCategory(category, cat, logs, dateStr, seed, nowTs) {
+  if (category === 'universal') {
+    const text = pick(Catnu.UNIVERSAL_QUEST_POOL, seed);
+    return { id: `${dateStr}-${cat.id}-u${seed}`, text, catId: cat.id, source: 'universal', done: false };
+  }
+  if (category === 'data') {
+    let best = null, bestN = Infinity, fallback = null;
+    for (const action of Catnu.ACTIONS) {
+      const r = Catnu.actionCorrelation(logs, cat.id, action.id, nowTs);
+      if (r.P_a !== null && (best === null || r.P_a > best.P_a)) best = { action, P_a: r.P_a };
+      if (r.n < bestN) { bestN = r.n; fallback = action; }
+    }
+    if (best) return { id: `${dateStr}-${cat.id}-d`, text: `今日做多次 ${best.action.label}`, catId: cat.id, source: 'data', done: false };
+    return { id: `${dateStr}-${cat.id}-d`, text: `試下 ${fallback.label}，收集數據`, catId: cat.id, source: 'data', done: false };
+  }
+  const breed = Catnu.BREEDS.find(b => b.id === cat.breedId);
+  const rule = breed && breed.breedRules.find(r => r.when === 'noRecentAction');
+  if (rule) return { id: `${dateStr}-${cat.id}-b`, text: rule.text, catId: cat.id, source: 'breed', done: false };
+  if (breed && breed.mixedBreed) {
+    const text = pick(breed.approachGuide, seed);
+    return { id: `${dateStr}-${cat.id}-b`, text, catId: cat.id, source: 'breed', done: false };
+  }
+  const text = pick(Catnu.UNIVERSAL_QUEST_POOL, seed + 3);
+  return { id: `${dateStr}-${cat.id}-b`, text, catId: cat.id, source: 'universal', done: false };
+}
+
+Catnu.generateDailyQuests = function generateDailyQuests(dateStr, cats, logs, nowTs) {
+  const seed = seedFromDate(dateStr);
+  const CATEGORIES = ['universal', 'data', 'breed'];
+  const quests = [];
+  for (let slot = 0; slot < 3; slot++) {
+    const cat = cats[(seed + slot) % cats.length];
+    const category = CATEGORIES[(seed + slot * 7) % CATEGORIES.length];
+    quests.push(buildQuestForCategory(category, cat, logs, dateStr, seed + slot, nowTs));
+  }
+  return quests;
 };
 /* @APP:STORE */
 /* @APP:INIT */
