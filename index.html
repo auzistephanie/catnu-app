@@ -91,6 +91,9 @@ input,select{font-family:inherit}
 .field label{font-size:12px;color:var(--sub);display:block;margin-bottom:4px;font-weight:700}
 .field input,.field select{width:100%;padding:10px;border:2px solid var(--ink);border-radius:8px;background:var(--paper);font-size:14px}
 .field input:focus,.field select:focus{outline:none;border-color:var(--terra)}
+.milestone-wall{display:flex;flex-wrap:wrap;gap:8px}
+.milestone-wall .chip.locked{opacity:.4}
+.danger-btn{color:var(--terra);font-size:12px;font-weight:700;cursor:pointer;margin-top:8px;display:inline-block}
 .tilehead{position:relative;padding:18px 18px 14px;color:var(--cream);background:var(--teal);overflow:hidden}
 .tilehead::before{content:"";position:absolute;inset:0;opacity:.16;
   background-image:
@@ -1416,6 +1419,159 @@ function renderQuizOverlay(state) {
   }));
   document.getElementById('quiz-close').addEventListener('click', closeQuiz);
 }
+
+let profileEditingCatId = null;
+let profileAdding = false;
+
+function catAffectionLabel(state, catId) {
+  const a = Catnu.affectionScore(state.logs, catId, Date.now());
+  return a.insufficient ? '--' : a.score;
+}
+
+function renderProfileCatCard(state, cat) {
+  const breed = Catnu.BREEDS.find(b => b.id === cat.breedId);
+  if (profileEditingCatId !== cat.id) {
+    return `
+      <div class="card">
+        <div class="cat-row">
+          <div class="avatar">${cat.emoji}</div>
+          <div class="cat-meta">
+            <div class="name">${cat.name} ${breed ? `<span class="tag">${breed.name}</span>` : ''}</div>
+            <div class="breed">${cat.sex || '性別未填'} · ${cat.birthYM || '出生年月未填'} · ${cat.neutered === true ? '已絕育' : cat.neutered === false ? '未絕育' : '絕育狀態未填'}</div>
+          </div>
+          <div class="score"><div class="num">${catAffectionLabel(state, cat.id)}</div><div class="lbl">好感度</div></div>
+        </div>
+        ${cat.notes ? `<div class="note" style="margin-top:10px">${cat.notes}</div>` : ''}
+        <button class="btn ghost" type="button" data-edit-cat="${cat.id}" style="margin-top:10px">編輯</button>
+        <span class="danger-btn" data-delete-cat="${cat.id}">刪除呢隻貓</span>
+      </div>
+    `;
+  }
+  return `
+    <div class="card">
+      <div class="field"><label>名</label><input type="text" data-edit-field="name" value="${cat.name}"></div>
+      <div class="field"><label>Emoji</label><input type="text" data-edit-field="emoji" value="${cat.emoji}" maxlength="4" style="width:70px"></div>
+      <div class="field"><label>品種</label><select data-edit-field="breedId">${Catnu.BREEDS.map(b => `<option value="${b.id}" ${b.id === cat.breedId ? 'selected' : ''}>${b.emoji} ${b.name}</option>`).join('')}</select></div>
+      <div class="field"><label>性別</label><input type="text" data-edit-field="sex" value="${cat.sex || ''}" placeholder="公／母"></div>
+      <div class="field"><label>出生年月</label><input type="text" data-edit-field="birthYM" value="${cat.birthYM || ''}" placeholder="例如 2023-05"></div>
+      <div class="field"><label>已絕育？</label>
+        <select data-edit-field="neutered">
+          <option value="" ${cat.neutered == null ? 'selected' : ''}>未填</option>
+          <option value="true" ${cat.neutered === true ? 'selected' : ''}>已絕育</option>
+          <option value="false" ${cat.neutered === false ? 'selected' : ''}>未絕育</option>
+        </select>
+      </div>
+      <div class="field"><label>到家日</label><input type="text" data-edit-field="homeDate" value="${cat.homeDate || ''}" placeholder="YYYY-MM-DD"></div>
+      <div class="field"><label>個性筆記</label><input type="text" data-edit-field="notes" value="${cat.notes || ''}"></div>
+      <button class="btn" type="button" data-save-cat="${cat.id}">儲存</button>
+      <button class="btn ghost" type="button" data-cancel-edit="${cat.id}">取消</button>
+    </div>
+  `;
+}
+
+function renderMilestoneWall(state) {
+  const unlockedIds = new Set(state.milestones.map(m => m.id));
+  return `
+    <div class="card">
+      <h3><span class="deco">◆</span> 里程碑牆</h3>
+      <div class="milestone-wall">
+        ${Object.entries(Catnu.MILESTONE_META).map(([id, meta]) => `<span class="chip ${unlockedIds.has(id) ? '' : 'locked'}">${meta.emoji} ${meta.label}${unlockedIds.has(id) ? '' : '（未解鎖）'}</span>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderProfile(state) {
+  const el = document.getElementById('tab-profile');
+  el.innerHTML = `
+    ${state.cats.map(c => renderProfileCatCard(state, c)).join('')}
+    ${profileAdding ? `
+      <div class="card">
+        <div class="field"><label>新貓個名</label><input type="text" id="new-cat-name" placeholder="例如：貓C"></div>
+        <div class="field"><label>品種</label><select id="new-cat-breed">${Catnu.BREEDS.map(b => `<option value="${b.id}">${b.emoji} ${b.name}</option>`).join('')}</select></div>
+        <button class="btn" type="button" id="new-cat-save">加入</button>
+        <button class="btn ghost" type="button" id="new-cat-cancel">取消</button>
+      </div>
+    ` : `<button class="btn ghost" type="button" id="add-cat-btn">＋加貓</button>`}
+    ${renderMilestoneWall(state)}
+    <div class="card">
+      <h3><span class="deco">◆</span> 數據備份</h3>
+      <button class="btn ghost" type="button" id="export-btn">⤓ 匯出 JSON</button>
+      <label class="btn ghost" style="display:block;text-align:center;margin-top:10px" for="import-input">⤒ 還原</label>
+      <input type="file" id="import-input" accept="application/json" style="display:none">
+      <div class="note">還原會完全覆蓋現有數據，記得先匯出備份。</div>
+    </div>
+  `;
+
+  el.querySelectorAll('[data-edit-cat]').forEach(b => b.addEventListener('click', () => { profileEditingCatId = b.dataset.editCat; renderProfile(state); }));
+  el.querySelectorAll('[data-cancel-edit]').forEach(b => b.addEventListener('click', () => { profileEditingCatId = null; renderProfile(state); }));
+  el.querySelectorAll('[data-save-cat]').forEach(b => b.addEventListener('click', () => {
+    const cat = state.cats.find(c => c.id === b.dataset.saveCat);
+    el.querySelectorAll('[data-edit-field]').forEach(f => {
+      const field = f.dataset.editField;
+      if (field === 'neutered') cat.neutered = f.value === '' ? null : f.value === 'true';
+      else cat[field] = f.value;
+    });
+    Catnu.Store.save(state);
+    profileEditingCatId = null;
+    renderProfile(state);
+  }));
+  el.querySelectorAll('[data-delete-cat]').forEach(b => b.addEventListener('click', () => {
+    const id = b.dataset.deleteCat;
+    const cat = state.cats.find(c => c.id === id);
+    if (!confirm(`確定刪除「${cat.name}」？佢嘅所有記錄都會一齊刪走，無法還原。`)) return;
+    state.cats = state.cats.filter(c => c.id !== id);
+    state.logs = state.logs.filter(l => l.catId !== id);
+    state.milestones = state.milestones.filter(m => m.catId !== id);
+    if (profileEditingCatId === id) profileEditingCatId = null;
+    Catnu.Store.save(state);
+    renderProfile(state);
+  }));
+  const addBtn = document.getElementById('add-cat-btn');
+  if (addBtn) addBtn.addEventListener('click', () => { profileAdding = true; renderProfile(state); });
+  const cancelAddBtn = document.getElementById('new-cat-cancel');
+  if (cancelAddBtn) cancelAddBtn.addEventListener('click', () => { profileAdding = false; renderProfile(state); });
+  const saveAddBtn = document.getElementById('new-cat-save');
+  if (saveAddBtn) saveAddBtn.addEventListener('click', () => {
+    const name = document.getElementById('new-cat-name').value.trim();
+    if (!name) return;
+    const breedId = document.getElementById('new-cat-breed').value;
+    const breed = Catnu.BREEDS.find(b => b.id === breedId);
+    state.cats.push({ id: 'c' + Date.now(), name, breedId, emoji: breed ? breed.emoji : '🐱', sex: '', birthYM: '', neutered: null, homeDate: '', notes: '' });
+    Catnu.Store.save(state);
+    profileAdding = false;
+    renderProfile(state);
+  });
+
+  document.getElementById('export-btn').addEventListener('click', () => {
+    const dateStr = todayStr().replace(/-/g, '');
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `catnu-backup-${dateStr}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+  document.getElementById('import-input').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result);
+        if (parsed.schemaVersion !== 1 || !Array.isArray(parsed.cats) || !Array.isArray(parsed.logs)) throw new Error('bad schema');
+        Catnu.Store.save(parsed);
+        location.reload();
+      } catch (err) {
+        Catnu.showToast('還原失敗：檔案格式唔啱');
+      }
+    };
+    reader.readAsText(file);
+  });
+}
+
+RENDERERS.profile = renderProfile;
 
 /* @APP:BOOT */
 window.addEventListener('DOMContentLoaded', initApp);
