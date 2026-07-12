@@ -375,6 +375,24 @@ Catnu.generateInsights = function generateInsights(logs, cat, nowTs) {
 
   return [...positives, ...negatives, ...notes].slice(0, 5);
 };
+
+function dateStrToDays(s) {
+  const [y, m, d] = s.split('-').map(Number);
+  return Math.floor(Date.UTC(y, m - 1, d) / DAY_MS);
+}
+
+Catnu.checkStreakBreak = function checkStreakBreak(streak, todayStr) {
+  if (!streak.lastDoneDate) return { ...streak };
+  const diff = dateStrToDays(todayStr) - dateStrToDays(streak.lastDoneDate);
+  if (diff >= 2) return { ...streak, current: 0 };
+  return { ...streak };
+};
+
+Catnu.completeQuestsForDay = function completeQuestsForDay(streak, todayStr) {
+  if (streak.lastDoneDate === todayStr) return { ...streak };
+  const current = streak.current + 1;
+  return { current, best: Math.max(streak.best, current), lastDoneDate: todayStr };
+};
 /* @APP:STORE */
 /* @APP:INIT */
 function initApp(){
