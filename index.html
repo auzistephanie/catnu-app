@@ -39,8 +39,73 @@ input,select{font-family:inherit}
 (function(){
 'use strict';
 window.Catnu = window.Catnu || {};
+var Catnu = window.Catnu;
 /* @LOGIC:DATA */
+Catnu.REACTIONS = [
+  { id: 'approach',  label: '😻 主動貼近', polarity: 1 },
+  { id: 'slowblink', label: '😌 慢眨眼',   polarity: 1 },
+  { id: 'purr',      label: '🎵 呼嚕',     polarity: 1 },
+  { id: 'knead',     label: '🍞 踩奶',     polarity: 1 },
+  { id: 'belly',     label: '🙃 露肚',     polarity: 1 },
+  { id: 'lap',       label: '🦵 坐大脾',   polarity: 1 },
+  { id: 'walkaway',  label: '🏃 即刻走開', polarity: -1 },
+  { id: 'flatears',  label: '👂 飛機耳',   polarity: -1 },
+  { id: 'hiss',      label: '😾 hiss／拍手', polarity: -1 },
+  { id: 'bite',      label: '🦷 咬／抓',   polarity: -1 },
+];
+
+Catnu.ACTIONS = [
+  { id: 'feed',     label: '🍗 餵食/小食' },
+  { id: 'groom',    label: '🪮 梳毛' },
+  { id: 'wand',     label: '🎣 逗貓棒' },
+  { id: 'hold',     label: '🤗 抱佢' },
+  { id: 'pet',      label: '✋ 摸頭/下巴' },
+  { id: 'callname', label: '📢 叫佢名' },
+  { id: 'litter',   label: '🧹 執貓砂' },
+  { id: 'talk',     label: '🗣 同佢傾偈' },
+];
+
+Catnu.REACTION_POLARITY = Object.fromEntries(Catnu.REACTIONS.map(r => [r.id, r.polarity]));
 /* @LOGIC:ENGINE */
+const DAY_MS = 86400000;
+const DECAY = 0.85;
+
+Catnu.entryPolarity = function entryPolarity(entry) {
+  let pos = 0, neg = 0;
+  for (const rid of (entry.reactions || [])) {
+    const p = Catnu.REACTION_POLARITY[rid];
+    if (p === 1) pos++; else if (p === -1) neg++;
+  }
+  if (pos > neg) return 'positive';
+  if (neg > pos) return 'negative';
+  return 'neutral';
+};
+
+function weightedWindowScore(logs, catId, nowTs, windowStartDaysAgo, windowEndDaysAgo) {
+  let num = 0, den = 0, nonNeutralCount = 0;
+  for (const entry of logs) {
+    if (entry.catId !== catId) continue;
+    const daysAgo = Math.floor((nowTs - entry.ts) / DAY_MS);
+    if (daysAgo < windowStartDaysAgo || daysAgo > windowEndDaysAgo) continue;
+    const polarity = Catnu.entryPolarity(entry);
+    if (polarity === 'neutral') continue;
+    nonNeutralCount++;
+    const w = Math.pow(DECAY, daysAgo);
+    den += w;
+    if (polarity === 'positive') num += w;
+  }
+  if (nonNeutralCount < 5) return { score: null, insufficient: true };
+  return { score: Math.round((100 * num) / den), insufficient: false };
+}
+
+Catnu.affectionScore = function affectionScore(logs, catId, nowTs) {
+  const current = weightedWindowScore(logs, catId, nowTs, 0, 6);
+  const previous = weightedWindowScore(logs, catId, nowTs, 7, 13);
+  const weekChange = (!current.insufficient && !previous.insufficient)
+    ? current.score - previous.score
+    : null;
+  return { score: current.score, insufficient: current.insufficient, weekChange };
+};
 /* @APP:STORE */
 /* @APP:INIT */
 function initApp(){
