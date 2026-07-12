@@ -893,9 +893,13 @@ function renderOnboarding() {
           `).join('')}
           <button class="btn" type="submit">開始修行 →</button>
         </form>
-        <div class="note">得閒可以喺「檔案」page 隨時加多隻貓，唔一定要而家開晒。</div>
+        <div class="note">得閒可以喺「檔案」page 隨時加多隻貓，唔一定要而家開晒。<br>
+          已經有備份檔？<label style="text-decoration:underline;cursor:pointer;color:var(--terra);font-weight:700" for="onboard-import-input">⤒ 還原番舊資料</label>
+          <input type="file" id="onboard-import-input" accept="application/json" style="display:none">
+        </div>
       </div>
     </div>
+    <div class="toast" id="toast"></div>
   `;
 
   app.querySelectorAll('[data-field="breedId"]').forEach(el => {
@@ -917,6 +921,13 @@ function renderOnboarding() {
     renderShell();
     switchTab('record');
   });
+
+  // A wiped/first-ever user has 0 cats, so they can never reach the 檔案 tab
+  // (it doesn't exist until onboarding completes) — without this, "匯出 →
+  // localStorage.clear() → 還原" has no way back in via the UI. Same restore
+  // handler as the 檔案 tab's, wired here too so recovery is reachable from
+  // the empty state.
+  wireRestoreInput(document.getElementById('onboard-import-input'));
 }
 
 let recordCatId = null;
@@ -1469,6 +1480,27 @@ function renderProfileCatCard(state, cat) {
   `;
 }
 
+// Shared by both the 檔案 tab's "⤒ 還原" control and the onboarding screen's
+// (a wiped/first-run user has no cats yet, so they can't reach 檔案 at all).
+function wireRestoreInput(inputEl) {
+  inputEl.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result);
+        if (parsed.schemaVersion !== 1 || !Array.isArray(parsed.cats) || !Array.isArray(parsed.logs)) throw new Error('bad schema');
+        Catnu.Store.save(parsed);
+        location.reload();
+      } catch (err) {
+        Catnu.showToast('還原失敗：檔案格式唔啱');
+      }
+    };
+    reader.readAsText(file);
+  });
+}
+
 function renderMilestoneWall(state) {
   const unlockedIds = new Set(state.milestones.map(m => m.id));
   return `
@@ -1553,22 +1585,7 @@ function renderProfile(state) {
     a.click();
     URL.revokeObjectURL(url);
   });
-  document.getElementById('import-input').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const parsed = JSON.parse(reader.result);
-        if (parsed.schemaVersion !== 1 || !Array.isArray(parsed.cats) || !Array.isArray(parsed.logs)) throw new Error('bad schema');
-        Catnu.Store.save(parsed);
-        location.reload();
-      } catch (err) {
-        Catnu.showToast('還原失敗：檔案格式唔啱');
-      }
-    };
-    reader.readAsText(file);
-  });
+  wireRestoreInput(document.getElementById('import-input'));
 }
 
 RENDERERS.profile = renderProfile;
