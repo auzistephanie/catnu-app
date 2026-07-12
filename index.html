@@ -28,6 +28,10 @@ button{font-family:inherit;border:none;background:none;cursor:pointer}
 input,select{font-family:inherit}
 .app{width:100%;max-width:430px;min-height:100vh;background:var(--cream);position:relative;overflow-x:hidden}
 /* @CSS:TABS */
+.field{margin-bottom:14px}
+.field label{font-size:12px;color:var(--sub);display:block;margin-bottom:4px;font-weight:700}
+.field input,.field select{width:100%;padding:10px;border:2px solid var(--ink);border-radius:8px;background:var(--paper);font-size:14px}
+.field input:focus,.field select:focus{outline:none;border-color:var(--terra)}
 .tilehead{position:relative;padding:18px 18px 14px;color:var(--cream);background:var(--teal);overflow:hidden}
 .tilehead::before{content:"";position:absolute;inset:0;opacity:.16;
   background-image:
@@ -788,11 +792,69 @@ function initApp() {
   Catnu.Store.save(STATE);
 
   if (STATE.cats.length === 0) {
-    renderOnboarding(); // defined in Task 14
+    renderOnboarding();
     return;
   }
   renderShell();
   switchTab('record');
+}
+
+function renderOnboarding() {
+  const app = document.getElementById('app');
+  const draftCats = [
+    { name: '', breedId: 'british-longhair', emoji: '🐱' },
+    { name: '', breedId: 'british-longhair', emoji: '🐱' },
+  ];
+  const breedOptions = Catnu.BREEDS.map(b => `<option value="${b.id}">${b.emoji} ${b.name}</option>`).join('');
+
+  app.innerHTML = `
+    <div class="tilehead"><h1>🐾 貓奴修行</h1></div>
+    <div class="page active">
+      <div class="card">
+        <h3><span class="deco">◆</span> 歡迎！先幫你嘅貓開個檔案</h3>
+        <form id="onboard-form">
+          ${draftCats.map((c, i) => `
+            <div style="${i === 0 ? 'padding-bottom:14px;margin-bottom:14px;border-bottom:1px dashed var(--line)' : ''}">
+              <div class="field">
+                <label>貓 ${i + 1} 個名${i === 0 ? '（必填）' : '（可留空，遲啲再補）'}</label>
+                <input type="text" data-idx="${i}" data-field="name" placeholder="例如：貓A" ${i === 0 ? 'required' : ''}>
+              </div>
+              <div class="field">
+                <label>品種</label>
+                <select data-idx="${i}" data-field="breedId">${breedOptions}</select>
+              </div>
+              <div class="field">
+                <label>Emoji（可自己揀，例如 🐱🐈🐈‍⬛🧡）</label>
+                <input type="text" data-idx="${i}" data-field="emoji" value="${c.emoji}" maxlength="4" style="width:70px">
+              </div>
+            </div>
+          `).join('')}
+          <button class="btn" type="submit">開始修行 →</button>
+        </form>
+        <div class="note">得閒可以喺「檔案」page 隨時加多隻貓，唔一定要而家開晒。</div>
+      </div>
+    </div>
+  `;
+
+  app.querySelectorAll('[data-field="breedId"]').forEach(el => {
+    el.value = draftCats[+el.dataset.idx].breedId;
+  });
+  app.querySelectorAll('[data-field]').forEach(el => {
+    el.addEventListener('input', () => { draftCats[+el.dataset.idx][el.dataset.field] = el.value; });
+  });
+
+  document.getElementById('onboard-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    draftCats.filter(c => c.name.trim()).forEach((c, i) => {
+      STATE.cats.push({
+        id: 'c' + (Date.now() + i), name: c.name.trim(), breedId: c.breedId,
+        emoji: c.emoji.trim() || '🐱', sex: '', birthYM: '', neutered: null, homeDate: '', notes: '',
+      });
+    });
+    Catnu.Store.save(STATE);
+    renderShell();
+    switchTab('record');
+  });
 }
 /* @APP:BOOT */
 window.addEventListener('DOMContentLoaded', initApp);
