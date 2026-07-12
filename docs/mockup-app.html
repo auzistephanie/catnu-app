@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>貓奴修行 — 復古花磚版 Preview</title>
+<style>
+  :root{
+    --cream:#f4edda; --paper:#fbf6e9; --teal:#1d5c52; --teal-dk:#14453e;
+    --terra:#c05a2e; --mustard:#d9a441; --rose:#c98d83; --ink:#2f2a22; --sub:#7d7361;
+    --line:#e2d7bd;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,"PingFang HK","Noto Sans TC",sans-serif}
+  body{background:#28504a;display:flex;justify-content:center;padding:24px 12px;
+    background-image:radial-gradient(circle at 25% 25%,rgba(217,164,65,.12) 0 12%,transparent 13%),radial-gradient(circle at 75% 75%,rgba(192,90,46,.12) 0 12%,transparent 13%);
+    background-size:80px 80px}
+  .phone{width:390px;max-width:100%;background:var(--cream);border-radius:28px;box-shadow:0 16px 50px rgba(0,0,0,.35);overflow:hidden;border:3px solid #d9a441}
+  .banner{background:var(--ink);color:var(--cream);text-align:center;font-size:11px;padding:6px;letter-spacing:2px}
+  /* 花磚 header */
+  .tilehead{position:relative;padding:20px 20px 16px;color:var(--cream);background:var(--teal);overflow:hidden}
+  .tilehead::before{content:"";position:absolute;inset:0;opacity:.16;
+    background-image:
+      radial-gradient(circle at 0 0, var(--mustard) 0 18px, transparent 19px),
+      radial-gradient(circle at 56px 0, var(--mustard) 0 18px, transparent 19px),
+      radial-gradient(circle at 0 56px, var(--mustard) 0 18px, transparent 19px),
+      radial-gradient(circle at 56px 56px, var(--mustard) 0 18px, transparent 19px),
+      radial-gradient(circle at 28px 28px, var(--terra) 0 12px, transparent 13px);
+    background-size:56px 56px}
+  .tilehead h1{font-size:22px;position:relative;letter-spacing:1px}
+  .tilehead p{font-size:12px;opacity:.85;position:relative;margin-top:3px}
+  .tilehead .streak{position:absolute;right:16px;top:18px;background:var(--terra);border:2px solid var(--cream);border-radius:14px;padding:6px 10px;text-align:center;box-shadow:2px 2px 0 rgba(0,0,0,.2)}
+  .tilehead .streak b{display:block;font-size:18px}
+  .tilehead .streak span{font-size:9px;letter-spacing:1px}
+  .tabs{display:flex;background:var(--teal-dk)}
+  .tab{flex:1;text-align:center;padding:10px 2px;font-size:12px;color:#9fbcb2;cursor:pointer;border-bottom:3px solid transparent}
+  .tab.active{color:var(--cream);border-bottom-color:var(--mustard);font-weight:700;background:rgba(255,255,255,.05)}
+  .page{display:none;padding:16px;min-height:500px}
+  .page.active{display:block}
+  .card{background:var(--paper);border:2px solid var(--ink);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:4px 4px 0 rgba(47,42,34,.15)}
+  h3{font-size:14px;margin:0 0 10px;color:var(--teal-dk);letter-spacing:.5px}
+  h3 .deco{color:var(--terra)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{border:2px solid var(--ink);background:var(--paper);border-radius:18px;padding:7px 11px;font-size:13px;cursor:pointer;user-select:none;box-shadow:2px 2px 0 rgba(47,42,34,.15)}
+  .chip.sel{background:var(--mustard);font-weight:700}
+  .chip.neg.sel{background:var(--rose)}
+  .chip.act.sel{background:#8fb3a5}
+  .switcher{display:flex;gap:8px;margin-bottom:12px}
+  .switcher .chip{flex:1;text-align:center}
+  .switcher .chip.sel{background:var(--teal);color:var(--cream)}
+  .btn{width:100%;background:var(--terra);color:var(--cream);border:2px solid var(--ink);border-radius:12px;padding:12px;font-size:15px;font-weight:700;margin-top:14px;cursor:pointer;box-shadow:3px 3px 0 rgba(47,42,34,.3);letter-spacing:1px}
+  .note{font-size:11px;color:var(--sub);background:var(--cream);border:1px dashed var(--terra);border-radius:10px;padding:9px;margin-top:10px;line-height:1.6}
+  .cat-row{display:flex;align-items:center;gap:12px}
+  .avatar{width:50px;height:50px;border-radius:50%;background:var(--mustard);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-size:24px}
+  .cat-meta{flex:1}
+  .cat-meta .name{font-weight:800;font-size:15px}
+  .cat-meta .breed{font-size:11px;color:var(--sub)}
+  .score .num{font-size:24px;font-weight:900;color:var(--terra);font-family:Georgia,serif}
+  .score .lbl{font-size:9px;color:var(--sub);text-align:right}
+  .meter{height:10px;background:var(--cream);border:1.5px solid var(--ink);border-radius:5px;margin-top:10px;overflow:hidden}
+  .meter>div{height:100%;background:repeating-linear-gradient(45deg,var(--terra),var(--terra) 6px,var(--mustard) 6px,var(--mustard) 12px)}
+  .insight{display:flex;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13px;line-height:1.55}
+  .insight:last-child{border-bottom:none}
+  .quest{display:flex;align-items:center;gap:10px;padding:10px;border:2px solid var(--ink);border-radius:12px;margin-bottom:10px;background:var(--paper);box-shadow:3px 3px 0 rgba(47,42,34,.12)}
+  .quest.done{background:#e5eee4;opacity:.85}
+  .quest .box{width:26px;height:26px;border:2px solid var(--ink);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;background:var(--paper)}
+  .quest.done .box{background:var(--teal);color:var(--cream)}
+  .quest .q{flex:1;font-size:13px;line-height:1.4}
+  .quest .q small{display:block;color:var(--sub);font-size:11px}
+  .trait-bar{display:flex;align-items:center;gap:8px;font-size:12px;margin-top:7px}
+  .trait-bar .t{width:78px;color:var(--sub)}
+  .trait-bar .m{flex:1;height:8px;background:var(--cream);border:1.5px solid var(--ink);border-radius:4px;overflow:hidden}
+  .trait-bar .m>div{height:100%;background:var(--teal)}
+  .tag{font-size:10px;background:var(--mustard);border:1.5px solid var(--ink);border-radius:8px;padding:1px 8px;font-weight:700}
+  .decode{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13px}
+  .decode .ico{font-size:22px;width:30px;text-align:center}
+  .decode b{color:var(--teal-dk)}
+  .decode small{display:block;color:var(--sub);font-size:11px;line-height:1.5}
+  .milestone{border:2px solid var(--ink);border-radius:14px;padding:12px;text-align:center;background:linear-gradient(160deg,var(--paper) 60%,var(--cream));box-shadow:4px 4px 0 var(--mustard);margin-bottom:12px}
+  .milestone .big{font-size:30px}
+  .milestone b{display:block;font-size:14px;margin-top:4px}
+  .milestone small{color:var(--sub);font-size:11px}
+  .milestone .share{margin-top:8px;font-size:11px;color:var(--terra);font-weight:700}
+  .quiz-entry{display:flex;gap:10px}
+  .quiz-entry .qe{flex:1;text-align:center;border:2px solid var(--ink);border-radius:12px;padding:12px 8px;font-size:12px;background:var(--paper);cursor:pointer;box-shadow:3px 3px 0 rgba(47,42,34,.15);line-height:1.5}
+  .quiz-entry .qe span{font-size:20px;display:block;margin-bottom:4px}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="banner">復古花磚版 PREVIEW · 未係成品</div>
+  <div class="tilehead">
+    <h1>🐾 貓奴修行</h1>
+    <p>記錄 · 分析 · 令佢更鍾意你</p>
+    <div class="streak"><b>🔥 6</b><span>日連續</span></div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="go(0)">記錄</div>
+    <div class="tab" onclick="go(1)">任務</div>
+    <div class="tab" onclick="go(2)">分析</div>
+    <div class="tab" onclick="go(3)">圖鑑</div>
+    <div class="tab" onclick="go(4)">檔案</div>
+  </div>
+
+  <!-- 0 記錄 -->
+  <div class="page active">
+    <div class="switcher">
+      <div class="chip sel">🐱 貓A（英長）</div>
+      <div class="chip">🐱 貓B（英長）</div>
+    </div>
+    <div class="card">
+      <h3><span class="deco">◆</span> 佢對我嘅反應</h3>
+      <div class="chips">
+        <span class="chip sel">😻 主動貼近</span><span class="chip">😌 慢眨眼</span>
+        <span class="chip sel">🎵 呼嚕</span><span class="chip">🍞 踩奶</span>
+        <span class="chip">🙃 露肚</span><span class="chip neg">🏃 走開</span>
+        <span class="chip neg sel">👂 飛機耳</span><span class="chip neg">😾 hiss</span>
+      </div>
+      <h3 style="margin-top:14px"><span class="deco">◆</span> 我啱啱做咗咩</h3>
+      <div class="chips">
+        <span class="chip act sel">🍗 餵食</span><span class="chip act">🪮 梳毛</span>
+        <span class="chip act sel">🎣 逗貓棒</span><span class="chip act">🤗 抱佢</span>
+        <span class="chip act">✋ 摸下巴</span><span class="chip act">📢 叫佢名</span>
+      </div>
+      <button class="btn">✓ 記錄呢一刻</button>
+      <div class="note">10 秒 tap 完，時間自動記。瞓前可用「補記」一次過補返今日互動。可選加一句備註。</div>
+    </div>
+  </div>
+
+  <!-- 1 任務 -->
+  <div class="page">
+    <div class="card">
+      <h3><span class="deco">◆</span> 今日溝貓任務 <span class="tag">2/3</span></h3>
+      <div class="quest done"><div class="box">✓</div><div class="q">同貓A 慢眨眼 3 次<small>建立信任嘅通用貓語 · +心心</small></div></div>
+      <div class="quest done"><div class="box">✓</div><div class="q">逗貓棒 5 分鐘（貓B）<small>根據分析：玩後係佢最錫你嘅時段</small></div></div>
+      <div class="quest"><div class="box"></div><div class="q">幫貓A 梳毛<small>英長已 4 日冇梳 · 佢哋接受度最高嘅親密接觸</small></div></div>
+      <div class="note">任務由分析引擎＋品種特性生成，日日唔同。完成晒先保得住 🔥 Streak。</div>
+    </div>
+    <div class="card">
+      <h3><span class="deco">◆</span> 最新里程碑</h3>
+      <div class="milestone">
+        <div class="big">🍞</div>
+        <b>貓A 第一次踩奶！</b>
+        <small>2026.07.10 · 相處第 213 日</small>
+        <div class="share">⤴ 生成靚卡 share 俾朋友</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 分析 -->
+  <div class="page">
+    <div class="switcher">
+      <div class="chip sel">🐱 貓A</div><div class="chip">🐱 貓B</div>
+    </div>
+    <div class="card">
+      <div class="cat-row">
+        <div class="avatar">😻</div>
+        <div class="cat-meta"><div class="name">好感度指數</div><div class="breed">近 7 日正面反應加權比率</div></div>
+        <div class="score"><div class="num">72</div><div class="lbl">↑ +6</div></div>
+      </div>
+      <div class="meter"><div style="width:72%"></div></div>
+    </div>
+    <div class="card">
+      <h3><span class="deco">◆</span> 溝貓建議</h3>
+      <div class="insight"><span>🎣</span><span><b>逗貓棒後 30 分鐘</b>正面反應率 82%（平時 55%）——玩完先摸，事半功倍。</span></div>
+      <div class="insight"><span>🤗</span><span><b>抱佢</b>7 次有 5 次飛機耳。英長普遍抗拒被抱——坐埋佢隔離等佢主動。</span></div>
+      <div class="insight"><span>🪮</span><span>梳毛記錄得 3 次，未夠數據落結論——今晚試多次？</span></div>
+    </div>
+  </div>
+
+  <!-- 3 圖鑑 -->
+  <div class="page">
+    <div class="card">
+      <h3><span class="deco">◆</span> 貓語即時解碼</h3>
+      <div class="decode"><span class="ico">🐈</span><span><b>尾巴直豎微顫</b><small>超開心見到你——黃金機會，出手摸下巴</small></span></div>
+      <div class="decode"><span class="ico">👂</span><span><b>飛機耳</b><small>唔妥/驚——即刻停手，俾空間佢</small></span></div>
+      <div class="decode"><span class="ico">😌</span><span><b>慢眨眼</b><small>「我信你」——眨返俾佢，貓界錫錫</small></span></div>
+      <div class="note">完整版：尾巴 / 耳仔 / 鬍鬚 / 坐姿 / 叫聲 五大類速查</div>
+    </div>
+    <div class="card">
+      <h3><span class="deco">◆</span> 品種圖鑑（16 類）</h3>
+      <div style="font-size:13px;border-bottom:1px dashed var(--line);padding:8px 0"><b>🇬🇧 英國長毛</b> <span class="tag">你嘅貓 · 詳細版</span>
+        <div class="trait-bar"><span class="t">黐人程度</span><div class="m"><div style="width:55%"></div></div></div>
+        <div class="trait-bar"><span class="t">接受被抱</span><div class="m"><div style="width:25%"></div></div></div>
+      </div>
+      <div style="font-size:13px;padding:8px 0"><b>🐈 唐貓／混種</b> <span class="tag">獨立類別</span><div style="font-size:11px;color:var(--sub);margin-top:4px">唔套品種假設，100% 睇實際記錄 · 附「摸底攻略」</div></div>
+    </div>
+    <div class="card">
+      <h3><span class="deco">◆</span> 配對測驗</h3>
+      <div class="quiz-entry">
+        <div class="qe"><span>🏠</span>我想養<br>第一隻貓</div>
+        <div class="qe"><span>➕</span>我想加多隻<br>（夾唔夾現有貓？）</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 檔案 -->
+  <div class="page">
+    <div class="card">
+      <div class="cat-row">
+        <div class="avatar">🐱</div>
+        <div class="cat-meta"><div class="name">貓A <span class="tag">英長</span></div><div class="breed">性別/年齡/絕育/到家日 · 個性筆記</div></div>
+        <div class="score"><div class="num">72</div><div class="lbl">好感度</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="cat-row">
+        <div class="avatar">🐱</div>
+        <div class="cat-meta"><div class="name">貓B <span class="tag">英長</span></div><div class="breed">性別/年齡/絕育/到家日 · 個性筆記</div></div>
+        <div class="score"><div class="num">58</div><div class="lbl">好感度</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="deco">◆</span> 里程碑牆</h3>
+      <div class="chips">
+        <span class="chip">🍞 第一次踩奶</span><span class="chip">🎵 第一次呼嚕</span>
+        <span class="chip" style="opacity:.4">🦵 坐大脾（未解鎖）</span><span class="chip" style="opacity:.4">🛏 瞓你張床（未解鎖）</span>
+      </div>
+      <div class="note">數據備份：⤓ 匯出 JSON ／ ⤒ 還原</div>
+    </div>
+  </div>
+</div>
+<script>
+  const tabs=document.querySelectorAll('.tab'),pages=document.querySelectorAll('.page');
+  function go(i){tabs.forEach((t,j)=>t.classList.toggle('active',i===j));pages.forEach((p,j)=>p.classList.toggle('active',i===j));}
+</script>
+</body>
+</html>
