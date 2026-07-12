@@ -325,6 +325,56 @@ Catnu.actionCorrelation = function actionCorrelation(logs, catId, actionId, nowT
 
   return { n, P_a, P_base, negativeCount, negativeRate, insufficientData, positiveFinding, negativeWarning };
 };
+
+function formatPct(x) { return Math.round(x * 100); }
+
+const POSITIVE_TIPS = {
+  wand: '玩完先摸，事半功倍。', feed: '餵嘢之後嘅親近感特別高，把握呢個時段。',
+  groom: '梳毛之後佢會特別鍾意你摸佢。', hold: '呢個時段抱佢，佢接受度特別高。',
+  pet: '摸完佢通常會有正面回應，繼續保持。', callname: '叫佢名之後佢反應特別好，加強呢個習慣。',
+  litter: '執完貓砂佢反而會走埋嚟，值得留意。', talk: '同佢傾偈之後佢反應特別好，佢鍾意聽你把聲。',
+};
+const NEGATIVE_TIPS = {
+  wand: '可能玩得太劇烈，試下放慢節奏。', feed: '留意係咪餵食方式/時機令佢有壓力。',
+  groom: '梳毛力度或部位可能令佢唔舒服，試下換方式。', hold: '佢可能唔鍾意被抱束縛，由佢主動先。',
+  pet: '摸嘅位置或力度可能令佢唔自在。', callname: '可能太頻密令佢覺得煩，減少次數試下。',
+  litter: '佢可能對執貓砂嘅動靜敏感，儘量喺佢唔喺場時做。', talk: '聲調可能太大或太急，試下放輕聲線。',
+};
+
+Catnu.generateInsights = function generateInsights(logs, cat, nowTs) {
+  const breed = Catnu.BREEDS.find(b => b.id === cat.breedId);
+  const positives = [], negatives = [], notes = [];
+
+  for (const action of Catnu.ACTIONS) {
+    const r = Catnu.actionCorrelation(logs, cat.id, action.id, nowTs);
+    if (r.positiveFinding) {
+      let text = `**${action.label}後 30 分鐘**正面反應率 ${formatPct(r.P_a)}%（平時 ${formatPct(r.P_base)}%）——${POSITIVE_TIPS[action.id] || '呢個係你哋之間嘅黃金公式，不妨保持！'}`;
+      const rule = breed && breed.breedRules.find(x => x.when === 'positiveFinding' && x.action === action.id);
+      if (rule) text += ` ${rule.text}`;
+      positives.push({ type: 'positive', actionId: action.id, text });
+    } else if (r.negativeWarning) {
+      let text = `**${action.label}** ${r.n} 次有 ${r.negativeCount} 次負面反應——${NEGATIVE_TIPS[action.id] || '留意佢嘅即時反應，減少呢個動作嘅頻率。'}`;
+      const rule = breed && breed.breedRules.find(x => x.when === 'negativeWarning' && x.action === action.id);
+      if (rule) text += ` ${rule.text}`;
+      negatives.push({ type: 'negative', actionId: action.id, text });
+    } else if (r.insufficientData) {
+      notes.push({ type: 'insufficient', actionId: action.id, text: `${action.label} 記錄得 ${r.n} 次，未夠數據——今晚試多次？` });
+    }
+  }
+
+  if (breed) {
+    for (const rule of breed.breedRules) {
+      if (rule.when !== 'noRecentAction') continue;
+      const last = logs
+        .filter(e => e.catId === cat.id && (e.actions || []).includes(rule.action))
+        .reduce((max, e) => Math.max(max, e.ts), -Infinity);
+      const daysSince = last === -Infinity ? Infinity : (nowTs - last) / DAY_MS;
+      if (daysSince >= rule.days) notes.push({ type: 'insufficient', actionId: rule.action, text: rule.text });
+    }
+  }
+
+  return [...positives, ...negatives, ...notes].slice(0, 5);
+};
 /* @APP:STORE */
 /* @APP:INIT */
 function initApp(){
