@@ -856,6 +856,124 @@ function renderOnboarding() {
     switchTab('record');
   });
 }
+
+let recordCatId = null;
+let recordSelReactions = new Set();
+let recordSelActions = new Set();
+let recordNoteOpen = false;
+let recordBackfill = false;
+
+function actionsForRecord(state) {
+  return Catnu.ACTIONS.concat(state.customActions.map(c => ({ id: c.id, label: `${c.emoji} ${c.label}` })));
+}
+
+function renderRecord(state) {
+  if (!recordCatId || !state.cats.some(c => c.id === recordCatId)) recordCatId = state.cats[0].id;
+  const el = document.getElementById('tab-record');
+  const actions = actionsForRecord(state);
+  el.innerHTML = `
+    <div class="switcher">
+      ${state.cats.map(c => `<div class="chip ${c.id === recordCatId ? 'sel' : ''}" data-cat="${c.id}">${c.emoji} ${c.name}</div>`).join('')}
+    </div>
+    <div class="card">
+      <h3><span class="deco">◆</span> 佢對我嘅反應</h3>
+      <div class="chips" id="record-reactions">
+        ${Catnu.REACTIONS.map(r => `<span class="chip ${r.polarity < 0 ? 'neg' : ''} ${recordSelReactions.has(r.id) ? 'sel' : ''}" data-reaction="${r.id}">${r.label}</span>`).join('')}
+      </div>
+      <h3 style="margin-top:14px"><span class="deco">◆</span> 我啱啱做咗咩</h3>
+      <div class="chips" id="record-actions">
+        ${actions.map(a => `<span class="chip act ${recordSelActions.has(a.id) ? 'sel' : ''}" data-action="${a.id}">${a.label}</span>`).join('')}
+      </div>
+      <div style="margin-top:8px">
+        <button class="btn ghost" type="button" id="record-add-action-btn" style="margin-top:0">＋自訂動作</button>
+        <div class="field" id="record-add-action-form" style="display:none;margin-top:8px">
+          <input type="text" id="record-new-action-emoji" placeholder="emoji，例如 🧶" maxlength="4" style="width:60px;display:inline-block;margin-right:6px">
+          <input type="text" id="record-new-action-label" placeholder="動作名稱" style="width:calc(100% - 68px);display:inline-block">
+          <button class="btn" type="button" id="record-new-action-save" style="margin-top:8px">加入</button>
+        </div>
+      </div>
+      <div style="margin-top:10px">
+        <button class="btn ghost" type="button" id="record-note-toggle" style="margin-top:0">${recordNoteOpen ? '－收埋備註' : '＋備註'}</button>
+        <div class="field" style="${recordNoteOpen ? '' : 'display:none'};margin-top:8px">
+          <input type="text" id="record-note-input" placeholder="呢刻想記低啲咩...">
+        </div>
+      </div>
+      <div style="margin-top:10px">
+        <button class="btn ghost" type="button" id="record-backfill-toggle" style="margin-top:0">${recordBackfill ? '－取消補記' : '🕐 補記'}</button>
+        <div class="field" style="${recordBackfill ? '' : 'display:none'};margin-top:8px">
+          <label>選返時間（今日內，半小時一格）</label>
+          <input type="time" id="record-backfill-time" step="1800">
+        </div>
+      </div>
+      <button class="btn" type="button" id="record-submit">✓ 記錄呢一刻</button>
+      <div class="note">10 秒 tap 完，時間自動記。瞓前可用「補記」一次過補返今日互動。</div>
+    </div>
+  `;
+
+  el.querySelectorAll('[data-cat]').forEach(c => c.addEventListener('click', () => { recordCatId = c.dataset.cat; renderRecord(state); }));
+  el.querySelectorAll('[data-reaction]').forEach(c => c.addEventListener('click', () => {
+    const id = c.dataset.reaction;
+    recordSelReactions.has(id) ? recordSelReactions.delete(id) : recordSelReactions.add(id);
+    renderRecord(state);
+  }));
+  el.querySelectorAll('[data-action]').forEach(c => c.addEventListener('click', () => {
+    const id = c.dataset.action;
+    recordSelActions.has(id) ? recordSelActions.delete(id) : recordSelActions.add(id);
+    renderRecord(state);
+  }));
+  document.getElementById('record-add-action-btn').addEventListener('click', () => {
+    document.getElementById('record-add-action-form').style.display = 'block';
+  });
+  document.getElementById('record-new-action-save').addEventListener('click', () => {
+    const emoji = document.getElementById('record-new-action-emoji').value.trim() || '⭐';
+    const label = document.getElementById('record-new-action-label').value.trim();
+    if (!label) return;
+    state.customActions.push({ id: 'custom-' + Date.now(), emoji, label });
+    Catnu.Store.save(state);
+    renderRecord(state);
+  });
+  document.getElementById('record-note-toggle').addEventListener('click', () => { recordNoteOpen = !recordNoteOpen; renderRecord(state); });
+  document.getElementById('record-backfill-toggle').addEventListener('click', () => { recordBackfill = !recordBackfill; renderRecord(state); });
+
+  document.getElementById('record-submit').addEventListener('click', () => {
+    let ts = Date.now();
+    if (recordBackfill) {
+      const timeVal = document.getElementById('record-backfill-time').value;
+      if (timeVal) {
+        const [hh, mm] = timeVal.split(':').map(Number);
+        const d = new Date();
+        d.setHours(hh, mm, 0, 0);
+        ts = d.getTime();
+      }
+    }
+    const note = recordNoteOpen ? document.getElementById('record-note-input').value.trim() : '';
+    state.logs.push({
+      id: 'log-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+      catId: recordCatId, ts,
+      reactions: [...recordSelReactions], actions: [...recordSelActions],
+      note, backfilled: recordBackfill,
+    });
+    Catnu.Store.save(state);
+
+    const unlocked = Catnu.checkNewMilestones(state, Date.now());
+    if (unlocked.length) {
+      state.milestones.push(...unlocked);
+      Catnu.Store.save(state);
+      const meta = Catnu.MILESTONE_META[unlocked[0].id] || {};
+      Catnu.showToast(`🎉 解鎖里程碑：${meta.emoji || ''} ${meta.label || unlocked[0].id}`);
+    } else {
+      Catnu.showToast('✓ 記錄咗喇！');
+    }
+
+    recordSelReactions = new Set();
+    recordSelActions = new Set();
+    recordNoteOpen = false;
+    recordBackfill = false;
+    renderRecord(state);
+  });
+}
+
+RENDERERS.record = renderRecord;
 /* @APP:BOOT */
 window.addEventListener('DOMContentLoaded', initApp);
 })();
