@@ -241,6 +241,32 @@ Catnu.BREEDS = [
     ],
   },
 ];
+
+Catnu.MILESTONE_DEFS = [
+  { id: 'first-log',       scope: 'cat', check: (logs, catId) => logs.some(e => e.catId === catId) },
+  { id: 'first-purr',      scope: 'cat', check: (logs, catId) => logs.some(e => e.catId === catId && (e.reactions || []).includes('purr')) },
+  { id: 'first-knead',     scope: 'cat', check: (logs, catId) => logs.some(e => e.catId === catId && (e.reactions || []).includes('knead')) },
+  { id: 'first-belly',     scope: 'cat', check: (logs, catId) => logs.some(e => e.catId === catId && (e.reactions || []).includes('belly')) },
+  { id: 'first-lap',       scope: 'cat', check: (logs, catId) => logs.some(e => e.catId === catId && (e.reactions || []).includes('lap')) },
+  { id: 'first-slowblink', scope: 'cat', check: (logs, catId) => logs.some(e => e.catId === catId && (e.reactions || []).includes('slowblink')) },
+  { id: 'logs-50',         scope: 'cat', check: (logs, catId) => logs.filter(e => e.catId === catId).length >= 50 },
+  { id: 'logs-100',        scope: 'cat', check: (logs, catId) => logs.filter(e => e.catId === catId).length >= 100 },
+];
+
+Catnu.MILESTONE_META = {
+  'first-log': { emoji: '📝', label: '第一次記錄' },
+  'first-purr': { emoji: '🎵', label: '第一次呼嚕' },
+  'first-knead': { emoji: '🍞', label: '第一次踩奶' },
+  'first-belly': { emoji: '🙃', label: '第一次露肚' },
+  'first-lap': { emoji: '🦵', label: '第一次坐大脾' },
+  'first-slowblink': { emoji: '😌', label: '第一次慢眨眼' },
+  'logs-50': { emoji: '📚', label: '累積 50 條記錄' },
+  'logs-100': { emoji: '📚', label: '累積 100 條記錄' },
+  'score-70': { emoji: '💛', label: '好感度達 70' },
+  'score-85': { emoji: '💛', label: '好感度達 85' },
+  'streak-7': { emoji: '🔥', label: '連續 7 日' },
+  'streak-30': { emoji: '🔥', label: '連續 30 日' },
+};
 /* @LOGIC:ENGINE */
 const DAY_MS = 86400000;
 const DECAY = 0.85;
@@ -392,6 +418,29 @@ Catnu.completeQuestsForDay = function completeQuestsForDay(streak, todayStr) {
   if (streak.lastDoneDate === todayStr) return { ...streak };
   const current = streak.current + 1;
   return { current, best: Math.max(streak.best, current), lastDoneDate: todayStr };
+};
+
+Catnu.checkNewMilestones = function checkNewMilestones(state, nowTs) {
+  const unlocked = new Set(state.milestones.map(m => `${m.id}:${m.catId || ''}`));
+  const found = [];
+
+  for (const cat of state.cats) {
+    for (const def of Catnu.MILESTONE_DEFS) {
+      const key = `${def.id}:${cat.id}`;
+      if (unlocked.has(key)) continue;
+      if (def.check(state.logs, cat.id)) found.push({ id: def.id, catId: cat.id, unlockedAt: nowTs });
+    }
+    const score = Catnu.affectionScore(state.logs, cat.id, nowTs);
+    if (!score.insufficient) {
+      if (score.score >= 70 && !unlocked.has(`score-70:${cat.id}`)) found.push({ id: 'score-70', catId: cat.id, unlockedAt: nowTs });
+      if (score.score >= 85 && !unlocked.has(`score-85:${cat.id}`)) found.push({ id: 'score-85', catId: cat.id, unlockedAt: nowTs });
+    }
+  }
+
+  if (state.streak.best >= 7 && !unlocked.has('streak-7:')) found.push({ id: 'streak-7', catId: null, unlockedAt: nowTs });
+  if (state.streak.best >= 30 && !unlocked.has('streak-30:')) found.push({ id: 'streak-30', catId: null, unlockedAt: nowTs });
+
+  return found;
 };
 /* @APP:STORE */
 /* @APP:INIT */
