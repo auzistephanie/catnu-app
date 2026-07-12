@@ -457,7 +457,11 @@ Catnu.checkNewMilestones = function checkNewMilestones(state, nowTs) {
 function seedFromDate(dateStr) {
   let h = 0;
   for (let i = 0; i < dateStr.length; i++) h = (h * 31 + dateStr.charCodeAt(i)) >>> 0;
-  return h;
+  // avalanche mix (murmur3-style finalizer) — without this, adjacent YYYY-MM-DD strings
+  // (which differ only in the last digit on 9 of 10 days) produce seeds that differ by ~1,
+  // so pool picks would visibly "walk" by one slot per day instead of varying day to day.
+  h ^= h >>> 16; h = Math.imul(h, 0x45d9f3b) >>> 0; h ^= h >>> 13;
+  return h >>> 0; // ^= yields a signed Int32 result — re-normalize to unsigned before returning
 }
 function pick(arr, seed) { return arr[seed % arr.length]; }
 
@@ -493,6 +497,10 @@ Catnu.generateDailyQuests = function generateDailyQuests(dateStr, cats, logs, no
   const quests = [];
   for (let slot = 0; slot < 3; slot++) {
     const cat = cats[(seed + slot) % cats.length];
+    // slot*7 is coprime with CATEGORIES.length (3), guaranteeing each category appears
+    // exactly once per day. The 'data'/'breed' branches below rely on that — their quest
+    // ids have no per-slot suffix, so they'd collide if this guarantee ever broke (e.g.
+    // CATEGORIES growing to a length sharing a factor with 7, or slot*7 being changed).
     const category = CATEGORIES[(seed + slot * 7) % CATEGORIES.length];
     quests.push(buildQuestForCategory(category, cat, logs, dateStr, seed + slot, nowTs));
   }
