@@ -278,6 +278,49 @@ Catnu.UNIVERSAL_QUEST_POOL = [
   '留意佢今日嘅尾巴狀態',
   '同佢對視慢慢眨眼 2 次',
 ];
+
+Catnu.QUIZ_QUESTIONS = [
+  { id: 'space', text: '你屋企居住空間點？', options: [
+    { label: '細單位/開放式', delta: { active: -15, clingy: 5 } },
+    { label: '中等，有分房', delta: {} },
+    { label: '大屋/多層', delta: { active: 15 } },
+  ]},
+  { id: 'time', text: '你日常喺屋企嘅時間？', options: [
+    { label: '成日在家/WFH', delta: { clingy: 15 } },
+    { label: '朝九晚六', delta: {} },
+    { label: '經常出差/夜歸', delta: { clingy: -20, active: -10 } },
+  ]},
+  { id: 'style', text: '你想要黐人定獨立嘅貓？', options: [
+    { label: '越黐越好', delta: { clingy: 25, holdOk: 10 } },
+    { label: '各有各忙就好', delta: {} },
+    { label: '獨立自主', delta: { clingy: -25, holdOk: -10 } },
+  ]},
+  { id: 'groom', text: '你對日常梳毛功夫嘅接受度？', options: [
+    { label: '好樂意，梳毛係親密時間', delta: {}, groomTolerance: 90 },
+    { label: '一般，得閒先梳', delta: {}, groomTolerance: 55 },
+    { label: '希望越少功夫越好', delta: {}, groomTolerance: 20 },
+  ]},
+  { id: 'kids', text: '屋企有冇細路？', options: [
+    { label: '有，年紀仲細', delta: { holdOk: 20, vocal: -5 } },
+    { label: '有，已經大個仔女', delta: { holdOk: 10 } },
+    { label: '冇細路', delta: {} },
+  ]},
+  { id: 'budget', text: '養貓預算？', options: [
+    { label: '希望慳返啲', delta: {}, budgetLow: true },
+    { label: '中等，睇情況', delta: {} },
+    { label: '預算充裕', delta: {} },
+  ]},
+  { id: 'experience', text: '你養貓經驗？', options: [
+    { label: '第一次養貓', delta: { active: -10 }, beginner: true },
+    { label: '有少少經驗', delta: {} },
+    { label: '資深貓奴', delta: { active: 5 } },
+  ]},
+];
+
+Catnu.GROOMING_NEED = {
+  'british-longhair': 80, persian: 90, chinchilla: 75, 'maine-coon': 60,
+  'norwegian-forest': 65, ragdoll: 55, sphynx: 70, mixed: 30,
+};
 /* @LOGIC:ENGINE */
 const DAY_MS = 86400000;
 const DECAY = 0.85;
@@ -505,6 +548,70 @@ Catnu.generateDailyQuests = function generateDailyQuests(dateStr, cats, logs, no
     quests.push(buildQuestForCategory(category, cat, logs, dateStr, seed + slot, nowTs));
   }
   return quests;
+};
+
+function groomingNeedFor(breedId) {
+  return Catnu.GROOMING_NEED[breedId] != null ? Catnu.GROOMING_NEED[breedId] : 35;
+}
+
+function quizReason(breed, desired) {
+  if (desired.clingy >= 60 && breed.traits && breed.traits.clingy >= desired.clingy - 10) {
+    return `${breed.name}黐人度高，啱你想要成日跟前跟後嘅陪伴感。`;
+  }
+  if (desired.active >= 60 && breed.traits && breed.traits.active >= 60) {
+    return `${breed.name}活躍愛玩，配合到你屋企夠空間俾佢郁嘅生活模式。`;
+  }
+  if (desired.clingy <= 40 && breed.traits && breed.traits.clingy <= 45) {
+    return `${breed.name}性格獨立，唔會日日纏住你，啱你想要嘅自由度。`;
+  }
+  return `${breed.name}整體性格特徵同你嘅生活模式最夾。`;
+}
+
+Catnu.scoreAllBreeds = function scoreAllBreeds(answers, opts) {
+  opts = opts || {};
+  const desired = { clingy: 50, active: 50, holdOk: 50, vocal: 50 };
+  let groomTolerance = 55, beginner = false, budgetLow = false;
+
+  Catnu.QUIZ_QUESTIONS.forEach((q, i) => {
+    const opt = q.options[answers[i]];
+    if (!opt) return;
+    for (const key of Object.keys(opt.delta || {})) {
+      desired[key] = Math.max(0, Math.min(100, desired[key] + opt.delta[key]));
+    }
+    if (opt.groomTolerance != null) groomTolerance = opt.groomTolerance;
+    if (opt.beginner) beginner = true;
+    if (opt.budgetLow) budgetLow = true;
+  });
+
+  const scored = Catnu.BREEDS.map(breed => {
+    if (breed.mixedBreed) {
+      return { breed, score: 60 + (budgetLow ? 15 : 0), reason: '性格靠實際相處摸底，唔受品種刻板定型限制，加上養育成本通常較低。' };
+    }
+    const dims = ['clingy', 'active', 'holdOk', 'vocal'];
+    let diff = 0;
+    for (const d of dims) diff += Math.abs(breed.traits[d] - desired[d]);
+    let score = 100 - diff / dims.length;
+
+    score -= Math.abs(groomingNeedFor(breed.id) - groomTolerance) * 0.15;
+    if (beginner && breed.traits.active > 70) score -= 10;
+    if (beginner && groomingNeedFor(breed.id) > 70) score -= 8;
+
+    if (opts.mode === 'addCat') {
+      score += ((breed.multiCatFriendly - 50) / 50) * 15;
+      if ((opts.existingCatNegativeRate || 0) > 0.4) {
+        score += ((50 - breed.traits.active) / 50) * 10 + ((50 - breed.traits.clingy) / 50) * 5;
+      }
+    }
+
+    return { breed, score, reason: quizReason(breed, desired) };
+  });
+
+  scored.sort((a, b) => b.score - a.score);
+  return scored;
+};
+
+Catnu.matchQuiz = function matchQuiz(answers, opts) {
+  return Catnu.scoreAllBreeds(answers, opts).slice(0, 3);
 };
 /* @APP:STORE */
 /* @APP:INIT */
