@@ -66,6 +66,183 @@ Catnu.ACTIONS = [
 ];
 
 Catnu.REACTION_POLARITY = Object.fromEntries(Catnu.REACTIONS.map(r => [r.id, r.polarity]));
+
+Catnu.BREEDS = [
+  {
+    id: 'british-longhair', name: '英國長毛', emoji: '🐱', origin: '英國',
+    traits: { clingy: 55, holdOk: 25, active: 35, vocal: 20 }, multiCatFriendly: 60,
+    strategy: '慢郎中傲嬌型：唔好靠估佢唔鍾意你，睇慢眨眼/跟隨先係真心意，飛機耳/走開先係真警號。',
+    pitfalls: ['強行抱佢，換嚟飛機耳', '見佢面癱以為佢冷淡，其實佢淨係表達慢'],
+    breedRules: [
+      { when: 'negativeWarning', action: 'hold', text: '英長普遍抗拒被抱——坐埋佢隔離等佢主動。' },
+      { when: 'noRecentAction', action: 'groom', days: 3, text: '英長係長毛貓，梳毛係佢哋接受度最高嘅親密接觸。' },
+      { when: 'positiveFinding', action: 'wand', text: '英長玩心重，逗貓棒後嘅親近黃金期特別明顯。' },
+    ],
+    deepDive: {
+      personality: '外表高貴慢郎中，其實內心「傲嬌」——鍾意你但唔會誇張表達，要留意慢眨眼、跟你行嚟行去呢啲細微動作先睇得出。',
+      socialPattern: '對熟人先會放開，對陌生人/陌生環境警覺性高，唔會一見面就熱情。',
+      closenessDevelopment: '典型發展：第1個月觀察你多過接觸你 → 第2-3個月開始主動埋身、踩奶 → 半年後先會有坐大脾、主動求抱等高信任行為，唔使心急。',
+      withOtherCats: '對其他貓態度溫和，唔算主動挑釁，但都需要時間互相適應，新貓入屋建議循序漸進介紹。',
+      commonMisunderstandings: '好多人以為英長「唔黐人」，其實佢只係表達方式慢熱兼含蓄——唔好用其他品種嘅熱情標準衡量佢。',
+    },
+  },
+  {
+    id: 'mixed', name: '唐貓／混種', emoji: '🐈', origin: '本地',
+    traits: null, mixedBreed: true, multiCatFriendly: 50,
+    strategy: '性格差異極大，唔套 baseline——用 2 星期記錄快速摸清呢隻貓嘅底。',
+    pitfalls: ['用其他品種嘅刻板印象套落佢度', '因為冇「官方」traits 就唔記錄，其實佢最需要靠數據認識'],
+    breedRules: [
+      { when: 'noRecentAction', action: 'talk', days: 3, text: '混種底蘊未知，每日同佢傾下偈幫手快速摸清佢對聲氣嘅反應。' },
+    ],
+    approachGuide: [
+      '第 1-3 日：淨係擺食物同水，唔強行接觸，記錄佢主動走近嘅次數。',
+      '第 4-7 日：用逗貓棒測試玩樂意欲，記低邊種玩具佢有反應。',
+      '第 8-10 日：試下摸背、摸頭，留意佢容忍時間有幾長。',
+      '第 11-14 日：試下抱一陣，睇佢係掙扎定係攤軟，呢個至關重要。',
+      '成日留意：飛機耳/尾巴狀態先係佢嘅「真心話」，唔好靠外表估性格。',
+    ],
+  },
+  {
+    id: 'british-shorthair', name: '英國短毛', emoji: '🐱', origin: '英國',
+    traits: { clingy: 40, holdOk: 45, active: 30, vocal: 15 }, multiCatFriendly: 65,
+    strategy: '佛系隨和，唔鍾意就用行動話你知，唔會扭計。',
+    pitfalls: ['易肥唔郁，缺乏運動', '以為佢冷淡，其實佢只係慢熱佛系'],
+    breedRules: [
+      { when: 'noRecentAction', action: 'wand', days: 4, text: '英短易肥，要識定期用逗貓棒陪佢郁下。' },
+      { when: 'negativeWarning', action: 'hold', text: '英短性格佛系，唔鍾意就會用行動話你知，由佢主動走埋嚟。' },
+    ],
+  },
+  {
+    id: 'american-shorthair', name: '美國短毛', emoji: '🐱', origin: '美國',
+    traits: { clingy: 45, holdOk: 50, active: 45, vocal: 20 }, multiCatFriendly: 70,
+    strategy: '親人隨和，原生獵性強，逗貓棒最買帳。',
+    pitfalls: ['冇俾夠運動量會變肥', '獨留太耐都算適應到，但唔代表唔需要陪伴'],
+    breedRules: [
+      { when: 'positiveFinding', action: 'wand', text: '美短原生獵性強，逗貓棒係佢最買帳嘅溝通方式。' },
+      { when: 'noRecentAction', action: 'talk', days: 3, text: '美短親人隨和，得閒同佢傾下偈已經好加分。' },
+    ],
+  },
+  {
+    id: 'ragdoll', name: '布偶貓', emoji: '🐱', origin: '美國',
+    traits: { clingy: 85, holdOk: 80, active: 20, vocal: 15 }, multiCatFriendly: 75,
+    strategy: '出名「攤晒喺手」，抱佢對佢嚟講係享受，黐人程度全場最高。',
+    pitfalls: ['因為太乖以為唔使理佢，其實佢好需要陪伴', '過重物理限制活動會影響關節'],
+    breedRules: [
+      { when: 'noRecentAction', action: 'hold', days: 2, text: '布偶出名「攤晒喺手」，抱佢對佢嚟講係享受唔係壓力。' },
+      { when: 'positiveFinding', action: 'talk', text: '布偶黐人，你講嘢佢已經好留心聽。' },
+    ],
+  },
+  {
+    id: 'maine-coon', name: '緬因貓', emoji: '🐱', origin: '美國',
+    traits: { clingy: 60, holdOk: 40, active: 65, vocal: 35 }, multiCatFriendly: 70,
+    strategy: '體型大但貪玩，原始獵犬式互動最啱佢，唔鍾意被局限。',
+    pitfalls: ['強行抱實一隻大貓', '忽略咗佢其實好需要空間走動'],
+    breedRules: [
+      { when: 'positiveFinding', action: 'wand', text: '緬因體型大但貪玩，原始獵犬式互動最啱佢。' },
+      { when: 'negativeWarning', action: 'hold', text: '緬因體型重，唔鍾意被局限，坐得耐先抱好過強行攬實。' },
+    ],
+  },
+  {
+    id: 'scottish-fold', name: '蘇格蘭摺耳', emoji: '🐱', origin: '蘇格蘭',
+    traits: { clingy: 65, holdOk: 55, active: 30, vocal: 20 }, multiCatFriendly: 60,
+    strategy: '黐人，坐大脾對佢係最高獎賞；但要留意健康爭議。',
+    pitfalls: ['摺耳基因帶關節/軟骨病變風險，異常痛感反應要睇獸醫', '因為佢乖就唔留意佢郁動時嘅細微不適'],
+    breedRules: [
+      { when: 'noRecentAction', action: 'pet', days: 3, text: '摺耳基因帶關節/軟骨病變風險，摸耳仔摸下巴時留意佢有冇抗拒或痛感反應。' },
+      { when: 'positiveFinding', action: 'pet', text: '摺耳出名黐人，坐大脾對佢嚟講係最高獎賞。' },
+    ],
+  },
+  {
+    id: 'siamese', name: '暹羅貓', emoji: '🐱', origin: '泰國',
+    traits: { clingy: 70, holdOk: 35, active: 70, vocal: 80 }, multiCatFriendly: 50,
+    strategy: '出晒名多話又獨立，唔同佢傾偈佢會嫌你冷落佢。',
+    pitfalls: ['以為佢嘈就係唔開心，其實叫係佢嘅日常溝通', '強行限制佢行動'],
+    breedRules: [
+      { when: 'noRecentAction', action: 'talk', days: 2, text: '暹羅出晒名多話，唔同佢傾偈佢會嫌你冷落佢。' },
+      { when: 'negativeWarning', action: 'hold', text: '暹羅獨立心強，唔鍾意被限制，由佢揀時間主動埋身。' },
+    ],
+  },
+  {
+    id: 'persian', name: '波斯貓', emoji: '🐱', origin: '伊朗',
+    traits: { clingy: 60, holdOk: 40, active: 15, vocal: 10 }, multiCatFriendly: 55,
+    strategy: '長毛易打結，梳毛唔淨止係親密接觸，仲係日常必需。',
+    pitfalls: ['耐左唔梳毛導致打結甚至皮膚病', '玩得太劇烈反而有負面反應，佢活動量低'],
+    breedRules: [
+      { when: 'noRecentAction', action: 'groom', days: 1, text: '波斯長毛易打結，梳毛唔淨止係親密接觸，仲係日常必需。' },
+      { when: 'negativeWarning', action: 'wand', text: '波斯活動量低，玩得太劇烈反而會有負面反應，放慢節奏。' },
+    ],
+  },
+  {
+    id: 'chinchilla', name: '金吉拉', emoji: '🐱', origin: '英國',
+    traits: { clingy: 55, holdOk: 35, active: 20, vocal: 15 }, multiCatFriendly: 55,
+    strategy: '性情溫和，被毛蓬鬆易亂，定期梳毛保得住親密度。',
+    pitfalls: ['忽略定期梳毛令被毛打結', '眼淚痕重要定期清潔，唔淨係得個樣靚'],
+    breedRules: [
+      { when: 'noRecentAction', action: 'groom', days: 2, text: '金吉拉被毛蓬鬆易亂，定期梳毛先保得住佢嗰身「貴族感」同你嘅親密度。' },
+      { when: 'positiveFinding', action: 'pet', text: '金吉拉性情溫和，摸頭下巴通常都受落。' },
+    ],
+  },
+  {
+    id: 'russian-blue', name: '俄羅斯藍貓', emoji: '🐱', origin: '俄羅斯',
+    traits: { clingy: 40, holdOk: 20, active: 35, vocal: 15 }, multiCatFriendly: 35,
+    strategy: '慢熱怕生，識返你聲氣需要時間，耐性最重要。',
+    pitfalls: ['強行抱一隻怕生嘅貓，拖慢信任建立', '對陌生環境/人太快引入，令佢過度緊張'],
+    breedRules: [
+      { when: 'negativeWarning', action: 'hold', text: '俄藍出名怕生兼唔受抱，強行抱只會拖慢佢對你嘅信任。' },
+      { when: 'noRecentAction', action: 'callname', days: 3, text: '俄藍慢熱，耐心叫佢名等佢主動搭理，唔使心急。' },
+    ],
+  },
+  {
+    id: 'bengal', name: '豹貓', emoji: '🐱', origin: '美國',
+    traits: { clingy: 50, holdOk: 20, active: 90, vocal: 45 }, multiCatFriendly: 40,
+    strategy: '精力極高又野性重，運動量要俾夠，唔鍾意被抱束縛。',
+    pitfalls: ['運動量唔夠導致搞搞震屋企', '強行抱束縛佢，換嚟強烈抗拒'],
+    breedRules: [
+      { when: 'noRecentAction', action: 'wand', days: 1, text: '豹貓精力極高，一日冇消耗夠運動量，好易搞搞震屋企。' },
+      { when: 'negativeWarning', action: 'hold', text: '豹貓野性重，唔鍾意被抱束縛，俾佢自由走動先易攞信任。' },
+    ],
+  },
+  {
+    id: 'abyssinian', name: '阿比西尼亞貓', emoji: '🐱', origin: '埃塞俄比亞',
+    traits: { clingy: 55, holdOk: 25, active: 85, vocal: 30 }, multiCatFriendly: 55,
+    strategy: '精力旺盛又貪玩，獵性強，逗貓棒係打開話題嘅好方法。',
+    pitfalls: ['冇夠玩樂容易悶到搗蛋', '長時間困喺細空間'],
+    breedRules: [
+      { when: 'noRecentAction', action: 'wand', days: 1, text: '阿比精力旺盛又貪玩，冇夠玩樂容易悶到搗蛋。' },
+      { when: 'positiveFinding', action: 'wand', text: '阿比獵性強，逗貓棒後嘅親近感特別明顯。' },
+    ],
+  },
+  {
+    id: 'sphynx', name: '斯芬克斯無毛貓', emoji: '🐱', origin: '加拿大',
+    traits: { clingy: 80, holdOk: 70, active: 55, vocal: 40 }, multiCatFriendly: 65,
+    strategy: '皮膚出油快、怕凍又黐人，定期清潔皮膚同抱佢取暖通常雙贏。',
+    pitfalls: ['忽略定期抹身導致皮膚出油堆積', '冬天冇保暖措施'],
+    breedRules: [
+      { when: 'noRecentAction', action: 'groom', days: 2, text: '無毛貓皮膚出油快，定期抹身/梳理皮膚都算「梳毛」類接觸，唔可以慳。' },
+      { when: 'positiveFinding', action: 'hold', text: '無毛貓怕凍又黐人，抱佢取暖通常係雙贏。' },
+    ],
+  },
+  {
+    id: 'norwegian-forest', name: '挪威森林貓', emoji: '🐱', origin: '挪威',
+    traits: { clingy: 50, holdOk: 35, active: 55, vocal: 20 }, multiCatFriendly: 60,
+    strategy: '雙層被毛保留較多野性獵欲，轉季要定期梳毛。',
+    pitfalls: ['轉季唔梳毛導致大量脫毛結界', '體型大易被忽略運動需求'],
+    breedRules: [
+      { when: 'noRecentAction', action: 'groom', days: 4, text: '森林貓雙層被毛，轉季唔梳容易大量脫毛結界，要定期跟進。' },
+      { when: 'positiveFinding', action: 'wand', text: '森林貓保留較多野性獵欲，逗貓棒係打開話題嘅好方法。' },
+    ],
+  },
+  {
+    id: 'munchkin', name: '曼赤肯貓', emoji: '🐱', origin: '美國',
+    traits: { clingy: 65, holdOk: 50, active: 60, vocal: 30 }, multiCatFriendly: 65,
+    strategy: '短腳但彈跳力唔差，抱佢時要托穩全身。',
+    pitfalls: ['抱嘅姿勢冇托穩全身，對脊椎造成壓力', '因為腳短就唔俾佢跳高，其實適度運動仲需要'],
+    breedRules: [
+      { when: 'positiveFinding', action: 'wand', text: '曼赤肯短腳但彈跳力唔差，玩樂後通常會黐得更埋。' },
+      { when: 'negativeWarning', action: 'hold', text: '曼赤肯脊椎結構特殊，抱嘅姿勢要托穩全身，唔啱先會有負面反應。' },
+    ],
+  },
+];
 /* @LOGIC:ENGINE */
 const DAY_MS = 86400000;
 const DECAY = 0.85;
