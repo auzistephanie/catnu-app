@@ -81,6 +81,12 @@ input,select{font-family:inherit}
 .quiz-entry{display:flex;gap:10px}
 .quiz-entry .qe{flex:1;text-align:center;border:2px solid var(--ink);border-radius:12px;padding:12px 8px;font-size:12px;background:var(--paper);cursor:pointer;box-shadow:3px 3px 0 rgba(47,42,34,.15);line-height:1.5}
 .quiz-entry .qe span{font-size:20px;display:block;margin-bottom:4px}
+.quiz-overlay{position:fixed;inset:0;background:rgba(13,43,38,.75);z-index:40;display:flex;align-items:flex-end;justify-content:center}
+.quiz-panel{background:var(--cream);width:100%;max-width:430px;max-height:85vh;overflow-y:auto;border-radius:20px 20px 0 0;padding:20px;position:relative;box-shadow:0 -8px 30px rgba(0,0,0,.3)}
+.quiz-panel h3{margin:6px 0 12px}
+.quiz-close{position:absolute;right:14px;top:14px;width:30px;height:30px;border:2px solid var(--ink);border-radius:50%;background:var(--paper);font-size:14px;cursor:pointer}
+.quiz-panel .chips{flex-direction:column}
+.quiz-panel .chips .chip{width:100%;text-align:left}
 .field{margin-bottom:14px}
 .field label{font-size:12px;color:var(--sub);display:block;margin-bottom:4px;font-weight:700}
 .field input,.field select{width:100%;padding:10px;border:2px solid var(--ink);border-radius:8px;background:var(--paper);font-size:14px}
@@ -1310,6 +1316,107 @@ function renderAlmanac(state) {
 }
 
 RENDERERS.almanac = renderAlmanac;
+
+let quizState = null;
+
+function closeQuiz() {
+  quizState = null;
+  const ov = document.getElementById('quiz-overlay');
+  if (ov) ov.remove();
+}
+
+function startQuiz(state, mode) {
+  quizState = {
+    mode,
+    existingCatId: mode === 'addCat' ? state.cats[0].id : null,
+    stepIndex: mode === 'addCat' && state.cats.length > 1 ? -1 : 0,
+    answers: [],
+  };
+  renderQuizOverlay(state);
+}
+
+function renderQuizOverlay(state) {
+  let panel = document.getElementById('quiz-overlay');
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = 'quiz-overlay';
+    panel.className = 'quiz-overlay';
+    document.getElementById('app').appendChild(panel);
+  }
+
+  if (quizState.stepIndex === -1) {
+    panel.innerHTML = `
+      <div class="quiz-panel">
+        <button class="quiz-close" id="quiz-close">✕</button>
+        <h3><span class="deco">◆</span> 想幫邊隻貓搵新拍檔？</h3>
+        <div class="chips">${state.cats.map(c => `<span class="chip" data-existing-cat="${c.id}">${c.emoji} ${c.name}</span>`).join('')}</div>
+      </div>
+    `;
+    panel.querySelectorAll('[data-existing-cat]').forEach(c => c.addEventListener('click', () => {
+      quizState.existingCatId = c.dataset.existingCat;
+      quizState.stepIndex = 0;
+      renderQuizOverlay(state);
+    }));
+    document.getElementById('quiz-close').addEventListener('click', closeQuiz);
+    return;
+  }
+
+  if (quizState.stepIndex < Catnu.QUIZ_QUESTIONS.length) {
+    const q = Catnu.QUIZ_QUESTIONS[quizState.stepIndex];
+    panel.innerHTML = `
+      <div class="quiz-panel">
+        <button class="quiz-close" id="quiz-close">✕</button>
+        <div class="note" style="margin-top:0">第 ${quizState.stepIndex + 1} / ${Catnu.QUIZ_QUESTIONS.length} 題</div>
+        <h3>${q.text}</h3>
+        <div class="chips">${q.options.map((opt, i) => `<span class="chip" data-answer="${i}">${opt.label}</span>`).join('')}</div>
+      </div>
+    `;
+    panel.querySelectorAll('[data-answer]').forEach(c => c.addEventListener('click', () => {
+      quizState.answers[quizState.stepIndex] = +c.dataset.answer;
+      quizState.stepIndex++;
+      renderQuizOverlay(state);
+    }));
+    document.getElementById('quiz-close').addEventListener('click', closeQuiz);
+    return;
+  }
+
+  const opts = { mode: quizState.mode };
+  if (quizState.mode === 'addCat') {
+    const existingCat = state.cats.find(c => c.id === quizState.existingCatId);
+    let pos = 0, neg = 0;
+    state.logs.filter(l => l.catId === existingCat.id).forEach(l => {
+      const p = Catnu.entryPolarity(l);
+      if (p === 'positive') pos++; else if (p === 'negative') neg++;
+    });
+    const total = pos + neg;
+    opts.existingCat = existingCat;
+    opts.existingCatNegativeRate = total > 0 ? neg / total : 0;
+  }
+  const top3 = Catnu.matchQuiz(quizState.answers, opts);
+
+  panel.innerHTML = `
+    <div class="quiz-panel">
+      <button class="quiz-close" id="quiz-close">✕</button>
+      <h3><span class="deco">◆</span> 最夾你嘅 3 個品種</h3>
+      ${top3.map((r, i) => `
+        <div class="breed-card" data-result-breed="${r.breed.id}">
+          <div class="bh"><span class="emoji">${r.breed.emoji}</span><span class="name">${i + 1}. ${r.breed.name}</span></div>
+          <div class="bd open"><div>${r.reason}</div></div>
+        </div>
+      `).join('')}
+      ${quizState.mode === 'addCat' ? `
+        <div class="note"><b>引入新貓步驟：</b>先隔離一星期唔好直接見面，交換氣味（毛巾/床墊），再用圍欄或開細縫俾佢哋睇到但摸唔到對方，觀察雙方反應冇異常先正式見面，成個過程可以花 2-4 星期，唔好心急。</div>
+      ` : ''}
+    </div>
+  `;
+  panel.querySelectorAll('[data-result-breed]').forEach(card => card.addEventListener('click', () => {
+    almanacBreedOpen.add(card.dataset.resultBreed);
+    closeQuiz();
+    switchTab('almanac');
+  }));
+  document.getElementById('quiz-close').addEventListener('click', closeQuiz);
+}
+
 /* @APP:BOOT */
 window.addEventListener('DOMContentLoaded', initApp);
 })();
