@@ -624,6 +624,37 @@ Catnu.matchQuiz = function matchQuiz(answers, opts) {
   return Catnu.scoreAllBreeds(answers, opts).slice(0, 3);
 };
 /* @APP:STORE */
+const STORAGE_KEY = 'catnu.v1';
+
+function defaultState() {
+  return {
+    schemaVersion: 1,
+    cats: [],
+    logs: [],
+    quests: {},
+    streak: { current: 0, best: 0, lastDoneDate: '' },
+    milestones: [],
+    customActions: [],
+    settings: { createdAt: Date.now() },
+  };
+}
+
+Catnu.Store = {
+  load() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return defaultState();
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed.schemaVersion !== 1) return defaultState();
+      return parsed;
+    } catch (e) {
+      return defaultState();
+    }
+  },
+  save(state) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  },
+};
 /* @APP:INIT */
 function initApp(){
   // populated by later tasks
