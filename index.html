@@ -106,6 +106,50 @@ Catnu.affectionScore = function affectionScore(logs, catId, nowTs) {
     : null;
   return { score: current.score, insufficient: current.insufficient, weekChange };
 };
+
+Catnu.actionCorrelation = function actionCorrelation(logs, catId, actionId, nowTs) {
+  const catLogs = logs.filter(e => e.catId === catId);
+  const actionEntries = catLogs.filter(e => (e.actions || []).includes(actionId));
+  const n = actionEntries.length;
+
+  const THIRTY_MIN = 30 * 60000;
+  const sample = [];
+  for (const a of actionEntries) {
+    if (!sample.includes(a)) sample.push(a);
+    for (const e of catLogs) {
+      if (e !== a && e.ts > a.ts && e.ts - a.ts <= THIRTY_MIN && !sample.includes(e)) {
+        sample.push(e);
+      }
+    }
+  }
+  let samplePos = 0, sampleNeg = 0;
+  for (const e of sample) {
+    const p = Catnu.entryPolarity(e);
+    if (p === 'positive') samplePos++; else if (p === 'negative') sampleNeg++;
+  }
+  const sampleNonNeutral = samplePos + sampleNeg;
+  const P_a = sampleNonNeutral > 0 ? samplePos / sampleNonNeutral : null;
+
+  let basePos = 0, baseNeg = 0;
+  for (const e of catLogs) {
+    const p = Catnu.entryPolarity(e);
+    if (p === 'positive') basePos++; else if (p === 'negative') baseNeg++;
+  }
+  const baseNonNeutral = basePos + baseNeg;
+  const P_base = baseNonNeutral > 0 ? basePos / baseNonNeutral : null;
+
+  const NEG_IDS = ['flatears', 'walkaway', 'hiss', 'bite'];
+  const negativeCount = actionEntries.filter(e =>
+    (e.reactions || []).some(r => NEG_IDS.includes(r))
+  ).length;
+  const negativeRate = n > 0 ? negativeCount / n : 0;
+
+  const insufficientData = n >= 1 && n < 5;
+  const positiveFinding = n >= 5 && P_a !== null && P_base !== null && (P_a - P_base) >= 0.15;
+  const negativeWarning = n >= 5 && negativeRate >= 0.6;
+
+  return { n, P_a, P_base, negativeCount, negativeRate, insufficientData, positiveFinding, negativeWarning };
+};
 /* @APP:STORE */
 /* @APP:INIT */
 function initApp(){
