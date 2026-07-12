@@ -324,6 +324,42 @@ Catnu.GROOMING_NEED = {
   'british-longhair': 80, persian: 90, chinchilla: 75, 'maine-coon': 60,
   'norwegian-forest': 65, ragdoll: 55, sphynx: 70, mixed: 30,
 };
+Catnu.DECODE = [
+  { category: '尾巴', items: [
+    { icon: '🐈', signal: '尾巴直豎微顫', meaning: '超開心見到你', response: '摸下巴/俾小食，把握呢個黃金機會' },
+    { icon: '〰️', signal: '尾巴慢慢左右擺', meaning: '專注觀察緊啲嘢，可能就快出手', response: '唔好嘈佢，等佢自己決定' },
+    { icon: '💢', signal: '尾巴大力拍打地面', meaning: '煩躁/唔耐煩', response: '即刻停手，俾佢空間' },
+    { icon: '⚡', signal: '尾巴毛炸起', meaning: '受驚或者好緊張', response: '保持安靜，唔好突然郁動嚇親佢' },
+    { icon: '🥰', signal: '尾巴纏住你隻腳', meaning: '撒嬌示好', response: '摸下佢，回應佢嘅親近' },
+  ]},
+  { category: '耳仔', items: [
+    { icon: '👂', signal: '耳仔向前豎起', meaning: '好奇/警覺', response: '可以慢慢埋近同佢互動' },
+    { icon: '✈️', signal: '飛機耳（向後貼平）', meaning: '唔妥/驚/戒備', response: '即刻停手，俾空間佢' },
+    { icon: '🎧', signal: '耳仔輕微轉動', meaning: '留意緊周圍聲音', response: '唔使特別處理，佢好放鬆' },
+    { icon: '↔️', signal: '一隻耳向前一隻向後', meaning: '心情矛盾/警戒中', response: '慢慢嚟，唔好強行接觸' },
+    { icon: '😨', signal: '耳仔完全側向兩邊', meaning: '極度緊張或者防禦', response: '立即停止任何接觸，等佢自己平復' },
+  ]},
+  { category: '鬍鬚', items: [
+    { icon: '✨', signal: '鬍鬚向前伸', meaning: '好奇/興奮，想探索', response: '可以俾佢玩具或者小食' },
+    { icon: '⚠️', signal: '鬍鬚貼向臉頰', meaning: '驚慌或者攻擊前兆', response: '立即停止動作，遠離佢' },
+    { icon: '😌', signal: '鬍鬚放鬆自然下垂', meaning: '心情平靜放鬆', response: '呢個係摸佢嘅好時機' },
+    { icon: '🎯', signal: '鬍鬚輕微顫動', meaning: '專注緊某啲嘢（可能係獵物模式）', response: '唔好打斷佢，等佢滿足獵性' },
+  ]},
+  { category: '坐姿', items: [
+    { icon: '🙃', signal: '露肚仰臥', meaning: '極度信任你', response: '唔代表一定想摸肚，可以輕摸幾秒觀察反應' },
+    { icon: '🍞', signal: '蹲坐成一個包', meaning: '放鬆但保持警覺（半防禦）', response: '佢覺得安全但未完全卸防，唔使刻意打擾' },
+    { icon: '😴', signal: '側身攤平瞓', meaning: '完全放鬆，深度信任呢個環境', response: '呢個係最佳嘅陪伴時間，靜靜坐埋佢隔離' },
+    { icon: '🙀', signal: '弓背豎毛', meaning: '受驚/防禦攻擊姿態', response: '唔好埋近，俾佢自己冷靜' },
+    { icon: '🐾', signal: '前腳踩地後腳蓄勢', meaning: '準備撲擊（玩耍或者狩獵模式）', response: '可以用玩具引導佢嘅獵性' },
+  ]},
+  { category: '叫聲', items: [
+    { icon: '🗣', signal: '短促「喵」一聲', meaning: '打招呼/引起你注意', response: '回應佢，同佢講幾句' },
+    { icon: '📢', signal: '連續短促喵喵叫', meaning: '興奮/想要嘢（食物、開門等）', response: '睇下佢想要咩，滿足合理需求' },
+    { icon: '😾', signal: '低沉持續嘅「嗚嗚」聲', meaning: '警告/唔滿意', response: '停低手上動作，觀察佢嘅身體語言' },
+    { icon: '🎵', signal: '呼嚕聲', meaning: '通常代表滿足放鬆，但都可能係自我安撫（不適時）', response: '配合身體語言判斷，一般係好事' },
+    { icon: '😱', signal: '尖銳短促嘅「喵！」或者「嘎」聲', meaning: '疼痛或者受驚嚇', response: '檢查佢有冇受傷，立即安撫' },
+  ]},
+];
 /* @LOGIC:ENGINE */
 const DAY_MS = 86400000;
 const DECAY = 0.85;
