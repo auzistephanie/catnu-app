@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>貓奴修行 — 令你隻貓，愛上你</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;900&family=Fraunces:ital,wght@1,600;1,900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#f4edda; --paper:#fbf6e9; --teal:#1d5c52; --teal-dk:#123f38; --night:#0d2b26;
+  --terra:#c05a2e; --terra-dk:#9c4522; --mustard:#d9a441; --mustard-lt:#e8c37a;
+  --rose:#c98d83; --ink:#2f2a22; --sub:#7d7361; --line:#e2d7bd;
+  --serif:'Noto Serif TC',serif; --sans:'Noto Sans TC',sans-serif; --disp:'Fraunces',serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);color:var(--ink);background:var(--cream);overflow-x:hidden}
+img,svg{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+h1,h2,h3{font-family:var(--serif)}
+section{position:relative}
+
+/* ---------- NAV ---------- */
+nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;
+  padding:14px 28px;transition:background .5s,color .5s;backdrop-filter:blur(8px);background:rgba(244,237,218,.82);color:var(--ink)}
+nav .logo{font-family:var(--serif);font-weight:900;font-size:19px;display:flex;align-items:center;gap:8px}
+nav .logo .paw{font-size:22px}
+nav ul{display:flex;gap:22px;list-style:none;font-size:14px;font-weight:500}
+nav ul a{position:relative;padding:4px 2px}
+nav ul a::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:0;background:var(--terra);transition:width .3s}
+nav ul a:hover::after{width:100%}
+nav .cta-mini{border:2px solid currentColor;border-radius:20px;padding:7px 16px;font-size:13px;font-weight:700;transition:all .3s}
+nav .cta-mini:hover{background:var(--terra);border-color:var(--terra);color:var(--cream)}
+body.zone-dark nav{background:rgba(13,43,38,.78);color:var(--cream)}
+body.zone-warm nav{background:rgba(217,164,65,.82);color:var(--ink)}
+@media(max-width:640px){nav ul{display:none}}
+
+/* ---------- PROGRESS RAIL ---------- */
+.rail{position:fixed;right:22px;top:50%;transform:translateY(-50%);z-index:40;display:flex;flex-direction:column;align-items:center;gap:18px}
+.rail::before{content:"";position:absolute;top:0;bottom:0;width:0;border-left:2px dotted rgba(125,115,97,.5)}
+.rail a{width:12px;height:12px;border-radius:50%;background:var(--cream);border:2px solid var(--sub);position:relative;transition:all .3s}
+.rail a.on{background:var(--terra);border-color:var(--terra);transform:scale(1.3)}
+.rail a .tip{position:absolute;right:22px;top:50%;transform:translateY(-50%);background:var(--ink);color:var(--cream);font-size:11px;
+  padding:3px 10px;border-radius:10px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .25s}
+.rail a:hover .tip{opacity:1}
+.rail .walker{position:absolute;left:50%;transform:translate(-50%,-50%);font-size:20px;transition:top .2s linear;filter:drop-shadow(1px 2px 0 rgba(0,0,0,.25))}
+body.zone-dark .rail a{background:var(--night);border-color:#5f8a80}
+body.zone-dark .rail::before{border-color:rgba(159,188,178,.4)}
+@media(max-width:820px){.rail{display:none}}
+
+/* ---------- REVEAL ---------- */
+.reveal{opacity:0;transform:translateY(34px);transition:opacity .8s ease,transform .8s ease}
+.reveal.zoom{transform:scale(.86)}
+.reveal.slide-l{transform:translateX(-50px)}
+.reveal.slide-r{transform:translateX(50px)}
+.reveal.show{opacity:1;transform:none}
+.d1{transition-delay:.12s}.d2{transition-delay:.24s}.d3{transition-delay:.36s}.d4{transition-delay:.48s}
+
+/* ---------- HERO ---------- */
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;
+  padding:110px 20px 0;background:var(--cream);overflow:hidden}
+.hero .kicker{font-size:13px;letter-spacing:6px;color:var(--terra);font-weight:700;margin-bottom:14px}
+.hero h1{font-size:clamp(38px,7vw,72px);font-weight:900;line-height:1.18;color:var(--teal-dk)}
+.hero h1 .accent{color:var(--terra);position:relative;display:inline-block}
+.hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:6px;height:12px;background:var(--mustard);opacity:.45;z-index:-1;transform:rotate(-1deg)}
+.hero .sub{margin-top:18px;font-size:clamp(15px,2.2vw,19px);color:var(--sub);max-width:560px;line-height:1.9}
+.hero .btn-row{margin-top:34px;display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.btn{display:inline-block;font-weight:700;font-size:16px;padding:15px 34px;border-radius:14px;border:2.5px solid var(--ink);
+  position:relative;overflow:hidden;transition:transform .18s,box-shadow .18s}
+.btn.primary{background:var(--terra);color:var(--cream);box-shadow:5px 5px 0 var(--ink)}
+.btn.ghost{background:var(--paper);color:var(--ink);box-shadow:5px 5px 0 rgba(47,42,34,.25)}
+.btn:hover{transform:translate(-2px,-2px);box-shadow:8px 8px 0 var(--ink)}
+.btn.ghost:hover{box-shadow:8px 8px 0 rgba(47,42,34,.3)}
+.btn.primary::after{content:"";position:absolute;top:0;left:-80%;width:45%;height:100%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent);animation:shine 3.2s infinite}
+@keyframes shine{0%{left:-80%}55%{left:130%}100%{left:130%}}
+.hero .stats{display:flex;gap:44px;margin-top:46px;flex-wrap:wrap;justify-content:center}
+.hero .stat b{font-family:var(--disp);font-style:italic;font-size:34px;color:var(--teal);display:block}
+.hero .stat span{font-size:12px;color:var(--sub);letter-spacing:2px}
+.hero-cat{margin-top:20px;width:min(300px,60vw);position:relative;z-index:2}
+.tail{transform-origin:18px 150px;animation:tailwag 3.4s ease-in-out infinite}
+@keyframes tailwag{0%,100%{transform:rotate(0)}50%{transform:rotate(9deg)}}
+.blink{animation:blink 5s infinite}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}96%{transform:scaleY(.08)}}
+.heart-float{position:absolute;font-size:22px;opacity:0;animation:heartup 4s ease-in-out infinite}
+@keyframes heartup{0%{opacity:0;transform:translateY(0) scale(.6)}25%{opacity:1}60%{opacity:0;transform:translateY(-70px) scale(1.15)}100%{opacity:0}}
+.hero-floor{position:absolute;left:0;right:0;bottom:-30px;height:32vh;min-height:180px;z-index:0;opacity:.9}
+.hero-floor svg{width:100%;height:100%;transform:scaleY(.62);transform-origin:bottom}
+.scroll-hint{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:3;width:26px;height:44px;border:2px solid var(--sub);border-radius:14px}
+.scroll-hint::before{content:"";position:absolute;left:50%;top:8px;width:4px;height:8px;border-radius:2px;background:var(--terra);transform:translateX(-50%);animation:wheel 1.8s infinite}
+@keyframes wheel{0%{top:8px;opacity:1}70%{top:24px;opacity:0}100%{top:8px;opacity:0}}
+
+/* ---------- MARQUEE ---------- */
+.marquee{background:var(--ink);color:var(--cream);overflow:hidden;padding:13px 0;border-top:3px solid var(--mustard);border-bottom:3px solid var(--mustard)}
+.marquee .track{display:flex;gap:44px;white-space:nowrap;width:max-content;animation:mq 26s linear infinite;font-size:14px;letter-spacing:3px}
+.marquee .track span i{color:var(--mustard);font-style:normal;margin-right:10px}
+@keyframes mq{to{transform:translateX(-50%)}}
+
+/* ---------- TILE DIVIDER ---------- */
+.tile-divider{width:100%;height:26px;display:block}
+
+/* ---------- STOP COMMON ---------- */
+.stop{padding:96px 20px}
+.stop .inner{max-width:1060px;margin:0 auto}
+.stop-tag{display:inline-block;font-family:var(--disp);font-style:italic;font-size:15px;letter-spacing:2px;
+  border:2px solid currentColor;border-radius:20px;padding:4px 18px;margin-bottom:16px}
+.stop h2{font-size:clamp(28px,4.4vw,44px);font-weight:900;line-height:1.3}
+.stop .lead{margin-top:14px;font-size:16px;line-height:2;max-width:640px}
+
+/* ---------- STOP 01 dark ---------- */
+.s1{background:var(--night);color:var(--cream)}
+.s1 .stop-tag{color:var(--mustard)}
+.s1 h2 .accent{color:var(--mustard)}
+.s1 .lead{color:#b9cfc8}
+.cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:52px}
+.fcard{background:#12352f;border:2px solid #2c5a51;border-radius:18px;padding:26px 22px;position:relative;transition:transform .25s,box-shadow .25s}
+.fcard:hover{transform:translateY(-8px) rotate(-.6deg);box-shadow:0 16px 30px rgba(0,0,0,.35);border-color:var(--mustard)}
+.fcard .ico{font-size:34px}
+.fcard h3{font-size:19px;margin:14px 0 10px;color:var(--mustard-lt)}
+.fcard p{font-size:13.5px;line-height:1.9;color:#a8c4bc}
+.fcard .corner{position:absolute;top:10px;right:10px;width:30px;height:30px;opacity:.85}
+.demo-insight{margin-top:46px;background:#0a211d;border:2px dashed #3b6b60;border-radius:18px;padding:24px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.demo-insight .pct{font-family:var(--disp);font-style:italic;font-size:52px;color:var(--mustard)}
+.demo-insight p{flex:1;min-width:240px;font-size:14.5px;line-height:2;color:#c4d8d2}
+.demo-insight p b{color:var(--cream)}
+
+/* ---------- STOP 02 light postcards ---------- */
+.s2{background:var(--paper)}
+.s2 .stop-tag{color:var(--terra)}
+.s2 h2 .accent{color:var(--terra)}
+.s2 .lead{color:var(--sub)}
+.postcards{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:52px}
+.pcard{background:var(--cream);border:2px solid var(--ink);border-radius:6px;padding:20px;position:relative;
+  box-shadow:6px 6px 0 rgba(47,42,34,.14);transition:transform .25s}
+.pcard:nth-child(odd){transform:rotate(-1.4deg)}
+.pcard:nth-child(even){transform:rotate(1.2deg)}
+.pcard:hover{transform:rotate(0) translateY(-6px)}
+.pcard::before{content:"";position:absolute;top:10px;right:10px;width:34px;height:40px;border:2px solid var(--terra);opacity:.55;
+  background:repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(192,90,46,.35) 3px,rgba(192,90,46,.35) 6px)}
+.pcard .ico{font-size:32px}
+.pcard h3{font-size:18px;margin:12px 0 8px;color:var(--teal-dk)}
+.pcard p{font-size:13.5px;line-height:1.9;color:var(--sub)}
+.pcard .sig{margin-top:12px;font-family:var(--disp);font-style:italic;font-size:13px;color:var(--terra)}
+.breed-strip{margin-top:54px;background:var(--cream);border:2px solid var(--ink);border-radius:18px;padding:26px;box-shadow:6px 6px 0 rgba(47,42,34,.14)}
+.breed-strip h3{font-size:20px;color:var(--teal-dk)}
+.breed-chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.bchip{border:2px solid var(--ink);border-radius:20px;padding:7px 14px;font-size:13px;background:var(--paper);transition:all .2s}
+.bchip:hover{background:var(--mustard);transform:translateY(-3px)}
+.bchip.star{background:var(--teal);color:var(--cream);font-weight:700}
+.bchip.mix{background:var(--terra);color:var(--cream);font-weight:700}
+
+/* ---------- STOP 03 warm quests ---------- */
+.s3{background:var(--mustard);color:var(--ink);overflow:hidden}
+.s3 .stop-tag{color:var(--terra-dk)}
+.s3 h2 .accent{color:var(--terra-dk)}
+.s3 .lead{color:#6e5a2a}
+.quest-wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;margin-top:50px;align-items:start}
+.qlist .q{display:flex;gap:14px;align-items:center;background:var(--paper);border:2.5px solid var(--ink);border-radius:16px;
+  padding:16px;margin-bottom:14px;box-shadow:5px 5px 0 rgba(47,42,34,.28)}
+.qlist .q .box{width:30px;height:30px;flex:none;border:2.5px solid var(--ink);border-radius:9px;background:var(--paper);
+  display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--teal)}
+.qlist .q.done .box{background:var(--teal);color:var(--cream)}
+.qlist .q .t{font-size:14.5px;font-weight:500;line-height:1.55}
+.qlist .q .t small{display:block;color:var(--sub);font-size:12px;font-weight:400}
+.streak-card{background:var(--paper);border:2.5px solid var(--ink);border-radius:20px;padding:30px;text-align:center;
+  box-shadow:7px 7px 0 rgba(47,42,34,.3);position:relative}
+.streak-card .fire{font-size:52px}
+.streak-card .num{font-family:var(--disp);font-style:italic;font-size:64px;color:var(--terra);line-height:1}
+.streak-card p{font-size:13px;color:var(--sub);margin-top:8px;line-height:1.8}
+.stamp{position:absolute;top:-26px;right:-20px;width:104px;height:104px;border-radius:50%;border:3px dashed var(--terra);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(251,246,233,.9);
+  color:var(--terra);font-weight:900;transform:rotate(12deg) scale(0);font-size:13px;letter-spacing:1px}
+.stamp .pawico{font-size:26px}
+.stamp.slam{animation:slam .55s cubic-bezier(.2,2.2,.4,1) forwards}
+@keyframes slam{to{transform:rotate(12deg) scale(1)}}
+.milestone-row{display:flex;gap:14px;margin-top:44px;flex-wrap:wrap}
+.mcard{background:var(--paper);border:2.5px solid var(--ink);border-radius:14px;padding:14px 18px;font-size:14px;font-weight:700;
+  box-shadow:4px 4px 0 rgba(47,42,34,.28);transition:transform .2s}
+.mcard:hover{transform:translateY(-5px) rotate(-1deg)}
+.mcard span{margin-right:8px;font-size:18px}
+.mcard.lock{opacity:.5;font-weight:400}
+
+/* ---------- GATE ---------- */
+.gate{background:var(--night);color:var(--cream);padding:100px 20px}
+.gate .inner{max-width:920px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+.gate h2{font-size:clamp(28px,4vw,42px);line-height:1.35}
+.gate h2 .accent{color:var(--mustard)}
+.gate .lead{color:#b9cfc8;font-size:15px;line-height:2;margin-top:16px}
+.ticket{background:var(--paper);color:var(--ink);border-radius:16px;position:relative;padding:28px 26px;
+  box-shadow:0 18px 44px rgba(0,0,0,.4)}
+.ticket::before,.ticket::after{content:"";position:absolute;left:0;right:0;height:14px;
+  background:radial-gradient(circle at 10px 0,var(--night) 0 7px,transparent 8px);background-size:24px 14px;background-position:2px 0}
+.ticket::before{top:-1px}
+.ticket::after{bottom:-1px;transform:rotate(180deg)}
+.ticket .th{display:flex;justify-content:space-between;align-items:center;border-bottom:2px dashed var(--sub);padding-bottom:12px;margin-bottom:16px}
+.ticket .th b{font-family:var(--serif);font-size:18px;color:var(--teal-dk)}
+.ticket .th span{font-family:var(--disp);font-style:italic;font-size:12px;color:var(--terra)}
+.ticket label{font-size:12px;font-weight:700;color:var(--sub);letter-spacing:1px;display:block;margin:12px 0 5px}
+.ticket input,.ticket select{width:100%;padding:11px 12px;border:2px solid var(--ink);border-radius:10px;background:var(--cream);
+  font-family:var(--sans);font-size:14px;color:var(--ink)}
+.ticket input:focus,.ticket select:focus{outline:none;border-color:var(--terra)}
+.ticket .btn{width:100%;text-align:center;margin-top:20px;cursor:pointer;font-family:var(--sans)}
+.ticket .barcode{margin-top:18px;height:34px;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 5px,var(--ink) 5px 8px,transparent 8px 10px)}
+.ticket .bc-num{font-size:10px;letter-spacing:4px;color:var(--sub);text-align:center;margin-top:4px}
+
+/* ---------- FOOTER ---------- */
+footer{background:#081d19;color:#7fa198;text-align:center;padding:30px 20px;font-size:12.5px;line-height:2}
+footer .paws{font-size:16px;letter-spacing:8px;color:var(--mustard)}
+
+/* ---------- ambient paws ---------- */
+.amb-paw{position:absolute;font-size:26px;opacity:.14;animation:drift 9s ease-in-out infinite}
+@keyframes drift{0%,100%{transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-22px) rotate(8deg)}}
+
+@media(max-width:900px){.cards3,.postcards{grid-template-columns:1fr 1fr}.quest-wrap,.gate .inner{grid-template-columns:1fr}}
+@media(max-width:640px){.cards3,.postcards{grid-template-columns:1fr}.stamp{right:-8px}}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .reveal{opacity:1;transform:none}
+}
+</style>
+</head>
+<body class="zone-light">
+
+<nav id="nav">
+  <a class="logo" href="#hero"><span class="paw">🐾</span>貓奴修行</a>
+  <ul>
+    <li><a href="#features">點樣運作</a></li>
+    <li><a href="#decode">貓語圖鑑</a></li>
+    <li><a href="#quest">每日任務</a></li>
+    <li><a href="#gate">搶先用</a></li>
+  </ul>
+  <a class="cta-mini" href="#gate">開始溝貓</a>
+</nav>
+
+<div class="rail" id="rail">
+  <span class="walker" id="walker">🐾</span>
+  <a href="#hero" data-dot><span class="tip">啟程</span></a>
+  <a href="#features" data-dot><span class="tip">記錄與分析</span></a>
+  <a href="#decode" data-dot><span class="tip">貓語圖鑑</span></a>
+  <a href="#quest" data-dot><span class="tip">任務與里程碑</span></a>
+  <a href="#gate" data-dot><span class="tip">搶先用</span></a>
+</div>
+
+<!-- ================= HERO ================= -->
+<section class="hero" id="hero" data-zone="light">
+  <span class="amb-paw" style="top:18%;left:8%">🐾</span>
+  <span class="amb-paw" style="top:30%;right:10%;animation-delay:2.2s">🐾</span>
+  <span class="amb-paw" style="bottom:40%;left:16%;animation-delay:4s">🐾</span>
+  <div class="kicker reveal show">CATNU · 貓奴修行手冊</div>
+  <h1 class="reveal show">令你隻貓，<br><span class="accent">真心愛上你</span></h1>
+  <p class="sub reveal show d1">記低佢對你嘅每個反應、你對佢嘅每個習慣，<br>用數據搵出「原來咁做佢先錫我」。</p>
+  <div class="btn-row reveal show d2">
+    <a class="btn primary" href="#gate">免費開始 →</a>
+    <a class="btn ghost" href="#features">睇下點運作</a>
+  </div>
+  <div class="stats reveal show d3">
+    <div class="stat"><b>10秒</b><span>一次記錄</span></div>
+    <div class="stat"><b>16類</b><span>品種圖鑑</span></div>
+    <div class="stat"><b>100%</b><span>數據留喺你手機</span></div>
+  </div>
+
+  <div class="hero-cat" data-plx="-0.05">
+    <span class="heart-float" style="left:12%;top:6%">🧡</span>
+    <span class="heart-float" style="right:14%;top:12%;animation-delay:1.6s">💛</span>
+    <svg viewBox="0 0 300 220" aria-hidden="true">
+      <g class="tail"><path d="M52 178 C10 170 4 128 30 116 C18 138 34 160 66 164Z" fill="#1d5c52"/></g>
+      <ellipse cx="150" cy="182" rx="92" ry="26" fill="rgba(47,42,34,.12)"/>
+      <path d="M150 60 C104 60 78 96 78 138 C78 176 108 196 150 196 C192 196 222 176 222 138 C222 96 196 60 150 60Z" fill="#1d5c52"/>
+      <path d="M96 78 L84 40 L122 62Z" fill="#1d5c52"/><path d="M204 78 L216 40 L178 62Z" fill="#1d5c52"/>
+      <path d="M99 72 L93 52 L112 63Z" fill="#c98d83"/><path d="M201 72 L207 52 L188 63Z" fill="#c98d83"/>
+      <circle cx="150" cy="128" r="46" fill="#2a7566"/>
+      <g class="blink" style="transform-origin:127px 120px"><ellipse cx="127" cy="120" rx="9" ry="12" fill="#f4edda"/><circle cx="127" cy="122" r="5" fill="#2f2a22"/></g>
+      <g class="blink" style="transform-origin:173px 120px"><ellipse cx="173" cy="120" rx="9" ry="12" fill="#f4edda"/><circle cx="173" cy="122" r="5" fill="#2f2a22"/></g>
+      <path d="M144 138 L156 138 L150 146Z" fill="#c05a2e"/>
+      <path d="M150 146 C150 154 142 156 136 152 M150 146 C150 154 158 156 164 152" stroke="#f4edda" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <g stroke="#f4edda" stroke-width="2.5" stroke-linecap="round"><path d="M96 132 L120 136"/><path d="M96 146 L120 144"/><path d="M204 132 L180 136"/><path d="M204 146 L180 144"/></g>
+      <path d="M118 190 C118 178 132 178 132 190" stroke="#f4edda" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M168 190 C168 178 182 178 182 190" stroke="#f4edda" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M236 96 C246 84 262 92 258 104 C255 114 240 122 236 124 C232 122 217 114 214 104 C210 92 226 84 236 96Z" fill="#c05a2e" opacity=".92"/>
+    </svg>
+  </div>
+
+  <div class="hero-floor" data-plx="0.05" aria-hidden="true">
+    <svg preserveAspectRatio="none">
+      <defs>
+        <pattern id="tileA" width="80" height="80" patternUnits="userSpaceOnUse">
+          <rect width="80" height="80" fill="#efe5cb"/>
+          <g fill="#1d5c52"><path d="M40 12 C46 24 46 32 40 40 C34 32 34 24 40 12Z"/><path d="M40 68 C46 56 46 48 40 40 C34 48 34 56 40 68Z"/><path d="M12 40 C24 34 32 34 40 40 C32 46 24 46 12 40Z"/><path d="M68 40 C56 34 48 34 40 40 C48 46 56 46 68 40Z"/></g>
+          <g fill="#c05a2e"><path d="M20 20 C30 22 36 28 40 40 C28 36 22 30 20 20Z"/><path d="M60 20 C58 30 52 36 40 40 C44 28 50 22 60 20Z"/><path d="M20 60 C22 50 28 44 40 40 C36 52 30 58 20 60Z"/><path d="M60 60 C50 58 44 52 40 40 C52 44 58 50 60 60Z"/></g>
+          <circle cx="40" cy="40" r="6" fill="#d9a441"/>
+          <g fill="#1d5c52"><path d="M0 0 L14 0 A14 14 0 0 1 0 14Z"/><path d="M80 0 L80 14 A14 14 0 0 1 66 0Z"/><path d="M0 80 L0 66 A14 14 0 0 1 14 80Z"/><path d="M80 80 L66 80 A14 14 0 0 1 80 66Z"/></g>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#tileA)"/>
+    </svg>
+  </div>
+  <div class="scroll-hint" aria-hidden="true"></div>
+</section>
+
+<!-- ================= MARQUEE ================= -->
+<div class="marquee" aria-hidden="true">
+  <div class="track" id="mqtrack">
+    <span><i>◆</i>慢眨眼</span><span><i>◆</i>呼嚕嚕</span><span><i>◆</i>踩奶</span><span><i>◆</i>尾巴直豎</span>
+    <span><i>◆</i>露肚皮</span><span><i>◆</i>飛機耳注意</span><span><i>◆</i>坐大脾</span><span><i>◆</i>貓界錫錫</span>
+    <span><i>◆</i>英國長毛</span><span><i>◆</i>唐貓至叻</span>
+  </div>
+</div>
+
+<!-- ================= STOP 01 ================= -->
+<section class="stop s1" id="features" data-zone="dark">
+  <div class="inner">
+    <span class="stop-tag reveal">STOP 01 · 記錄 → 分析</span>
+    <h2 class="reveal">佢鍾唔鍾意你，<span class="accent">數據話你知</span></h2>
+    <p class="lead reveal d1">貓唔識講嘢，但佢嘅反應從來冇呃過你。每次互動 10 秒記低——佢點反應、你做咗咩——分析引擎就會搵出規律。</p>
+    <div class="cards3">
+      <div class="fcard reveal d1">
+        <svg class="corner" viewBox="0 0 80 80"><rect width="80" height="80" fill="url(#tileA)"/></svg>
+        <div class="ico">⏱</div><h3>10 秒快速記錄</h3>
+        <p>Tap 幾粒掣就完成：佢嘅反應（貼近／呼嚕／飛機耳…）＋你嘅行為（餵食／梳毛／逗貓棒…）。瞓前仲可以一次過補記。</p>
+      </div>
+      <div class="fcard reveal d2">
+        <div class="ico">📈</div><h3>好感度指數</h3>
+        <p>近 7 日正面反應加權計分，每隻貓獨立追蹤。今日 72 分，上星期 66——你嘅努力，睇得見。</p>
+      </div>
+      <div class="fcard reveal d3">
+        <div class="ico">💡</div><h3>溝貓建議</h3>
+        <p>透明統計，唔靠 AI 老作：邊樣嘢令佢正面反應率飆升、邊樣嘢次次換嚟飛機耳，證據確鑿先出建議。</p>
+      </div>
+    </div>
+    <div class="demo-insight reveal zoom">
+      <div class="pct">82%</div>
+      <p><b>實例：</b>玩完逗貓棒後 30 分鐘內，貓A 嘅正面反應率係 <b>82%</b>（平時得 55%）。結論：<b>玩完先摸，事半功倍。</b>而「抱佢」7 次有 5 次飛機耳——英長唔受抱，坐埋佢隔離等佢主動先係正路。</p>
+    </div>
+  </div>
+</section>
+
+<svg class="tile-divider" preserveAspectRatio="none" aria-hidden="true">
+  <defs>
+    <pattern id="tileD" width="40" height="40" patternUnits="userSpaceOnUse">
+      <rect width="40" height="40" fill="#f4edda"/>
+      <path d="M20 2 L38 20 L20 38 L2 20Z" fill="none" stroke="#1d5c52" stroke-width="3"/>
+      <rect x="16" y="16" width="8" height="8" fill="#d9a441" transform="rotate(45 20 20)"/>
+      <g fill="#c05a2e"><circle cx="0" cy="0" r="4"/><circle cx="40" cy="0" r="4"/><circle cx="0" cy="40" r="4"/><circle cx="40" cy="40" r="4"/></g>
+    </pattern>
+  </defs>
+  <rect width="100%" height="26" fill="url(#tileD)"/>
+</svg>
+
+<!-- ================= STOP 02 ================= -->
+<section class="stop s2" id="decode" data-zone="light">
+  <div class="inner">
+    <span class="stop-tag reveal">STOP 02 · 貓語圖鑑</span>
+    <h2 class="reveal">讀懂佢嘅<span class="accent">身體語言</span></h2>
+    <p class="lead reveal d1">尾巴、耳仔、鬍鬚、坐姿、叫聲——五大類即時解碼，用正經行為學，唔靠估。</p>
+    <div class="postcards">
+      <div class="pcard reveal slide-l d1">
+        <div class="ico">🐈</div><h3>尾巴直豎微顫</h3>
+        <p>超開心見到你！呢下係黃金機會，出手摸下巴、俾小食，好感度直入袋。</p>
+        <div class="sig">— 貓語明信片 No.01</div>
+      </div>
+      <div class="pcard reveal d2">
+        <div class="ico">😌</div><h3>慢眨眼</h3>
+        <p>貓界嘅「我信你」。慢慢眨返俾佢，係唔使錢又最有效嘅示愛方法。</p>
+        <div class="sig">— 貓語明信片 No.02</div>
+      </div>
+      <div class="pcard reveal slide-r d3">
+        <div class="ico">👂</div><h3>飛機耳</h3>
+        <p>唔妥／驚緊。即刻停手俾空間佢——識收手嘅人類，先係值得信任嘅人類。</p>
+        <div class="sig">— 貓語明信片 No.03</div>
+      </div>
+    </div>
+    <div class="breed-strip reveal zoom">
+      <h3>🗺 品種圖鑑 · 16 類</h3>
+      <p style="font-size:13.5px;color:var(--sub);margin-top:8px;line-height:1.9">每個品種：四維性格條（黐人度／接受被抱／活躍度／嗲唔嗲）＋溝貓策略＋常見地雷。仲有配對測驗：想養第一隻貓，定想幫屋企貓搵個夾嘅新朋友？</p>
+      <div class="breed-chips">
+        <span class="bchip star">英國長毛 ★詳細版</span><span class="bchip mix">唐貓／混種 ◆獨立類別</span>
+        <span class="bchip">英短</span><span class="bchip">美短</span><span class="bchip">布偶</span><span class="bchip">緬因</span>
+        <span class="bchip">摺耳</span><span class="bchip">暹羅</span><span class="bchip">波斯</span><span class="bchip">金吉拉</span>
+        <span class="bchip">俄藍</span><span class="bchip">豹貓</span><span class="bchip">阿比</span><span class="bchip">無毛貓</span>
+        <span class="bchip">挪威森林</span><span class="bchip">曼赤肯</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= STOP 03 ================= -->
+<section class="stop s3" id="quest" data-zone="warm">
+  <span class="amb-paw" style="top:10%;right:6%;font-size:40px">🐾</span>
+  <span class="amb-paw" style="bottom:12%;left:5%;font-size:34px;animation-delay:3s">🐾</span>
+  <div class="inner">
+    <span class="stop-tag reveal">STOP 03 · 每日修行</span>
+    <h2 class="reveal">日日三個任務，<span class="accent">溝貓變習慣</span></h2>
+    <p class="lead reveal d1">任務由你嘅數據＋品種特性生成，日日唔同。完成晒先保得住條 Streak——同貓嘅感情，係逐日儲返嚟。</p>
+    <div class="quest-wrap">
+      <div class="qlist reveal slide-l">
+        <div class="q done"><div class="box">✓</div><div class="t">同貓A 慢眨眼 3 次<small>建立信任嘅通用貓語</small></div></div>
+        <div class="q done"><div class="box">✓</div><div class="t">逗貓棒 5 分鐘（貓B）<small>根據分析：玩後係佢最錫你嘅時段</small></div></div>
+        <div class="q"><div class="box"></div><div class="t">幫貓A 梳毛<small>英長已 4 日冇梳——佢哋接受度最高嘅親密接觸</small></div></div>
+        <div class="milestone-row">
+          <div class="mcard"><span>🍞</span>第一次踩奶</div>
+          <div class="mcard"><span>🎵</span>第一次呼嚕</div>
+          <div class="mcard lock"><span>🦵</span>坐大脾（未解鎖）</div>
+        </div>
+      </div>
+      <div class="streak-card reveal slide-r d1">
+        <div class="stamp" id="stamp"><span class="pawico">🐾</span>貓咪認證<br>好人類</div>
+        <div class="fire">🔥</div>
+        <div class="num">6</div>
+        <p>日連續溝貓中<br>每個里程碑自動生成靚卡，<br>曬貓兼曬恩愛。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= GATE ================= -->
+<section class="gate" id="gate" data-zone="dark">
+  <div class="inner">
+    <div>
+      <span class="stop-tag reveal" style="color:var(--mustard)">FINAL GATE</span>
+      <h2 class="reveal">準備好未？<br><span class="accent">佢一直喺度等緊你</span></h2>
+      <p class="lead reveal d1">免費、唔使 login、所有數據淨係存喺你部手機。<br>而家登記，第一批開放即刻通知你。</p>
+    </div>
+    <form class="ticket reveal zoom d1" onsubmit="event.preventDefault();this.querySelector('.btn').textContent='✓ 登記咗！貓咪批准';">
+      <div class="th"><b>🐾 貓奴修行 · 入場券</b><span>ADMIT ONE + CAT</span></div>
+      <label>你嘅名</label>
+      <input type="text" placeholder="貓奴一號" required>
+      <label>Email</label>
+      <input type="email" placeholder="you@example.com" required>
+      <label>你嘅狀態</label>
+      <select><option>已經係貓奴</option><option>諗緊養第一隻</option><option>想加多隻貓</option></select>
+      <button class="btn primary" type="submit">搶先登記 →</button>
+      <div class="barcode" aria-hidden="true"></div>
+      <div class="bc-num">C A T N U · 2 0 2 6</div>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="paws">🐾 🐾 🐾</div>
+  貓奴修行 · 令你隻貓真心愛上你<br>
+  聯絡：hello@catnu.example（placeholder）· © 2026 貓奴修行
+</footer>
+
+<script>
+// marquee duplicate
+const mq=document.getElementById('mqtrack');mq.innerHTML+=mq.innerHTML;
+
+// reveal observer
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('show');io.unobserve(e.target);}}),{threshold:.15});
+document.querySelectorAll('.reveal:not(.show)').forEach(el=>io.observe(el));
+
+// stamp one-shot
+const stamp=document.getElementById('stamp');
+const io2=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){stamp.classList.add('slam');io2.disconnect();}}),{threshold:.6});
+if(stamp)io2.observe(stamp);
+
+// zones / rail / parallax — one rAF handler
+const zones=[...document.querySelectorAll('[data-zone]')];
+const dots=[...document.querySelectorAll('[data-dot]')];
+const walker=document.getElementById('walker');
+const rail=document.getElementById('rail');
+const plx=[...document.querySelectorAll('[data-plx]')];
+let ticking=false;
+function onScroll(){
+  if(ticking)return;ticking=true;
+  requestAnimationFrame(()=>{
+    const mid=window.scrollY+window.innerHeight/2;
+    // zone
+    let zone='light';
+    for(const s of zones){const r=s.getBoundingClientRect();const top=r.top+window.scrollY;
+      if(mid>=top&&mid<top+r.height){zone=s.dataset.zone;break;}}
+    document.body.className='zone-'+zone;
+    // rail dots + walker
+    let idx=0;
+    zones.forEach((s)=>{const r=s.getBoundingClientRect();if(r.top+window.scrollY<=mid)idx=Math.min(dots.length-1,zones.indexOf(s));});
+    dots.forEach((d,i)=>d.classList.toggle('on',i===idx));
+    const pct=window.scrollY/(document.body.scrollHeight-window.innerHeight);
+    if(rail&&walker)walker.style.top=(pct*rail.offsetHeight)+'px';
+    // parallax
+    plx.forEach(el=>{const r=el.getBoundingClientRect();const c=r.top+r.height/2-window.innerHeight/2;
+      el.style.transform='translateY('+(c*parseFloat(el.dataset.plx)).toFixed(1)+'px)';});
+    ticking=false;
+  });
+}
+document.addEventListener('scroll',onScroll,{passive:true});
+onScroll();
+</script>
+</body>
+</html>
