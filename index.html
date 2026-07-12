@@ -40,6 +40,23 @@ input,select{font-family:inherit}
 .milestone b{display:block;font-size:14px;margin-top:4px}
 .milestone small{color:var(--sub);font-size:11px}
 .milestone .share{margin-top:8px;font-size:11px;color:var(--terra);font-weight:700;cursor:pointer}
+.cat-row{display:flex;align-items:center;gap:12px}
+.avatar{width:50px;height:50px;border-radius:50%;background:var(--mustard);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-size:24px;flex:none}
+.cat-meta{flex:1}
+.cat-meta .name{font-weight:800;font-size:15px}
+.cat-meta .breed{font-size:11px;color:var(--sub)}
+.score .num{font-size:26px;font-weight:900;color:var(--terra);font-family:var(--disp)}
+.score .lbl{font-size:10px;color:var(--sub);text-align:right}
+.meter{height:10px;background:var(--cream);border:1.5px solid var(--ink);border-radius:5px;margin-top:10px;overflow:hidden}
+.meter>div{height:100%;background:repeating-linear-gradient(45deg,var(--terra),var(--terra) 6px,var(--mustard) 6px,var(--mustard) 12px)}
+.minibars{display:flex;gap:4px;align-items:flex-end;height:40px;margin-top:12px}
+.minibars .bar{flex:1;background:var(--line);border-radius:3px 3px 0 0;min-height:3px}
+.minibars .bar.pos{background:var(--mustard)}
+.minibars .bar.neg{background:var(--rose)}
+.insight{display:flex;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13px;line-height:1.55}
+.insight:last-child{border-bottom:none}
+.empty-state{text-align:center;padding:40px 20px;color:var(--sub)}
+.empty-state .big{font-size:40px;margin-bottom:12px}
 .field{margin-bottom:14px}
 .field label{font-size:12px;color:var(--sub);display:block;margin-bottom:4px;font-weight:700}
 .field input,.field select{width:100%;padding:10px;border:2px solid var(--ink);border-radius:8px;background:var(--paper);font-size:14px}
@@ -1089,6 +1106,79 @@ function renderQuests(state) {
 }
 
 RENDERERS.quests = renderQuests;
+
+let analysisCatId = null;
+
+function insightIcon(insight) {
+  const action = Catnu.ACTIONS.find(a => a.id === insight.actionId);
+  if (action) return action.label.split(' ')[0];
+  return insight.type === 'positive' ? '💡' : insight.type === 'negative' ? '⚠️' : '🪄';
+}
+
+function mdBold(text) { return text.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>'); }
+
+function renderAnalysis(state) {
+  const el = document.getElementById('tab-analysis');
+  if (!state.cats.length) {
+    el.innerHTML = '<div class="card" style="text-align:center;padding:30px 16px"><div style="font-size:36px;margin-bottom:10px">🐾</div><b>未有貓貓資料</b><p style="margin-top:8px;font-size:13px;color:var(--sub)">去「檔案」page 加返隻貓先可以睇分析。</p></div>';
+    return;
+  }
+  if (!analysisCatId || !state.cats.some(c => c.id === analysisCatId)) analysisCatId = state.cats[0].id;
+  const cat = state.cats.find(c => c.id === analysisCatId);
+  const switcherHtml = `<div class="switcher">${state.cats.map(c => `<div class="chip ${c.id === analysisCatId ? 'sel' : ''}" data-cat="${c.id}">${c.emoji} ${c.name}</div>`).join('')}</div>`;
+  const now = Date.now();
+  const affection = Catnu.affectionScore(state.logs, cat.id, now);
+
+  if (affection.insufficient) {
+    el.innerHTML = `
+      ${switcherHtml}
+      <div class="card empty-state">
+        <div class="big">🙀</div>
+        <b>修行未夠，繼續記錄</b>
+        <p style="margin-top:8px;font-size:13px">呢隻貓近 7 日仲未夠 5 條非中性記錄，去「記錄」page 記多幾次先會有分析結果。</p>
+      </div>
+    `;
+    el.querySelectorAll('[data-cat]').forEach(c => c.addEventListener('click', () => { analysisCatId = c.dataset.cat; renderAnalysis(state); }));
+    return;
+  }
+
+  const insights = Catnu.generateInsights(state.logs, cat, now);
+  const dayBars = [];
+  for (let i = 6; i >= 0; i--) {
+    const dayStart = now - i * 86400000 - (now % 86400000);
+    const dayEnd = dayStart + 86400000;
+    let pos = 0, neg = 0;
+    state.logs.filter(l => l.catId === cat.id && l.ts >= dayStart && l.ts < dayEnd).forEach(l => {
+      const p = Catnu.entryPolarity(l);
+      if (p === 'positive') pos++; else if (p === 'negative') neg++;
+    });
+    const total = pos + neg;
+    dayBars.push({ pct: total > 0 ? Math.round((pos / total) * 100) : 0, hasData: total > 0 });
+  }
+
+  el.innerHTML = `
+    ${switcherHtml}
+    <div class="card">
+      <div class="cat-row">
+        <div class="avatar">${cat.emoji}</div>
+        <div class="cat-meta"><div class="name">好感度指數</div><div class="breed">近 7 日正面反應加權比率</div></div>
+        <div class="score">
+          <div class="num">${affection.score}</div>
+          <div class="lbl">${affection.weekChange == null ? '' : (affection.weekChange >= 0 ? `↑ +${affection.weekChange}` : `↓ ${affection.weekChange}`)}</div>
+        </div>
+      </div>
+      <div class="meter"><div style="width:${affection.score}%"></div></div>
+      <div class="minibars">${dayBars.map(b => `<div class="bar ${b.hasData ? (b.pct >= 50 ? 'pos' : 'neg') : ''}" style="height:${b.hasData ? Math.max(b.pct, 8) : 4}%"></div>`).join('')}</div>
+    </div>
+    <div class="card">
+      <h3><span class="deco">◆</span> 溝貓建議</h3>
+      ${insights.length ? insights.map(i => `<div class="insight"><span>${insightIcon(i)}</span><span>${mdBold(i.text)}</span></div>`).join('') : '<div class="note">暫時未有夠數據嘅發現，繼續記錄啦。</div>'}
+    </div>
+  `;
+  el.querySelectorAll('[data-cat]').forEach(c => c.addEventListener('click', () => { analysisCatId = c.dataset.cat; renderAnalysis(state); }));
+}
+
+RENDERERS.analysis = renderAnalysis;
 /* @APP:BOOT */
 window.addEventListener('DOMContentLoaded', initApp);
 })();
