@@ -18,11 +18,17 @@ test('british-longhair has deepDive; mixed has approachGuide instead of traits',
   assert.ok(Array.isArray(mixed.approachGuide) && mixed.approachGuide.length >= 4);
 });
 
-test('every breed has multiCatFriendly 0-100 and a non-empty breedRules array', () => {
+test('every breed has multiCatFriendly 0-100; every non-mixed breed has a non-empty breedRules array', () => {
   const Catnu = loadCatnu();
   for (const b of Catnu.BREEDS) {
     assert.ok(b.multiCatFriendly >= 0 && b.multiCatFriendly <= 100, `${b.id} multiCatFriendly`);
-    assert.ok(Array.isArray(b.breedRules) && b.breedRules.length >= 1, `${b.id} breedRules`);
+    assert.ok(Array.isArray(b.breedRules), `${b.id} breedRules must be an array`);
+    if (!b.mixedBreed) {
+      // mixed intentionally ships breedRules: [] — Task 9's quest generator relies on
+      // that emptiness to fall through to the approachGuide-sourced observation quest
+      // instead of a fixed baseline rule (which wouldn't make sense for "唔套 baseline").
+      assert.ok(b.breedRules.length >= 1, `${b.id} breedRules`);
+    }
     for (const rule of b.breedRules) {
       assert.ok(['negativeWarning', 'positiveFinding', 'noRecentAction'].includes(rule.when), `${b.id} rule.when`);
       assert.ok(Catnu.ACTIONS.some(a => a.id === rule.action), `${b.id} rule.action must be a real action id`);
