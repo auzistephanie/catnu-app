@@ -57,6 +57,30 @@ input,select{font-family:inherit}
 .insight:last-child{border-bottom:none}
 .empty-state{text-align:center;padding:40px 20px;color:var(--sub)}
 .empty-state .big{font-size:40px;margin-bottom:12px}
+.accordion-cat{margin-bottom:14px}
+.accordion-cat > .cat-title{font-weight:800;color:var(--terra);font-size:13px;margin-bottom:6px;letter-spacing:1px}
+.decode{padding:9px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.decode:last-child{border-bottom:none}
+.decode-head{display:flex;gap:10px;align-items:center;cursor:pointer}
+.decode-head .ico{font-size:20px;width:26px;text-align:center;flex:none}
+.decode-head b{flex:1;color:var(--teal-dk);font-weight:700}
+.decode-body{padding:6px 0 0 36px;color:var(--sub);font-size:12px;line-height:1.6;display:none}
+.decode-body.open{display:block}
+.trait-bar{display:flex;align-items:center;gap:8px;font-size:12px;margin-top:7px}
+.trait-bar .t{width:78px;color:var(--sub);flex:none}
+.trait-bar .m{flex:1;height:8px;background:var(--cream);border:1.5px solid var(--ink);border-radius:4px;overflow:hidden}
+.trait-bar .m>div{height:100%;background:var(--teal)}
+.breed-card{border:2px solid var(--ink);border-radius:12px;padding:12px;margin-bottom:10px;background:var(--paper);box-shadow:3px 3px 0 rgba(47,42,34,.12)}
+.breed-card .bh{display:flex;align-items:center;gap:10px;cursor:pointer}
+.breed-card .bh .emoji{font-size:22px}
+.breed-card .bh .name{font-weight:800;flex:1;font-size:14px}
+.breed-card .bd{display:none;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);font-size:12.5px;line-height:1.7;color:var(--sub)}
+.breed-card .bd.open{display:block}
+.breed-card .pitfall{color:var(--terra)}
+.breed-card ul{margin:4px 0 4px 18px}
+.quiz-entry{display:flex;gap:10px}
+.quiz-entry .qe{flex:1;text-align:center;border:2px solid var(--ink);border-radius:12px;padding:12px 8px;font-size:12px;background:var(--paper);cursor:pointer;box-shadow:3px 3px 0 rgba(47,42,34,.15);line-height:1.5}
+.quiz-entry .qe span{font-size:20px;display:block;margin-bottom:4px}
 .field{margin-bottom:14px}
 .field label{font-size:12px;color:var(--sub);display:block;margin-bottom:4px;font-weight:700}
 .field input,.field select{width:100%;padding:10px;border:2px solid var(--ink);border-radius:8px;background:var(--paper);font-size:14px}
@@ -1181,6 +1205,111 @@ function renderAnalysis(state) {
 }
 
 RENDERERS.analysis = renderAnalysis;
+
+let almanacDecodeOpen = new Set();
+let almanacBreedOpen = new Set(['british-longhair']);
+
+function renderAlmanacDecode() {
+  return `
+    <div class="card">
+      <h3><span class="deco">◆</span> 貓語即時解碼</h3>
+      ${Catnu.DECODE.map(cat => `
+        <div class="accordion-cat">
+          <div class="cat-title">${cat.category}</div>
+          ${cat.items.map((item, idx) => {
+            const key = `${cat.category}-${idx}`;
+            const open = almanacDecodeOpen.has(key);
+            return `
+              <div class="decode">
+                <div class="decode-head" data-decode-key="${key}">
+                  <span class="ico">${item.icon}</span><b>${item.signal}</b><span>${open ? '－' : '＋'}</span>
+                </div>
+                <div class="decode-body ${open ? 'open' : ''}">
+                  <div><b>意思：</b>${item.meaning}</div>
+                  <div style="margin-top:4px"><b>應對：</b>${item.response}</div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderAlmanacBreeds() {
+  return `
+    <div class="card">
+      <h3><span class="deco">◆</span> 品種圖鑑（16 類）</h3>
+      ${Catnu.BREEDS.map(b => {
+        const open = almanacBreedOpen.has(b.id);
+        const tagText = b.id === 'british-longhair' ? '你嘅貓・詳細版' : (b.mixedBreed ? '獨立類別' : '');
+        return `
+          <div class="breed-card">
+            <div class="bh" data-breed-key="${b.id}">
+              <span class="emoji">${b.emoji}</span><span class="name">${b.name}</span>
+              ${tagText ? `<span class="tag">${tagText}</span>` : ''}
+              <span>${open ? '－' : '＋'}</span>
+            </div>
+            <div class="bd ${open ? 'open' : ''}">
+              ${b.mixedBreed ? `
+                <div>${b.strategy}</div>
+                <div style="margin-top:8px"><b>2 星期摸底攻略：</b><ul>${b.approachGuide.map(s => `<li>${s}</li>`).join('')}</ul></div>
+              ` : `
+                <div class="trait-bar"><span class="t">黐人程度</span><div class="m"><div style="width:${b.traits.clingy}%"></div></div></div>
+                <div class="trait-bar"><span class="t">接受被抱</span><div class="m"><div style="width:${b.traits.holdOk}%"></div></div></div>
+                <div class="trait-bar"><span class="t">活躍度</span><div class="m"><div style="width:${b.traits.active}%"></div></div></div>
+                <div class="trait-bar"><span class="t">愛叫程度</span><div class="m"><div style="width:${b.traits.vocal}%"></div></div></div>
+                <div style="margin-top:8px">${b.strategy}</div>
+                <div style="margin-top:6px"><b>常見地雷：</b><ul>${b.pitfalls.map(p => `<li class="pitfall">${p}</li>`).join('')}</ul></div>
+                ${b.deepDive ? `
+                  <div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)">
+                    <div><b>性格全寫：</b>${b.deepDive.personality}</div>
+                    <div style="margin-top:6px"><b>社交模式：</b>${b.deepDive.socialPattern}</div>
+                    <div style="margin-top:6px"><b>對人親密度發展：</b>${b.deepDive.closenessDevelopment}</div>
+                    <div style="margin-top:6px"><b>同類相處：</b>${b.deepDive.withOtherCats}</div>
+                    <div style="margin-top:6px"><b>常見誤解：</b>${b.deepDive.commonMisunderstandings}</div>
+                  </div>
+                ` : ''}
+              `}
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+function renderAlmanac(state) {
+  const el = document.getElementById('tab-almanac');
+  el.innerHTML = `
+    ${renderAlmanacDecode()}
+    ${renderAlmanacBreeds()}
+    <div class="card">
+      <h3><span class="deco">◆</span> 配對測驗</h3>
+      <div class="quiz-entry">
+        <div class="qe" data-quiz-mode="first"><span>🏠</span>我想養<br>第一隻貓</div>
+        <div class="qe" data-quiz-mode="addCat"><span>➕</span>我想加多隻<br>（夾唔夾現有貓？）</div>
+      </div>
+    </div>
+  `;
+  el.querySelectorAll('[data-decode-key]').forEach(h => h.addEventListener('click', () => {
+    const key = h.dataset.decodeKey;
+    almanacDecodeOpen.has(key) ? almanacDecodeOpen.delete(key) : almanacDecodeOpen.add(key);
+    renderAlmanac(state);
+  }));
+  el.querySelectorAll('[data-breed-key]').forEach(h => h.addEventListener('click', () => {
+    const key = h.dataset.breedKey;
+    almanacBreedOpen.has(key) ? almanacBreedOpen.delete(key) : almanacBreedOpen.add(key);
+    renderAlmanac(state);
+  }));
+  el.querySelectorAll('[data-quiz-mode]').forEach(q => q.addEventListener('click', () => {
+    if (typeof startQuiz === 'function') startQuiz(state, q.dataset.quizMode);
+    else Catnu.showToast('配對測驗開發緊，下個 task 完成');
+  }));
+}
+
+RENDERERS.almanac = renderAlmanac;
 /* @APP:BOOT */
 window.addEventListener('DOMContentLoaded', initApp);
 })();
