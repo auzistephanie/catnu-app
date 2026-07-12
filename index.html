@@ -28,6 +28,18 @@ button{font-family:inherit;border:none;background:none;cursor:pointer}
 input,select{font-family:inherit}
 .app{width:100%;max-width:430px;min-height:100vh;background:var(--cream);position:relative;overflow-x:hidden}
 /* @CSS:TABS */
+.quest{display:flex;align-items:center;gap:10px;padding:10px;border:2px solid var(--ink);border-radius:12px;margin-bottom:10px;background:var(--paper);box-shadow:3px 3px 0 rgba(47,42,34,.12);cursor:pointer}
+.quest.done{background:#e5eee4;opacity:.85}
+.quest .box{width:26px;height:26px;flex:none;border:2px solid var(--ink);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;background:var(--paper)}
+.quest.done .box{background:var(--teal);color:var(--cream)}
+.quest .q{flex:1;font-size:13px;line-height:1.4}
+.quest .q small{display:block;color:var(--sub);font-size:11px;margin-top:2px}
+.tag{font-size:10px;background:var(--mustard);border:1.5px solid var(--ink);border-radius:8px;padding:1px 8px;font-weight:700;margin-left:6px;vertical-align:middle}
+.milestone{border:2px solid var(--ink);border-radius:14px;padding:14px;text-align:center;background:linear-gradient(160deg,var(--paper) 60%,var(--cream));box-shadow:4px 4px 0 var(--mustard)}
+.milestone .big{font-size:30px}
+.milestone b{display:block;font-size:14px;margin-top:4px}
+.milestone small{color:var(--sub);font-size:11px}
+.milestone .share{margin-top:8px;font-size:11px;color:var(--terra);font-weight:700;cursor:pointer}
 .field{margin-bottom:14px}
 .field label{font-size:12px;color:var(--sub);display:block;margin-bottom:4px;font-weight:700}
 .field input,.field select{width:100%;padding:10px;border:2px solid var(--ink);border-radius:8px;background:var(--paper);font-size:14px}
@@ -997,6 +1009,86 @@ function renderRecord(state) {
 }
 
 RENDERERS.record = renderRecord;
+
+function sourceLabel(source) {
+  if (source === 'data') return '根據你嘅分析數據生成';
+  if (source === 'breed') return '根據品種特性生成';
+  return '通用溝貓任務';
+}
+
+function renderShellStreak(state) {
+  const b = document.querySelector('.tilehead .streak b');
+  if (b) b.textContent = `🔥 ${state.streak.current}`;
+}
+
+function renderQuests(state) {
+  const el = document.getElementById('tab-quests');
+  if (!state.cats.length) {
+    el.innerHTML = '<div class="card" style="text-align:center;padding:30px 16px"><div style="font-size:36px;margin-bottom:10px">🐾</div><b>未有貓貓資料</b><p style="margin-top:8px;font-size:13px;color:var(--sub)">去「檔案」page 加返隻貓先可以生成任務。</p></div>';
+    return;
+  }
+  const today = todayStr();
+  if (!state.quests[today]) {
+    state.quests[today] = { catQuests: Catnu.generateDailyQuests(today, state.cats, state.logs, Date.now()) };
+    Catnu.Store.save(state);
+  }
+  const quests = state.quests[today].catQuests;
+  const doneCount = quests.filter(q => q.done).length;
+  const catName = id => (state.cats.find(c => c.id === id) || {}).name || '';
+  const latestMilestone = state.milestones.slice().sort((a, b) => b.unlockedAt - a.unlockedAt)[0];
+
+  el.innerHTML = `
+    <div class="card">
+      <h3><span class="deco">◆</span> 今日溝貓任務<span class="tag">${doneCount}/3</span></h3>
+      <div style="font-size:12px;color:var(--sub);margin:-4px 0 10px">🔥 連續 ${state.streak.current} 日 · 🏆 最佳 ${state.streak.best} 日</div>
+      ${quests.map(q => `
+        <div class="quest ${q.done ? 'done' : ''}" data-qid="${q.id}">
+          <div class="box">${q.done ? '✓' : ''}</div>
+          <div class="q">${catName(q.catId)}：${q.text}<small>${sourceLabel(q.source)}</small></div>
+        </div>
+      `).join('')}
+      <div class="note">任務由分析引擎＋品種特性生成，日日唔同。完成晒先保得住 🔥 Streak（過咗夜 11:59 未完成會斷）。</div>
+    </div>
+    ${latestMilestone ? `
+      <div class="card">
+        <h3><span class="deco">◆</span> 最新里程碑</h3>
+        <div class="milestone">
+          <div class="big">${(Catnu.MILESTONE_META[latestMilestone.id] || {}).emoji || '🏅'}</div>
+          <b>${catName(latestMilestone.catId) ? catName(latestMilestone.catId) + ' ' : ''}${(Catnu.MILESTONE_META[latestMilestone.id] || {}).label || latestMilestone.id}</b>
+          <small>${new Date(latestMilestone.unlockedAt).toLocaleDateString('zh-HK')}</small>
+          <div class="share" id="milestone-share-link">⤴ 生成靚卡 share 俾朋友</div>
+        </div>
+      </div>
+    ` : ''}
+  `;
+
+  el.querySelectorAll('[data-qid]').forEach(card => {
+    card.addEventListener('click', () => {
+      const q = quests.find(x => x.id === card.dataset.qid);
+      q.done = !q.done;
+      Catnu.Store.save(state);
+      if (quests.every(x => x.done)) {
+        state.streak = Catnu.completeQuestsForDay(state.streak, today);
+        const unlocked = Catnu.checkNewMilestones(state, Date.now());
+        if (unlocked.length) state.milestones.push(...unlocked);
+        Catnu.Store.save(state);
+        Catnu.showToast('🔥 今日任務全部完成！Streak +1');
+      }
+      renderQuests(state);
+      renderShellStreak(state);
+    });
+  });
+
+  const shareLink = document.getElementById('milestone-share-link');
+  if (shareLink) {
+    shareLink.addEventListener('click', () => {
+      if (typeof Catnu.shareMilestoneCard === 'function') Catnu.shareMilestoneCard(latestMilestone, state);
+      else Catnu.showToast('Share 功能開發緊，下個 task 完成');
+    });
+  }
+}
+
+RENDERERS.quests = renderQuests;
 /* @APP:BOOT */
 window.addEventListener('DOMContentLoaded', initApp);
 })();
