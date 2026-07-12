@@ -1,0 +1,4 @@
+.env
+.gh-token
+node_modules/
+.DS_Store
