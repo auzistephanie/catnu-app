@@ -13,7 +13,7 @@
 ## 開發
 
 ```bash
-cd /Users/stephanieau/catnu-app
+cd "/Users/stephanieau/Desktop/Stephanie-Google Drive/dev/catnu-app"
 node --test tests/*.test.mjs    # 跑晒 pure-logic 測試
 python3 -m http.server 8934     # 本機睇 index.html / landing.html
 ```
