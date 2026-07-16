@@ -83,7 +83,14 @@ body.zone-dark .rail::before{border-color:rgba(159,188,178,.4)}
 @keyframes tailwag{0%,100%{transform:rotate(0)}50%{transform:rotate(9deg)}}
 .blink{animation:blink 5s infinite}
 @keyframes blink{0%,94%,100%{transform:scaleY(1)}96%{transform:scaleY(.08)}}
-.heart-float{position:absolute;font-size:22px;opacity:0;animation:heartup 4s ease-in-out infinite}
+.hero-photo{margin:20px auto 0;width:min(320px,72vw);position:relative;z-index:2;background:var(--paper);
+  padding:12px 12px 40px;border-radius:8px;border:2.5px solid var(--ink);box-shadow:8px 8px 0 rgba(47,42,34,.28);
+  transform:rotate(-2.5deg);transition:transform .3s}
+.hero-photo:hover{transform:rotate(0)}
+.hero-photo img{width:100%;border-radius:3px;display:block}
+.hero-photo .photo-tag{position:absolute;bottom:12px;left:16px;right:16px;font-family:var(--serif);font-weight:700;
+  color:var(--teal-dk);font-size:13px}
+.heart-float{position:absolute;font-size:22px;opacity:0;animation:heartup 4s ease-in-out infinite;z-index:3}
 @keyframes heartup{0%{opacity:0;transform:translateY(0) scale(.6)}25%{opacity:1}60%{opacity:0;transform:translateY(-70px) scale(1.15)}100%{opacity:0}}
 .hero-floor{position:absolute;left:0;right:0;bottom:-30px;height:32vh;min-height:180px;z-index:0;opacity:.9}
 .hero-floor svg{width:100%;height:100%;transform:scaleY(.62);transform-origin:bottom}
@@ -228,9 +235,9 @@ footer .paws{font-size:16px;letter-spacing:8px;color:var(--mustard)}
     <li><a href="#features">點樣運作</a></li>
     <li><a href="#decode">貓語圖鑑</a></li>
     <li><a href="#quest">每日任務</a></li>
-    <li><a href="#gate">搶先用</a></li>
+    <li><a href="#gate">開始用</a></li>
   </ul>
-  <a class="cta-mini" href="#gate">開始溝貓</a>
+  <a class="cta-mini" href="index.html">開始溝貓</a>
 </nav>
 
 <div class="rail" id="rail">
@@ -239,7 +246,7 @@ footer .paws{font-size:16px;letter-spacing:8px;color:var(--mustard)}
   <a href="#features" data-dot><span class="tip">記錄與分析</span></a>
   <a href="#decode" data-dot><span class="tip">貓語圖鑑</span></a>
   <a href="#quest" data-dot><span class="tip">任務與里程碑</span></a>
-  <a href="#gate" data-dot><span class="tip">搶先用</span></a>
+  <a href="#gate" data-dot><span class="tip">開始用</span></a>
 </div>
 
 <!-- ================= HERO ================= -->
@@ -251,7 +258,7 @@ footer .paws{font-size:16px;letter-spacing:8px;color:var(--mustard)}
   <h1 class="reveal show">令你隻貓，<br><span class="accent">真心愛上你</span></h1>
   <p class="sub reveal show d1">記低佢對你嘅每個反應、你對佢嘅每個習慣，<br>用數據搵出「原來咁做佢先錫我」。</p>
   <div class="btn-row reveal show d2">
-    <a class="btn primary" href="#gate">免費開始 →</a>
+    <a class="btn primary" href="index.html">免費開始 →</a>
     <a class="btn ghost" href="#features">睇下點運作</a>
   </div>
   <div class="stats reveal show d3">
@@ -260,25 +267,11 @@ footer .paws{font-size:16px;letter-spacing:8px;color:var(--mustard)}
     <div class="stat"><b>100%</b><span>數據留喺你手機</span></div>
   </div>
 
-  <div class="hero-cat" data-plx="-0.05">
-    <span class="heart-float" style="left:12%;top:6%">🧡</span>
-    <span class="heart-float" style="right:14%;top:12%;animation-delay:1.6s">💛</span>
-    <svg viewBox="0 0 300 220" aria-hidden="true">
-      <g class="tail"><path d="M52 178 C10 170 4 128 30 116 C18 138 34 160 66 164Z" fill="#1d5c52"/></g>
-      <ellipse cx="150" cy="182" rx="92" ry="26" fill="rgba(47,42,34,.12)"/>
-      <path d="M150 60 C104 60 78 96 78 138 C78 176 108 196 150 196 C192 196 222 176 222 138 C222 96 196 60 150 60Z" fill="#1d5c52"/>
-      <path d="M96 78 L84 40 L122 62Z" fill="#1d5c52"/><path d="M204 78 L216 40 L178 62Z" fill="#1d5c52"/>
-      <path d="M99 72 L93 52 L112 63Z" fill="#c98d83"/><path d="M201 72 L207 52 L188 63Z" fill="#c98d83"/>
-      <circle cx="150" cy="128" r="46" fill="#2a7566"/>
-      <g class="blink" style="transform-origin:127px 120px"><ellipse cx="127" cy="120" rx="9" ry="12" fill="#f4edda"/><circle cx="127" cy="122" r="5" fill="#2f2a22"/></g>
-      <g class="blink" style="transform-origin:173px 120px"><ellipse cx="173" cy="120" rx="9" ry="12" fill="#f4edda"/><circle cx="173" cy="122" r="5" fill="#2f2a22"/></g>
-      <path d="M144 138 L156 138 L150 146Z" fill="#c05a2e"/>
-      <path d="M150 146 C150 154 142 156 136 152 M150 146 C150 154 158 156 164 152" stroke="#f4edda" stroke-width="3" fill="none" stroke-linecap="round"/>
-      <g stroke="#f4edda" stroke-width="2.5" stroke-linecap="round"><path d="M96 132 L120 136"/><path d="M96 146 L120 144"/><path d="M204 132 L180 136"/><path d="M204 146 L180 144"/></g>
-      <path d="M118 190 C118 178 132 178 132 190" stroke="#f4edda" stroke-width="4" fill="none" stroke-linecap="round"/>
-      <path d="M168 190 C168 178 182 178 182 190" stroke="#f4edda" stroke-width="4" fill="none" stroke-linecap="round"/>
-      <path d="M236 96 C246 84 262 92 258 104 C255 114 240 122 236 124 C232 122 217 114 214 104 C210 92 226 84 236 96Z" fill="#c05a2e" opacity=".92"/>
-    </svg>
+  <div class="hero-photo reveal zoom" data-plx="-0.05">
+    <span class="heart-float" style="left:8%;top:14%">🧡</span>
+    <span class="heart-float" style="right:10%;top:18%;animation-delay:1.6s">💛</span>
+    <img src="images/two-cats.jpg" alt="兩隻英國長毛貓相處插圖">
+    <span class="photo-tag">Day 142 · 相處紀錄</span>
   </div>
 
   <div class="hero-floor" data-plx="0.05" aria-hidden="true">
@@ -419,20 +412,18 @@ footer .paws{font-size:16px;letter-spacing:8px;color:var(--mustard)}
     <div>
       <span class="stop-tag reveal" style="color:var(--mustard)">FINAL GATE</span>
       <h2 class="reveal">準備好未？<br><span class="accent">佢一直喺度等緊你</span></h2>
-      <p class="lead reveal d1">免費、唔使 login、所有數據淨係存喺你部手機。<br>而家登記，第一批開放即刻通知你。</p>
+      <p class="lead reveal d1">免費、唔使 login、所有數據淨係存喺你部手機。<br>而家就用得，唔使等。</p>
     </div>
-    <form class="ticket reveal zoom d1" onsubmit="event.preventDefault();this.querySelector('.btn').textContent='✓ 登記咗！貓咪批准';">
+    <a class="ticket reveal zoom d1" href="index.html" style="display:block;text-decoration:none;cursor:pointer">
       <div class="th"><b>🐾 貓奴修行 · 入場券</b><span>ADMIT ONE + CAT</span></div>
-      <label>你嘅名</label>
-      <input type="text" placeholder="貓奴一號" required>
-      <label>Email</label>
-      <input type="email" placeholder="you@example.com" required>
-      <label>你嘅狀態</label>
-      <select><option>已經係貓奴</option><option>諗緊養第一隻</option><option>想加多隻貓</option></select>
-      <button class="btn primary" type="submit">搶先登記 →</button>
+      <label>持證人</label>
+      <div style="padding:11px 12px;border:2px solid var(--ink);border-radius:10px;background:var(--cream);font-size:14px;color:var(--ink)">貓奴一位</div>
+      <label>使用資格</label>
+      <div style="padding:11px 12px;border:2px solid var(--ink);border-radius:10px;background:var(--cream);font-size:14px;color:var(--ink)">終身有效・冇到期日</div>
+      <span class="btn primary" style="width:100%;text-align:center;margin-top:20px;display:block">開始用 App →</span>
       <div class="barcode" aria-hidden="true"></div>
       <div class="bc-num">C A T N U · 2 0 2 6</div>
-    </form>
+    </a>
   </div>
 </section>
 

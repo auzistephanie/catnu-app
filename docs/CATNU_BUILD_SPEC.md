@@ -19,7 +19,7 @@
 
 ## 2. 技術約束（硬性）
 
-1. **單一 `index.html`**：所有 CSS 喺一個 `<style>`、所有 JS 喺一個 `<script>`，vanilla JS，唔用框架、唔用 build step。Google Fonts link 允許，其他外部資源一律唔准。
+1. **單一 `index.html`**：所有 CSS 喺一個 `<style>`、所有 JS 喺一個 `<script>`，vanilla JS，唔用框架、唔用 build step。外部資源（Google Fonts、圖片、CDN）皆准用，但唔准用 build step / npm 框架。
 2. **數據全部存 `localStorage`**，key = `catnu.v1`，內容係一個 JSON object（schema 見 §4），入面有 `schemaVersion` 欄位方便將來 migrate。
 3. **手機優先**：以 iPhone Safari 為主要目標，390px 寬度設計，desktop 只需置中一個 phone-width container。
 4. 加 `<meta name="theme-color">`、`apple-mobile-web-app-capable`、`apple-mobile-web-app-title="貓奴修行"`，icon 用 inline data-URL（簡單 SVG 貓爪 favicon + apple-touch-icon）。
@@ -27,6 +27,7 @@
    ```
    /index.html        ← 個 app
    /landing.html      ← landing page（已有檔案，只需將品牌名由「貓心計劃」改做「貓奴修行」）
+   /images/           ← 圖片檔案（如有），HTML 用 relative path 引用
    /vercel.json       ← 唔需要特別設定，static 即可
    /CLAUDE.md         ← 完成後寫低架構決定 + 點行 dev/deploy
    ```
