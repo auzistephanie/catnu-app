@@ -2,17 +2,14 @@
 
 單一 `index.html` 嘅貓咪 bonding tracker，Stephanie 個人用（唔使 login，數據淨係存喺 localStorage `catnu.v1`）。完整 build spec + 實現計劃喺 `docs/superpowers/plans/2026-07-12-catnu-app.md`。
 
-## ⚙️ Standards（MANDATORY — 正本：`stephanie-personal/docs/ai-governance/06-STANDARDS.md`，改規則只改正本）
-
-Push（`github_push.py` 永不 git CLI・HTTPS・一次 run 一 commit）・寫入分流（改動記錄 → `CHANGELOG.md` **頂部**，唔准 append 落本檔；本檔上限 100 行/6KB）・清理 mv `_to_delete/`・改舊檔先 `.bak-YYYYMMDD`・方向性決定先 preview・改完以用家身份 run 一次先報完成・governance 00–05（派 subagent 先讀 01+03；報完成前過 02 §R2；冇 mount stephanie-personal → 叫 Stephanie 連埋）。詳文＋例外表 → 正本。
-
 ## 架構決定
 
 - **單一 index.html**：全部 CSS 喺一個 `<style>`、全部 JS 喺一個 `<script>`，vanilla JS，冇框架冇 build step。JS 分兩個 zone：
   - **Pure-logic zone**（`window.Catnu = {...}`）：好感度計算、action correlation、任務生成、里程碑、配對測驗計分——全部冇 DOM/localStorage 依賴，靠 `tests/helpers/load-app.mjs` 用 Node `vm` 讀 `index.html` 嘅 `<script>` 出嚟做 unit test。
   - **App zone**（`Catnu.Store` + render functions）：localStorage 讀寫、DOM 渲染，全部收埋喺 `initApp()`，靠 `window.addEventListener('DOMContentLoaded', initApp)` 先郁，唔會喺 Node test 環境入面執行。
 - **測試**：`node --test tests/*.test.mjs`（Node ≥18，冇裝額外套件；bare 嘅 `node --test tests/` directory form 喺呢部機 Node v22 冇 package.json 時唔work，一定要用 glob form）。淨係測 pure-logic zone 嘅精確公式（好感度加權、P_a/P_base、任務生成 determinism、配對計分）；UI 部分靠手動喺瀏覽器驗證，步驟記喺 plan 文件每個 task 嘅 manual verification steps。
-- **Push**：見 ⚙️ Standards §S1。本 repo 特有：`scripts/github_push.py` 有 empty-repo bootstrap（Git Data API 對零 commit repo 會 409，首次 push 經 Contents API 先種一個檔案）。
+- **Push**：`python3 scripts/github_push.py "<msg>"`，唔用 git CLI（同 sales-trainer/daily-novel/venturenix-lab-seminar 一致做法，避免 sandbox 留低 `.git/index.lock`）。呢個 repo 嘅 script 額外處理咗全新、零 commit 嘅 empty repo bootstrap（Git Data API 對完全冇 commit 嘅 repo 會 409，第一次 push 會經 Contents API 先種一個檔案）。一次 run = 一個 commit = 一次 Vercel deployment，唔好連環 push。
+- **冇背景 auto-push daemon**（2026-07-16 起，裝機步驟正本 → `stephanie-personal/docs/PUSH-SETUP.md`）：Cowork 雲端改完 → `device_commit_files` 寫返 Mac 之後，唔會自動 push，要手動雙擊 `stephanie-personal/scripts/push-now.command`（跑晒 autopush-registry 入面全部 repo，包括呢個），或者喺呢個 repo 入面直接跑上面嗰句 `github_push.py`。
 
 ## 開發
 
@@ -25,12 +22,6 @@ python3 -m http.server 8934     # 本機睇 index.html / landing.html
 ## 部署
 
 Vercel project `catnu-app`（static，`vercel.json` 唔需要特別設定），git auto-deploy from `main`。`index.html` = 個 app，`landing.html` = 對外 landing page。手機「加到主畫面」靠 `apple-mobile-web-app-capable` + inline SVG icon。Repo 喺 GitHub 係 **public**（Stephanie 確認過唔緊要，唔使刻意收埋）。
-
-## ✅ 完成前檢查（本 repo 專屬 DoD；通用四格 → 02-JUDGMENT §R2）
-
-1. 改咗 pure-logic zone → `node --test tests/*.test.mjs` 真跑全綠，貼 output
-2. UI 有改 → 瀏覽器實開 `index.html`／`landing.html`，行返 plan 文件該 task 嘅 manual verification steps
-3. Push：`python3 scripts/github_push.py "<msg>"`＋核實 GitHub HEAD（→ Standards §S1）
 
 ## v2 Backlog（唔好做，記低就算）
 
