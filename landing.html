@@ -87,6 +87,15 @@ body.zone-dark .rail::before{border-color:rgba(159,188,178,.4)}
   padding:12px 12px 40px;border-radius:8px;border:2.5px solid var(--ink);box-shadow:8px 8px 0 rgba(47,42,34,.28);
   transform:rotate(-2.5deg);transition:transform .3s}
 .hero-photo:hover{transform:rotate(0)}
+/* 2026-07-19 修：呢個 div 同時有 "hero-photo reveal zoom" 三個 class，JS
+   一幫佢加 "show"（IntersectionObserver 一 mount 就會即刻幫已喺 viewport
+   入面嘅元素加），`.reveal.show{transform:none}`（2 class）specificity 就會
+   蓋過 `.hero-photo` 自己嗰句 rotate(-2.5deg)（1 class）——tilted-polaroid
+   效果一路都唔會出現，連埋 hover 「拉直」個互動都跟住廢埋（本身一直已經係
+   transform:none，hover 都變唔到嘢）。加返一句 3-class 選擇器蓋返上去，
+   hover 都要跟住補一句（4-class）先贏得返 hover 嗰句。 */
+.hero-photo.reveal.show{transform:rotate(-2.5deg)}
+.hero-photo.reveal.show:hover{transform:rotate(0)}
 .hero-photo img{width:100%;border-radius:3px;display:block}
 .hero-photo .photo-tag{position:absolute;bottom:12px;left:16px;right:16px;font-family:var(--serif);font-weight:700;
   color:var(--teal-dk);font-size:13px}
@@ -267,7 +276,13 @@ footer .paws{font-size:16px;letter-spacing:8px;color:var(--mustard)}
     <div class="stat"><b>100%</b><span>數據留喺你手機</span></div>
   </div>
 
-  <div class="hero-photo reveal zoom" data-plx="-0.05">
+  <!-- 2026-07-19 修：拎走咗 data-plx——落面 parallax rAF handler 會用
+       `el.style.transform='translateY(...)'` 直接寫 inline style，inline style
+       嘅優先級贏晒任何 CSS selector（連 `.hero-photo.reveal.show` 呢種3-class
+       override都贏唔到），會將呢度想要嘅 tilt(-2.5deg)/hover拉直/reveal-zoom
+       entrance 成套 transform 效果完全冚走。呢張相本身已經有齊呢幾層獨立
+       設計好嘅 transform 效果，值得留低過幾px嘅 parallax float。 -->
+  <div class="hero-photo reveal zoom">
     <span class="heart-float" style="left:8%;top:14%">🧡</span>
     <span class="heart-float" style="right:10%;top:18%;animation-delay:1.6s">💛</span>
     <img src="images/two-cats.jpg" alt="兩隻英國長毛貓相處插圖">
