@@ -2,6 +2,19 @@
 
 > 改動記錄出口：新條目一律插喺呢個檔案頂部。CLAUDE.md 只放路由同現行規則。早期開發史 → `docs/superpowers/plans/2026-07-12-catnu-app.md`。
 
+## 2026-07-28 Phase 2：紀念日＋關係等級＋週報＋share 卡重造＋landing 換皮＋提醒
+
+- **Schema v2（version-dispatch migration）**：`Catnu.migrateState()` v1→v2 自動升級（cats 加 `birthDate`（完整日期，生日倒數用）＋`anniversaries[]` 自訂紀念日），舊數據/舊備份檔照食；`defaultState` schemaVersion=2；還原 validate 兼容 1/2。
+- **紀念日**：pure-logic `daysTogether`／`upcomingAnniversaries`（生日🎂／嚟屋企🏠／自訂，按倒數排序；birthYM 唔夠精度唔出倒數）；檔案頁每貓「相處第 N 日＋倒數」box＋自訂紀念日加/刪；編輯表格加「出生日期」date field；記錄頁 7 日內預告 badge、正日 🎉 celebration banner→burst＋紀念日 share 卡；相處 100/365/500/1000 日自動做里程碑（開 app 即 check，唔使等有新記錄）。
+- **關係等級**：`Catnu.relationshipLevel`（Lv1 高冷陌生貓 40→Lv2 畀少少面 55→Lv3 開始融化 70→Lv4 黐身小棉襖 85→Lv5 靈魂伴侶）；分析頁好感度卡顯示 Lv＋稱號＋「仲差 X 分升級」。
+- **貓咪週報**：`Catnu.weeklyReport`（7 日 count／正面率／對上週變化／最常做 action）；分析頁週報卡＋「生成週報靚卡」。
+- **Share 卡重造**：canvas 1080×1350 全新奶茶 clay 視覺（漸變底＋爪印 pattern＋白卡柔影＋tagline），三款共用底框：里程碑／週報／紀念日。
+- **每日提醒 .ics**：任務頁「🔔 加入每日提醒」→ 生成 FREQ=DAILY 21:00 行事曆事件（floating local time＋VALARM）。v1 冇 backend，真 push 維持 v2。
+- **公開入口分流**：onboarding 前加歡迎頁（tagline＋「我有貓→開檔案」／「我未有貓→配對測驗」）；`switchTab` 加 onboarding 期間 guard（測驗結果撳品種唔會爆）。
+- **Mascot**：header 由 emoji 換做 inline SVG 動畫貓（眨眼＋耳仔郁＋浮動，零外部依賴——冇用 Lottie 因為要另外 host 動畫 JSON，效果同級，想轉 Lottie 隨時可換）。
+- **landing.html 換皮**：全 palette 墨綠花磚→奶茶蜜桃（含 dark zone 轉深可可、花磚 pattern 轉暖色）、chunky offset shadow→柔影、btn 圓角 99px、hero 加英文 tagline。改版前原檔留 `landing.html.bak-20260728`（gitignored）。
+- **驗證**：`node --test tests/*.test.mjs` **44/44 全綠**（新增 `tests/phase2.test.mjs` 12 個 test：等級邊界/日數/紀念日排序/週報計算/migration/日數里程碑；`store.test.mjs` default schema 斷言跟 v2）；Playwright 實測：v1 seed 開 app 自動升 v2、預告 badge／正日 banner 出現、紀念日卡＋週報卡＋.ics 實際 download、自訂紀念日加/刪寫入 localStorage、days-100 開 app 即解鎖、onboarding 分流兩邊行到、無橫 scroll、零 console error。
+
 ## 2026-07-28 Phase 1 大改版：重新定位＋全 app 換皮「奶茶軟萌」clay 3D＋記錄頁減磅
 
 - **重新定位（決定已鎖）**：由 Stephanie 個人 app → 公開俾 20–40 歲女性貓奴用；維持無 login、數據存各自裝置 localStorage（真同步/push 留 v2 Supabase）。名 keep「貓奴修行」；tagline "Win your cat's heart, one moment at a time."；UI 方向 A「奶茶軟萌」；3D 做法 = clay CSS＋mascot（Phase 2 升級 Lottie）。

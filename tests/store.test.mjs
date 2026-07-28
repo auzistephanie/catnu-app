@@ -5,7 +5,7 @@ import { loadCatnu } from './helpers/load-app.mjs';
 test('Store.load: no existing data -> fresh default state', () => {
   const Catnu = loadCatnu();
   const state = Catnu.Store.load();
-  assert.equal(state.schemaVersion, 1);
+  assert.equal(state.schemaVersion, 2); // v2: cats 帶 birthDate + anniversaries
   // NOT assert.deepEqual(state.cats, []) — state.cats is created inside the vm-sandboxed
   // script, so it carries that realm's Array.prototype; comparing it via deepEqual against
   // a `[]` literal written here in the outer test file fails on prototype-identity alone,

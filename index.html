@@ -166,6 +166,32 @@ input,select{font-family:inherit}
 .minicard .mnum{font-family:var(--disp);font-style:italic;font-size:34px;font-weight:900;color:var(--terra);line-height:1}
 .minicard .mlbl{font-size:11.5px;color:var(--sub);font-weight:700}
 .minicard .mheart{margin-left:auto;font-size:28px;filter:drop-shadow(0 5px 4px rgba(224,117,79,.3))}
+/* 關係等級 */
+.lvl-line{margin-top:10px;font-size:12.5px;font-weight:800;color:#8A6A55;background:#FFF1E4;border-radius:12px;padding:8px 12px;display:flex;align-items:center;gap:7px;box-shadow:inset 0 2px 4px rgba(180,110,80,.08)}
+.lvl-line b{color:var(--terra)}
+.lvl-line .lvl-next{margin-left:auto;color:#C9A78F;font-weight:700;font-size:11.5px}
+/* 貓咪週報 */
+.wk-grid{display:flex;gap:10px}
+.wk-cell{flex:1;text-align:center;background:#FFF1E4;border-radius:16px;padding:12px 6px;box-shadow:inset 0 2px 4px rgba(180,110,80,.08)}
+.wk-cell b{display:block;font-family:var(--disp);font-style:italic;font-size:22px;font-weight:900;color:var(--terra);line-height:1.3}
+.wk-cell span{font-size:10.5px;font-weight:700;color:var(--sub)}
+/* 紀念日 */
+.celebrate{background:linear-gradient(135deg,#FFD98A,#F7B45C);color:#7A4A20;border-radius:20px;padding:14px 16px;font-size:14px;font-weight:800;margin-bottom:14px;cursor:pointer;box-shadow:0 8px 18px rgba(230,160,60,.35),inset 0 2px 0 rgba(255,255,255,.5),inset 0 -5px 9px rgba(180,110,30,.22);transition:transform .12s cubic-bezier(.34,1.56,.64,1)}
+.celebrate:active{transform:translateY(2px) scale(.98)}
+.celebrate small{display:block;font-weight:700;font-size:11.5px;opacity:.75;margin-top:2px}
+.anni-badge{background:#FFF1E4;color:#8A6A55;border-radius:99px;padding:8px 14px;font-size:12px;font-weight:800;margin-bottom:12px;text-align:center;box-shadow:inset 0 2px 4px rgba(180,110,80,.1)}
+.anni-box{margin-top:10px;background:#FFF1E4;border-radius:16px;padding:11px 13px;box-shadow:inset 0 2px 4px rgba(180,110,80,.08)}
+.anni-days{font-size:13px;font-weight:800;color:#8A6A55}
+.anni-days b{font-family:var(--disp);font-style:italic;font-size:19px;color:var(--terra)}
+.anni-item{font-size:12px;font-weight:700;color:var(--sub);margin-top:5px}
+.anni-item .anni-del{color:var(--terra);cursor:pointer;font-weight:900;margin-left:6px}
+.anni-item.dim{opacity:.7;font-weight:500}
+/* mascot SVG 動畫 */
+.mascot svg{display:block;overflow:visible}
+.mascot .eye{transform-origin:center;transform-box:fill-box;animation:blink 4.2s infinite}
+@keyframes blink{0%,91%,100%{transform:scaleY(1)}94%{transform:scaleY(.08)}}
+.mascot .ear.r{transform-origin:bottom left;transform-box:fill-box;animation:eartwitch 6s infinite}
+@keyframes eartwitch{0%,88%,100%{transform:rotate(0)}92%{transform:rotate(-14deg)}96%{transform:rotate(4deg)}}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
@@ -404,6 +430,111 @@ Catnu.MILESTONE_META = {
   'score-85': { emoji: '💛', label: '好感度達 85' },
   'streak-7': { emoji: '🔥', label: '連續 7 日' },
   'streak-30': { emoji: '🔥', label: '連續 30 日' },
+  'days-100': { emoji: '🏠', label: '相處 100 日' },
+  'days-365': { emoji: '🎂', label: '相處一週年' },
+  'days-500': { emoji: '🌟', label: '相處 500 日' },
+  'days-1000': { emoji: '👑', label: '相處 1000 日' },
+};
+
+/* @LOGIC:LEVELS — 好感度 → 關係等級稱號 */
+Catnu.RELATIONSHIP_LEVELS = [
+  { lv: 1, min: 0,  title: '高冷陌生貓', emoji: '🐈' },
+  { lv: 2, min: 40, title: '畀少少面',   emoji: '😼' },
+  { lv: 3, min: 55, title: '開始融化',   emoji: '😽' },
+  { lv: 4, min: 70, title: '黐身小棉襖', emoji: '😻' },
+  { lv: 5, min: 85, title: '靈魂伴侶',   emoji: '💞' },
+];
+
+Catnu.relationshipLevel = function relationshipLevel(score) {
+  if (score === null || score === undefined || Number.isNaN(score)) return null;
+  const L = Catnu.RELATIONSHIP_LEVELS;
+  let cur = L[0];
+  for (const l of L) if (score >= l.min) cur = l;
+  const idx = L.indexOf(cur);
+  const nxt = idx < L.length - 1 ? L[idx + 1] : null;
+  return {
+    lv: cur.lv, title: cur.title, emoji: cur.emoji,
+    next: nxt ? { lv: nxt.lv, title: nxt.title, pointsNeeded: nxt.min - score } : null,
+  };
+};
+
+/* @LOGIC:ANNIVERSARY — 紀念日／相處日數 */
+Catnu.daysTogether = function daysTogether(homeDate, nowTs) {
+  if (!homeDate) return null;
+  const start = new Date(homeDate + 'T00:00:00').getTime();
+  if (Number.isNaN(start) || start > nowTs) return null;
+  return Math.floor((nowTs - start) / 86400000) + 1;
+};
+
+// cat: { birthDate?, homeDate?, anniversaries?: [{id,label,emoji,date}] }
+// 回傳按 daysUntil 排序嘅 [{key,label,emoji,date:'YYYY-MM-DD',daysUntil,years}]
+// birthYM（淨係年月）唔夠精度做倒數，只用完整日期欄位。
+Catnu.upcomingAnniversaries = function upcomingAnniversaries(cat, nowTs) {
+  const now = new Date(nowTs); now.setHours(0, 0, 0, 0);
+  const out = [];
+  const pad = (n) => String(n).padStart(2, '0');
+  function push(key, label, emoji, baseDateStr) {
+    if (!baseDateStr) return;
+    const base = new Date(baseDateStr + 'T00:00:00');
+    if (Number.isNaN(base.getTime())) return;
+    let occ = new Date(now.getFullYear(), base.getMonth(), base.getDate());
+    if (occ < now) occ = new Date(now.getFullYear() + 1, base.getMonth(), base.getDate());
+    out.push({
+      key, label, emoji,
+      date: `${occ.getFullYear()}-${pad(occ.getMonth() + 1)}-${pad(occ.getDate())}`,
+      daysUntil: Math.round((occ - now) / 86400000),
+      years: occ.getFullYear() - base.getFullYear(),
+    });
+  }
+  push('birthday', '生日', '🎂', cat.birthDate);
+  push('gotcha', '嚟屋企紀念日', '🏠', cat.homeDate);
+  (cat.anniversaries || []).forEach(a => push('custom-' + a.id, a.label, a.emoji || '💗', a.date));
+  return out.sort((a, b) => a.daysUntil - b.daysUntil);
+};
+
+/* @LOGIC:WEEKLY — 貓咪週報 */
+Catnu.weeklyReport = function weeklyReport(logs, catId, nowTs) {
+  function windowStats(offsetDays) {
+    const end = nowTs - offsetDays * 86400000;
+    const start = end - 7 * 86400000;
+    const entries = logs.filter(l => l.catId === catId && l.ts > start && l.ts <= end);
+    let pos = 0, neg = 0;
+    const actionCount = {};
+    entries.forEach(l => {
+      let p = 0;
+      (l.reactions || []).forEach(r => { p += Catnu.REACTION_POLARITY[r] || 0; });
+      if (p > 0) pos++; else if (p < 0) neg++;
+      (l.actions || []).forEach(a => { actionCount[a] = (actionCount[a] || 0) + 1; });
+    });
+    const nonNeutral = pos + neg;
+    let topAction = null, topN = 0;
+    Object.entries(actionCount).forEach(([a, n]) => { if (n > topN) { topAction = a; topN = n; } });
+    return {
+      count: entries.length,
+      posRate: nonNeutral ? Math.round(100 * pos / nonNeutral) : null,
+      topAction, topActionCount: topN,
+    };
+  }
+  const thisWeek = windowStats(0);
+  const lastWeek = windowStats(7);
+  return {
+    count: thisWeek.count, posRate: thisWeek.posRate,
+    topAction: thisWeek.topAction, topActionCount: thisWeek.topActionCount,
+    prevCount: lastWeek.count, prevPosRate: lastWeek.posRate,
+    posRateChange: (thisWeek.posRate !== null && lastWeek.posRate !== null) ? thisWeek.posRate - lastWeek.posRate : null,
+  };
+};
+
+/* @LOGIC:MIGRATE — schema version-dispatch（v1 → v2 加 birthDate＋anniversaries）*/
+Catnu.migrateState = function migrateState(parsed) {
+  if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.cats)) return null;
+  if (parsed.schemaVersion === 1) parsed.schemaVersion = 2;
+  if (parsed.schemaVersion !== 2) return null;
+  parsed.cats.forEach(c => {
+    if (typeof c.birthDate !== 'string') c.birthDate = '';
+    if (!Array.isArray(c.anniversaries)) c.anniversaries = [];
+  });
+  return parsed;
 };
 
 Catnu.UNIVERSAL_QUEST_POOL = [
@@ -666,6 +797,12 @@ Catnu.checkNewMilestones = function checkNewMilestones(state, nowTs) {
       if (score.score >= 70 && !unlocked.has(`score-70:${cat.id}`)) found.push({ id: 'score-70', catId: cat.id, unlockedAt: nowTs });
       if (score.score >= 85 && !unlocked.has(`score-85:${cat.id}`)) found.push({ id: 'score-85', catId: cat.id, unlockedAt: nowTs });
     }
+    const days = Catnu.daysTogether(cat.homeDate, nowTs);
+    if (days !== null) {
+      [[100, 'days-100'], [365, 'days-365'], [500, 'days-500'], [1000, 'days-1000']].forEach(([n, id]) => {
+        if (days >= n && !unlocked.has(`${id}:${cat.id}`)) found.push({ id, catId: cat.id, unlockedAt: nowTs });
+      });
+    }
   }
 
   if (state.streak.best >= 7 && !unlocked.has('streak-7:')) found.push({ id: 'streak-7', catId: null, unlockedAt: nowTs });
@@ -802,7 +939,7 @@ const STORAGE_KEY = 'catnu.v1';
 
 function defaultState() {
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     cats: [],
     logs: [],
     quests: {},
@@ -819,10 +956,9 @@ Catnu.Store = {
     if (!raw) return defaultState();
     try {
       const parsed = JSON.parse(raw);
-      // TODO: when schemaVersion 2 ships, this needs to become a version-dispatch
-      // (migrate forward) instead of discarding data on any mismatch.
-      if (parsed.schemaVersion !== 1) return defaultState();
-      return parsed;
+      // version-dispatch：v1 自動升 v2（Catnu.migrateState），未識嘅版本先至 reset
+      const migrated = Catnu.migrateState(parsed);
+      return migrated || defaultState();
     } catch (e) {
       console.warn('Catnu.Store.load: corrupt localStorage data, resetting to default', e);
       return defaultState();
@@ -836,6 +972,22 @@ Catnu.Store = {
 let STATE = null;
 let CURRENT_TAB = 'record';
 const RENDERERS = {}; // tab name -> render(state); populated by Tasks 15-18
+
+// 動畫 mascot（inline SVG：眨眼＋耳仔郁，配合 .mascot 浮動）
+const MASCOT_SVG = `<span class="mascot" aria-hidden="true"><svg viewBox="0 0 64 64" width="32" height="32">
+  <path class="ear l" d="M13 27 L9 7 L29 15 Z" fill="#F5A46B"/>
+  <path class="ear r" d="M51 27 L55 7 L35 15 Z" fill="#F5A46B"/>
+  <path d="M15 24 L13 12 L25 17 Z" fill="#E8809A"/>
+  <circle cx="32" cy="37" r="21" fill="#F8B57E"/>
+  <circle class="eye" cx="24.5" cy="34" r="3" fill="#5C4638"/>
+  <circle class="eye" cx="39.5" cy="34" r="3" fill="#5C4638"/>
+  <path d="M30.5 40 Q32 42 33.5 40" stroke="#5C4638" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M29 43.5 Q32 46.5 35 43.5" stroke="#5C4638" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <g stroke="#C98A5C" stroke-width="1.6" stroke-linecap="round">
+    <path d="M6 34 L17 36"/><path d="M6 41 L17 40"/>
+    <path d="M58 34 L47 36"/><path d="M58 41 L47 40"/>
+  </g>
+</svg></span>`;
 
 function todayStr(d) {
   d = d || new Date();
@@ -856,7 +1008,7 @@ function renderShell() {
   const app = document.getElementById('app');
   app.innerHTML = `
     <div class="tilehead">
-      <h1><span class="mascot">🐈</span>貓奴修行</h1>
+      <h1>${MASCOT_SVG}貓奴修行</h1>
       <div class="streak"><b>🔥 ${STATE.streak.current}</b><span>日連續</span></div>
     </div>
     <div class="tabs">
@@ -879,6 +1031,7 @@ function renderShell() {
 }
 
 function switchTab(name) {
+  if (!document.getElementById(`tab-${name}`)) return; // onboarding 期間（例如測驗結果撳品種）冇 tabs，唔好爆
   CURRENT_TAB = name;
   document.querySelectorAll('.tab').forEach(el => el.classList.toggle('active', el.dataset.tab === name));
   document.querySelectorAll('.page').forEach(el => el.classList.toggle('active', el.id === `tab-${name}`));
@@ -897,10 +1050,44 @@ function initApp() {
   }
   renderShell();
   switchTab('record');
+
+  // 時間類里程碑（相處日數）唔使等有新記錄，開 app 就 check
+  const bootUnlocked = Catnu.checkNewMilestones(STATE, Date.now());
+  if (bootUnlocked.length) {
+    STATE.milestones.push(...bootUnlocked);
+    Catnu.Store.save(STATE);
+    const parts = bootUnlocked.map(m => { const meta = Catnu.MILESTONE_META[m.id] || {}; return `${meta.emoji || ''} ${meta.label || m.id}`; });
+    Catnu.showToast(`🎉 解鎖里程碑：${parts.join(' ／ ')}`);
+  }
 }
+
+let onboardMode = null; // null = 歡迎分流頁；'have' = 開檔案 form
 
 function renderOnboarding() {
   const app = document.getElementById('app');
+
+  if (onboardMode !== 'have') {
+    app.innerHTML = `
+      <div class="tilehead"><h1>${MASCOT_SVG}貓奴修行</h1></div>
+      <div class="page active">
+        <div class="card">
+          <div class="empty-state" style="padding:10px 8px 4px"><div class="big">🐈</div></div>
+          <h3 style="font-size:18px;text-align:center;margin-bottom:4px">令貓貓愛上你嘅修行 app</h3>
+          <div style="font-size:12px;color:var(--sub);font-weight:700;text-align:center;margin-bottom:16px">Win your cat's heart, one moment at a time.</div>
+          <div class="tiles">
+            <div class="tile" id="onboard-have"><span class="em">🐱</span><div class="t">我有貓</div><div class="s">開檔案，即刻開始修行</div></div>
+            <div class="tile" id="onboard-none"><span class="em">🔮</span><div class="t">我未有貓</div><div class="s">配對測驗搵最夾你嘅品種</div></div>
+          </div>
+          <div class="note">記錄「你做咗咩 × 佢咩反應」，用透明統計搵出邊樣嘢令佢更鍾意你。數據淨係存喺你部機，冇 server 冇賬號。</div>
+        </div>
+      </div>
+      <div class="toast" id="toast"></div>
+    `;
+    document.getElementById('onboard-have').addEventListener('click', () => { onboardMode = 'have'; renderOnboarding(); });
+    document.getElementById('onboard-none').addEventListener('click', () => startQuiz(STATE, 'first'));
+    return;
+  }
+
   const draftCats = [
     { name: '', breedId: 'british-longhair', emoji: '🐱' },
     { name: '', breedId: 'british-longhair', emoji: '🐱' },
@@ -908,7 +1095,7 @@ function renderOnboarding() {
   const breedOptions = Catnu.BREEDS.map(b => `<option value="${b.id}">${b.emoji} ${b.name}</option>`).join('');
 
   app.innerHTML = `
-    <div class="tilehead"><h1><span class="mascot">🐈</span>貓奴修行</h1></div>
+    <div class="tilehead"><h1>${MASCOT_SVG}貓奴修行</h1></div>
     <div class="page active">
       <div class="card">
         <h3><span class="deco">◆</span> 歡迎！先幫你嘅貓開個檔案</h3>
@@ -952,7 +1139,7 @@ function renderOnboarding() {
     draftCats.filter(c => c.name.trim()).forEach((c, i) => {
       STATE.cats.push({
         id: 'c' + (Date.now() + i), name: c.name.trim(), breedId: c.breedId,
-        emoji: c.emoji.trim() || '🐱', sex: '', birthYM: '', neutered: null, homeDate: '', notes: '',
+        emoji: c.emoji.trim() || '🐱', sex: '', birthYM: '', birthDate: '', neutered: null, homeDate: '', notes: '', anniversaries: [],
       });
     });
     Catnu.Store.save(STATE);
@@ -1086,8 +1273,16 @@ function renderRecord(state) {
   const last = lastLogOf(state, recordCatId);
   const affection = Catnu.affectionScore(state.logs, recordCatId, Date.now());
   const todayCount = state.logs.filter(l => l.catId === recordCatId && todayStr(new Date(l.ts)) === todayStr()).length;
+  const annis = Catnu.upcomingAnniversaries(cat, Date.now());
+  const todayAnni = annis.find(a => a.daysUntil === 0);
+  const soonAnni = !todayAnni ? annis.find(a => a.daysUntil > 0 && a.daysUntil <= 7) : null;
 
   el.innerHTML = `
+    ${todayAnni ? `
+      <div class="celebrate" id="celebrate-banner">🎉 今日係${cat.name}嘅${todayAnni.label}${todayAnni.key !== 'birthday' && todayAnni.years ? `（${todayAnni.years} 周年）` : ''}！
+        <small>撳一下慶祝＋生成靚卡 share</small>
+      </div>` : ''}
+    ${soonAnni ? `<div class="anni-badge">⏰ 仲有 ${soonAnni.daysUntil} 日就係${cat.name}嘅${soonAnni.label} ${soonAnni.emoji}</div>` : ''}
     ${!loggedToday ? `
       <div class="night" id="night-banner">
         <span class="moon">🌙</span>
@@ -1161,6 +1356,12 @@ function renderRecord(state) {
       <div class="mlbl" style="margin-top:8px">${affection.insufficient ? '修行未夠，記多幾次先有分數' : `今日記咗 ${todayCount} 次 · 詳細分析喺「分析」tab`}</div>
     </div>
   `;
+
+  const celebrateBanner = document.getElementById('celebrate-banner');
+  if (celebrateBanner) celebrateBanner.addEventListener('click', () => {
+    spawnBurst(celebrateBanner);
+    Catnu.shareAnniversaryCard(state, cat, todayAnni);
+  });
 
   const nightBanner = document.getElementById('night-banner');
   if (nightBanner) nightBanner.addEventListener('click', () => { nightReviewOpen = !nightReviewOpen; renderRecord(state); });
@@ -1244,6 +1445,36 @@ function renderRecord(state) {
 
 RENDERERS.record = renderRecord;
 
+// 每日提醒 .ics（v1 冇 backend 做唔到真 push——用行事曆 recurring event 代替，一次 set 日日彈）
+function downloadReminderICS() {
+  const pad = n => String(n).padStart(2, '0');
+  const d = new Date();
+  d.setDate(d.getDate() + 1); // 由聽日開始
+  const dtstart = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T210000`; // 每晚 9 點（floating local time）
+  const stamp = new Date().toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z';
+  const ics = [
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//catnu//daily-reminder//ZH',
+    'BEGIN:VEVENT',
+    'UID:catnu-daily-reminder-' + Date.now() + '@catnu',
+    'DTSTAMP:' + stamp,
+    'DTSTART:' + dtstart,
+    'RRULE:FREQ=DAILY',
+    'SUMMARY:🐾 同貓貓修行：記低今日相處一刻',
+    'DESCRIPTION:開返「貓奴修行」記低今日互動＋完成 3 個任務保住 streak 🔥',
+    'URL:https://catnu-app.vercel.app',
+    'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:🐾 貓奴修行時間', 'TRIGGER:-PT0M', 'END:VALARM',
+    'END:VEVENT', 'END:VCALENDAR',
+  ].join('\r\n');
+  const blob = new Blob([ics], { type: 'text/calendar' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'catnu-daily-reminder.ics';
+  a.click();
+  URL.revokeObjectURL(url);
+  Catnu.showToast('📅 開個檔案加入行事曆，晚晚 9 點提你');
+}
+
 function sourceLabel(source) {
   if (source === 'data') return '根據你嘅分析數據生成';
   if (source === 'breed') return '根據品種特性生成';
@@ -1282,6 +1513,7 @@ function renderQuests(state) {
         </div>
       `).join('')}
       <div class="note">任務由分析引擎＋品種特性生成，日日唔同。完成晒先保得住 🔥 Streak（過咗夜 11:59 未完成會斷）。</div>
+      <button class="btn ghost" type="button" id="ics-btn" style="margin-top:10px">🔔 加入每日提醒（行事曆）</button>
     </div>
     ${latestMilestone ? `
       <div class="card">
@@ -1313,6 +1545,8 @@ function renderQuests(state) {
     });
   });
 
+  document.getElementById('ics-btn').addEventListener('click', downloadReminderICS);
+
   const shareLink = document.getElementById('milestone-share-link');
   if (shareLink) {
     shareLink.addEventListener('click', () => {
@@ -1333,6 +1567,11 @@ function insightIcon(insight) {
 }
 
 function mdBold(text) { return text.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>'); }
+
+function actionLabelOf(state, actionId) {
+  const a = actionsForRecord(state).find(x => x.id === actionId);
+  return a ? a.label : actionId;
+}
 
 function renderAnalysis(state) {
   const el = document.getElementById('tab-analysis');
@@ -1360,6 +1599,8 @@ function renderAnalysis(state) {
   }
 
   const insights = Catnu.generateInsights(state.logs, cat, now);
+  const level = Catnu.relationshipLevel(affection.score);
+  const weekly = Catnu.weeklyReport(state.logs, cat.id, now);
   const dayBars = [];
   const localMidnight = new Date(now); // day buckets must follow local calendar days,
   localMidnight.setHours(0, 0, 0, 0);  // not UTC midnight — todayStr()/streak logic do the same
@@ -1387,13 +1628,25 @@ function renderAnalysis(state) {
         </div>
       </div>
       <div class="meter"><div style="width:${affection.score}%"></div></div>
+      ${level ? `<div class="lvl-line">🏅 Lv.${level.lv} <b>${level.title}</b> ${level.emoji}<span class="lvl-next">${level.next ? `仲差 ${level.next.pointsNeeded} 分升 Lv.${level.next.lv}「${level.next.title}」` : '頂級！繼續寵佢 👑'}</span></div>` : ''}
       <div class="minibars">${dayBars.map(b => `<div class="bar ${b.hasData ? (b.pct >= 50 ? 'pos' : 'neg') : ''}" style="height:${b.hasData ? Math.max(b.pct, 8) : 4}%"></div>`).join('')}</div>
+    </div>
+    <div class="card">
+      <h3><span class="deco">◆</span> ${cat.name}週報<span class="tag">近 7 日</span></h3>
+      <div class="wk-grid">
+        <div class="wk-cell"><b>${weekly.count}</b><span>互動記錄</span></div>
+        <div class="wk-cell"><b>${weekly.posRate == null ? '--' : weekly.posRate + '%'}</b><span>正面率${weekly.posRateChange == null ? '' : (weekly.posRateChange >= 0 ? ` ↑+${weekly.posRateChange}` : ` ↓${weekly.posRateChange}`)}</span></div>
+        <div class="wk-cell"><b style="font-size:14px;line-height:2">${weekly.topAction ? actionLabelOf(state, weekly.topAction) : '--'}</b><span>今週做得最多</span></div>
+      </div>
+      <button class="btn ghost" type="button" id="weekly-share" style="margin-top:12px">⤴ 生成週報靚卡</button>
     </div>
     <div class="card">
       <h3><span class="deco">◆</span> 溝貓建議</h3>
       ${insights.length ? insights.map(i => `<div class="insight"><span>${insightIcon(i)}</span><span>${mdBold(i.text)}</span></div>`).join('') : '<div class="note">暫時未有夠數據嘅發現，繼續記錄啦。</div>'}
     </div>
   `;
+  const weeklyShareBtn = document.getElementById('weekly-share');
+  if (weeklyShareBtn) weeklyShareBtn.addEventListener('click', () => Catnu.shareWeeklyCard(state, cat, weekly));
   el.querySelectorAll('[data-cat]').forEach(c => c.addEventListener('click', () => { analysisCatId = c.dataset.cat; renderAnalysis(state); }));
 }
 
@@ -1612,6 +1865,29 @@ function catAffectionLabel(state, catId) {
   return a.insufficient ? '--' : a.score;
 }
 
+let profileAnniAddingCatId = null;
+
+function renderAnniBox(state, cat) {
+  const now = Date.now();
+  const days = Catnu.daysTogether(cat.homeDate, now);
+  const annis = Catnu.upcomingAnniversaries(cat, now);
+  const adding = profileAnniAddingCatId === cat.id;
+  return `
+    <div class="anni-box">
+      ${days !== null ? `<div class="anni-days">🏡 相處第 <b>${days}</b> 日</div>` : '<div class="anni-item dim">填返「到家日」就會計相處日數＋解鎖相處里程碑</div>'}
+      ${annis.map(a => `
+        <div class="anni-item">${a.emoji} ${a.label}${(a.key === 'gotcha' && a.years) ? `（${a.years} 周年）` : (a.key === 'birthday' && a.years) ? `（${a.years} 歲）` : ''}：${a.daysUntil === 0 ? '就係今日！🎉' : `仲有 ${a.daysUntil} 日（${a.date}）`}${a.key.startsWith('custom-') ? `<span class="anni-del" data-anni-del="${cat.id}:${a.key.slice(7)}">✕</span>` : ''}</div>
+      `).join('')}
+      ${!cat.birthDate ? '<div class="anni-item dim">編輯 → 填「出生日期」就有生日倒數 🎂</div>' : ''}
+      ${adding ? `
+        <div class="field" style="margin:10px 0 0"><input type="text" id="anni-new-label-${cat.id}" placeholder="紀念日名（例如：絕育紀念）"></div>
+        <div class="field" style="margin:8px 0 0"><input type="date" id="anni-new-date-${cat.id}"></div>
+        <button class="btn" type="button" data-anni-save="${cat.id}" style="margin-top:8px;padding:10px">加入</button>
+      ` : `<div class="anni-item" style="cursor:pointer;color:var(--terra)" data-anni-add="${cat.id}">＋加自訂紀念日</div>`}
+    </div>
+  `;
+}
+
 function renderProfileCatCard(state, cat) {
   const breed = Catnu.BREEDS.find(b => b.id === cat.breedId);
   if (profileEditingCatId !== cat.id) {
@@ -1625,6 +1901,7 @@ function renderProfileCatCard(state, cat) {
           </div>
           <div class="score"><div class="num">${catAffectionLabel(state, cat.id)}</div><div class="lbl">好感度</div></div>
         </div>
+        ${renderAnniBox(state, cat)}
         ${cat.notes ? `<div class="note" style="margin-top:10px">${cat.notes}</div>` : ''}
         <button class="btn ghost" type="button" data-edit-cat="${cat.id}" style="margin-top:10px">編輯</button>
         <span class="danger-btn" data-delete-cat="${cat.id}">刪除呢隻貓</span>
@@ -1638,6 +1915,7 @@ function renderProfileCatCard(state, cat) {
       <div class="field"><label>品種</label><select data-edit-field="breedId">${Catnu.BREEDS.map(b => `<option value="${b.id}" ${b.id === cat.breedId ? 'selected' : ''}>${b.emoji} ${b.name}</option>`).join('')}</select></div>
       <div class="field"><label>性別</label><input type="text" data-edit-field="sex" value="${cat.sex || ''}" placeholder="公／母"></div>
       <div class="field"><label>出生年月</label><input type="text" data-edit-field="birthYM" value="${cat.birthYM || ''}" placeholder="例如 2023-05"></div>
+      <div class="field"><label>出生日期（完整，先有生日倒數 🎂）</label><input type="date" data-edit-field="birthDate" value="${cat.birthDate || ''}"></div>
       <div class="field"><label>已絕育？</label>
         <select data-edit-field="neutered">
           <option value="" ${cat.neutered == null ? 'selected' : ''}>未填</option>
@@ -1663,7 +1941,8 @@ function wireRestoreInput(inputEl) {
     reader.onload = () => {
       try {
         const parsed = JSON.parse(reader.result);
-        if (parsed.schemaVersion !== 1 || !Array.isArray(parsed.cats) || !Array.isArray(parsed.logs)) throw new Error('bad schema');
+        if (![1, 2].includes(parsed.schemaVersion) || !Array.isArray(parsed.cats) || !Array.isArray(parsed.logs)) throw new Error('bad schema');
+        if (!Catnu.migrateState(parsed)) throw new Error('bad schema');
         Catnu.Store.save(parsed);
         location.reload();
       } catch (err) {
@@ -1709,6 +1988,25 @@ function renderProfile(state) {
   `;
 
   el.querySelectorAll('[data-edit-cat]').forEach(b => b.addEventListener('click', () => { profileEditingCatId = b.dataset.editCat; renderProfile(state); }));
+  el.querySelectorAll('[data-anni-add]').forEach(b => b.addEventListener('click', () => { profileAnniAddingCatId = b.dataset.anniAdd; renderProfile(state); }));
+  el.querySelectorAll('[data-anni-save]').forEach(b => b.addEventListener('click', () => {
+    const catId = b.dataset.anniSave;
+    const label = document.getElementById('anni-new-label-' + catId).value.trim();
+    const date = document.getElementById('anni-new-date-' + catId).value;
+    if (!label || !date) { Catnu.showToast('填埋個名同日期先'); return; }
+    const cat = state.cats.find(c => c.id === catId);
+    cat.anniversaries.push({ id: 'a' + Date.now(), label, emoji: '💗', date });
+    Catnu.Store.save(state);
+    profileAnniAddingCatId = null;
+    renderProfile(state);
+  }));
+  el.querySelectorAll('[data-anni-del]').forEach(b => b.addEventListener('click', () => {
+    const [catId, annId] = b.dataset.anniDel.split(':');
+    const cat = state.cats.find(c => c.id === catId);
+    cat.anniversaries = (cat.anniversaries || []).filter(a => a.id !== annId);
+    Catnu.Store.save(state);
+    renderProfile(state);
+  }));
   el.querySelectorAll('[data-cancel-edit]').forEach(b => b.addEventListener('click', () => { profileEditingCatId = null; renderProfile(state); }));
   el.querySelectorAll('[data-save-cat]').forEach(b => b.addEventListener('click', () => {
     const cat = state.cats.find(c => c.id === b.dataset.saveCat);
@@ -1742,7 +2040,7 @@ function renderProfile(state) {
     if (!name) return;
     const breedId = document.getElementById('new-cat-breed').value;
     const breed = Catnu.BREEDS.find(b => b.id === breedId);
-    state.cats.push({ id: 'c' + Date.now(), name, breedId, emoji: breed ? breed.emoji : '🐱', sex: '', birthYM: '', neutered: null, homeDate: '', notes: '' });
+    state.cats.push({ id: 'c' + Date.now(), name, breedId, emoji: breed ? breed.emoji : '🐱', sex: '', birthYM: '', birthDate: '', neutered: null, homeDate: '', notes: '', anniversaries: [] });
     Catnu.Store.save(state);
     profileAdding = false;
     renderProfile(state);
@@ -1784,65 +2082,138 @@ function wrapCenteredText(ctx, text, cx, y, maxWidth, lineHeight) {
   lines.forEach((l, i) => ctx.fillText(l, cx, y + i * lineHeight));
 }
 
-Catnu.shareMilestoneCard = function shareMilestoneCard(milestone, state) {
+/* ── Share 卡（奶茶 clay 視覺，1080×1350 IG portrait；三款共用底框）── */
+
+function drawShareCardBase(ctx) {
+  const g = ctx.createLinearGradient(0, 0, 0, 1350);
+  g.addColorStop(0, '#FFE7D6'); g.addColorStop(1, '#FFD3BE');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, 1080, 1350);
+
+  // 散落爪印 pattern
+  ctx.save(); ctx.globalAlpha = 0.10; ctx.fillStyle = '#B5605B';
+  const paw = (x, y, s, rot) => {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
+    ctx.beginPath(); ctx.arc(0, 12 * s, 16 * s, 0, Math.PI * 2); ctx.fill();
+    [[-14, -6], [0, -12], [14, -6]].forEach(([dx, dy]) => { ctx.beginPath(); ctx.arc(dx * s, dy * s, 7 * s, 0, Math.PI * 2); ctx.fill(); });
+    ctx.restore();
+  };
+  [[90, 120, 2.2, -0.4], [990, 180, 1.8, 0.5], [140, 1230, 1.9, 0.3], [950, 1240, 2.4, -0.2], [540, 80, 1.5, 0.1], [70, 700, 1.6, 0.6], [1010, 720, 1.7, -0.5]].forEach(([x, y, s, r]) => paw(x, y, s, r));
+  ctx.restore();
+
+  // 白卡＋柔影
+  ctx.save();
+  ctx.shadowColor = 'rgba(122,74,56,.28)'; ctx.shadowBlur = 60; ctx.shadowOffsetY = 24;
+  ctx.fillStyle = '#FFFDFA';
+  roundRect(ctx, 110, 150, 860, 1050, 56);
+  ctx.fill();
+  ctx.restore();
+
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#B99C8C';
+  ctx.font = 'bold 34px "M PLUS Rounded 1c","Noto Sans TC",sans-serif';
+  ctx.fillText('🐾 貓 奴 修 行 🐾', 540, 250);
+
+  ctx.fillStyle = '#C9A78F';
+  ctx.font = 'italic 30px Fraunces,serif';
+  ctx.fillText("Win your cat's heart, one moment at a time.", 540, 1290);
+}
+
+function downloadCanvas(canvas, name) {
+  canvas.toBlob((blob) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, 'image/png');
+}
+
+function newShareCanvas() {
   const canvas = document.createElement('canvas');
   canvas.width = 1080; canvas.height = 1350;
   const ctx = canvas.getContext('2d');
+  drawShareCardBase(ctx);
+  return { canvas, ctx };
+}
 
-  ctx.fillStyle = '#f4edda';
-  ctx.fillRect(0, 0, 1080, 1350);
-
-  ctx.save();
-  ctx.globalAlpha = 0.18;
-  const tile = 60;
-  for (let y = 0; y < 1350; y += tile) {
-    for (let x = 0; x < 1080; x += tile) {
-      const onBorder = x < 120 || x > 1080 - 120 - tile || y < 120 || y > 1350 - 120 - tile;
-      if (!onBorder) continue;
-      ctx.fillStyle = (x / tile + y / tile) % 2 === 0 ? '#d9a441' : '#c05a2e';
-      ctx.beginPath();
-      ctx.arc(x + tile / 2, y + tile / 2, tile / 2 - 6, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-  ctx.restore();
-
-  ctx.fillStyle = '#fbf6e9';
-  ctx.strokeStyle = '#2f2a22';
-  ctx.lineWidth = 6;
-  roundRect(ctx, 130, 130, 1080 - 260, 1350 - 260, 28);
-  ctx.fill(); ctx.stroke();
-
+Catnu.shareMilestoneCard = function shareMilestoneCard(milestone, state) {
+  const { canvas, ctx } = newShareCanvas();
   const cat = state.cats.find(c => c.id === milestone.catId);
   const meta = Catnu.MILESTONE_META[milestone.id] || {};
   const homeDate = (cat && cat.homeDate) ? new Date(cat.homeDate).getTime() : state.settings.createdAt;
   const dayN = Math.max(1, Math.floor((milestone.unlockedAt - homeDate) / 86400000) + 1);
 
-  ctx.textAlign = 'center';
-  ctx.fillStyle = '#2f2a22';
-  ctx.font = '160px sans-serif';
-  ctx.fillText(meta.emoji || '🏅', 540, 480);
+  ctx.font = '170px sans-serif';
+  ctx.fillStyle = '#5C4638';
+  ctx.fillText(meta.emoji || '🏅', 540, 560);
 
-  ctx.font = 'bold 56px "Noto Serif TC", serif';
-  ctx.fillStyle = '#123f38';
-  wrapCenteredText(ctx, `${cat ? cat.name + ' ' : ''}${meta.label || milestone.id}`, 540, 620, 760, 66);
+  ctx.font = 'bold 62px "M PLUS Rounded 1c","Noto Sans TC",sans-serif';
+  ctx.fillStyle = '#E0754F';
+  wrapCenteredText(ctx, `${cat ? cat.name + ' ' : ''}${meta.label || milestone.id}`, 540, 700, 740, 74);
 
-  ctx.font = '34px "Noto Sans TC", sans-serif';
-  ctx.fillStyle = '#7d7361';
-  ctx.fillText(`${new Date(milestone.unlockedAt).toLocaleDateString('zh-HK')} · 相處第 ${dayN} 日`, 540, 760);
+  ctx.font = '34px "Noto Sans TC",sans-serif';
+  ctx.fillStyle = '#A98D7C';
+  ctx.fillText(`${new Date(milestone.unlockedAt).toLocaleDateString('zh-HK')} · 相處第 ${dayN} 日`, 540, 850);
 
-  ctx.font = 'bold 40px "Noto Serif TC", serif';
-  ctx.fillStyle = '#c05a2e';
-  ctx.fillText('🐾 貓奴修行', 540, 1300);
+  ctx.font = '46px sans-serif';
+  ctx.fillText('💗 💛 💗', 540, 990);
 
-  canvas.toBlob((blob) => {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `catnu-milestone-${milestone.id}-${todayStr()}.png`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }, 'image/png');
+  downloadCanvas(canvas, `catnu-milestone-${milestone.id}-${todayStr()}.png`);
+};
+
+Catnu.shareWeeklyCard = function shareWeeklyCard(state, cat, weekly) {
+  const { canvas, ctx } = newShareCanvas();
+
+  ctx.font = 'bold 54px "M PLUS Rounded 1c","Noto Sans TC",sans-serif';
+  ctx.fillStyle = '#7A4A38';
+  ctx.fillText(`${cat.emoji} ${cat.name}嘅一週修行報告`, 540, 400);
+
+  ctx.font = 'italic 900 190px Fraunces,serif';
+  ctx.fillStyle = '#E0754F';
+  ctx.fillText(weekly.posRate == null ? '--' : `${weekly.posRate}%`, 540, 640);
+
+  ctx.font = 'bold 36px "Noto Sans TC",sans-serif';
+  ctx.fillStyle = '#A98D7C';
+  ctx.fillText('本週正面反應率' + (weekly.posRateChange == null ? '' : (weekly.posRateChange >= 0 ? `（↑ +${weekly.posRateChange}）` : `（↓ ${weekly.posRateChange}）`)), 540, 720);
+
+  ctx.font = '38px "Noto Sans TC",sans-serif';
+  ctx.fillStyle = '#5C4638';
+  ctx.fillText(`本週互動 ${weekly.count} 次`, 540, 850);
+  if (weekly.topAction) ctx.fillText(`做得最多：${actionLabelOf(state, weekly.topAction)} ×${weekly.topActionCount}`, 540, 920);
+
+  const a = Catnu.affectionScore(state.logs, cat.id, Date.now());
+  const level = a.insufficient ? null : Catnu.relationshipLevel(a.score);
+  if (level) {
+    ctx.font = 'bold 40px "M PLUS Rounded 1c","Noto Sans TC",sans-serif';
+    ctx.fillStyle = '#E0754F';
+    ctx.fillText(`🏅 Lv.${level.lv} ${level.title} ${level.emoji}`, 540, 1030);
+  }
+
+  downloadCanvas(canvas, `catnu-weekly-${cat.id}-${todayStr()}.png`);
+};
+
+Catnu.shareAnniversaryCard = function shareAnniversaryCard(state, cat, anni) {
+  const { canvas, ctx } = newShareCanvas();
+  const dayN = Catnu.daysTogether(cat.homeDate, Date.now());
+
+  ctx.font = '170px sans-serif';
+  ctx.fillText(anni.emoji || '🎉', 540, 560);
+
+  ctx.font = 'bold 64px "M PLUS Rounded 1c","Noto Sans TC",sans-serif';
+  ctx.fillStyle = '#E0754F';
+  const yearsBit = anni.key === 'birthday' ? `${anni.years} 歲生日` : anni.years ? `${anni.label}（${anni.years} 周年）` : anni.label;
+  wrapCenteredText(ctx, `${cat.name}嘅${yearsBit}`, 540, 700, 740, 76);
+
+  ctx.font = '36px "Noto Sans TC",sans-serif';
+  ctx.fillStyle = '#A98D7C';
+  ctx.fillText(anni.date, 540, 840);
+  if (dayN) ctx.fillText(`我哋已經一齊 ${dayN} 日喇`, 540, 910);
+
+  ctx.font = '46px sans-serif';
+  ctx.fillText('🎂 💗 🎈', 540, 1030);
+
+  downloadCanvas(canvas, `catnu-anniversary-${cat.id}-${todayStr()}.png`);
 };
 
 /* @APP:BOOT */
