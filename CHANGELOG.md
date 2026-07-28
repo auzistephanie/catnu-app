@@ -2,6 +2,17 @@
 
 > 改動記錄出口：新條目一律插喺呢個檔案頂部。CLAUDE.md 只放路由同現行規則。早期開發史 → `docs/superpowers/plans/2026-07-12-catnu-app.md`。
 
+## 2026-07-28 Phase 1 大改版：重新定位＋全 app 換皮「奶茶軟萌」clay 3D＋記錄頁減磅
+
+- **重新定位（決定已鎖）**：由 Stephanie 個人 app → 公開俾 20–40 歲女性貓奴用；維持無 login、數據存各自裝置 localStorage（真同步/push 留 v2 Supabase）。名 keep「貓奴修行」；tagline "Win your cat's heart, one moment at a time."；UI 方向 A「奶茶軟萌」；3D 做法 = clay CSS＋mascot（Phase 2 升級 Lottie）。
+- **index.html 換皮**：`<style>` 設計系統全換 — palette 墨綠花磚 → 奶茶蜜桃 clay 3D（頂光＋底影＋press 回彈），**CSS variable 名全部不變**（--teal/--terra 等只改值），JS zone 免改；5 個 tab 由頂部搬去 bottom nav（拇指可及）＋icon；header 浮動 mascot；theme-color/favicon 跟新色；字體加 M PLUS Rounded 1c。
+- **記錄頁減磅**（痛點：要入太多嘢）：新增「一撳即記」6 tiles（每張 map 落現有 reactions/actions 組合，pure-logic 分析引擎零改動）＋「⟳ 同上次一樣」重複掣＋原有詳細 chips 收入「✏️ 記詳細啲」toggle；新增 `commitLog()` helper 統一所有入 log 路徑（tiles/repeat/晚間回顧/詳細 submit 共用 milestone check＋toast＋burst）。
+- **唔記得記**：晚間回顧 banner（當日未記該貓先出現）→ 3 揀 1 快速補記（`backfilled:true`、note「晚間回顧」；「一般」= 中性 entry 唔計分）。
+- **micro-interactions**：記錄成功爪印/心心 burst、負面紫色分色、記錄頁好感度 mini-card（`Catnu.affectionScore` 直接攞）。
+- **驗證**：`node --test tests/*.test.mjs` 32/32 全綠；Playwright 390px 實開 5 tabs＋onboarding，互動實測（night review／tile／repeat／詳細 submit 各入 1 條 log，內容核對正確）；`scrollWidth=390` 無橫向 scroll。
+- `.gitignore` 加 `*.bak-*`（暫存檔冇 ignore rule 同類第 4 宗）；改版前原檔留 `index.html.bak-20260728`（gitignored）。
+- **Phase 2 backlog（已批未做）**：landing.html 換皮＋英文 tagline、share 卡重造（IG 1080×1350 新視覺）、「加入每日提醒」.ics、關係等級＋稱號、貓咪週報、配對測驗做公開入口 hook、紀念日 function（生日 schema 年月→完整日期，方案 a）、mascot 升級 Lottie。share 卡 canvas 暫仍舊 palette，Phase 2 一併重造。
+
 ## 2026-07-25 `.active-session.lock*` 冇入 .gitignore → session 鎖檔一直推上 GitHub
 
 - **問題**：`session-lock.sh` 喺每個 repo 根寫 `.active-session.lock`；release 嗰陣 Drive mount `rm` 唔到（device bridge 冇 rm 權限），會 fallback 改名做 `.active-session.lock.DELETE-ME-<epoch>`。兩種檔全部 repo 都**冇入 `.gitignore`**，所以 `github_push.py` 照推——最舊一個殘留檔 timestamp 係 **2026-07-14**，即係呢個洩漏行咗成十日。

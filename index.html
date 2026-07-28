@@ -3,60 +3,74 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#1d5c52">
+<meta name="theme-color" content="#FFE7D6">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="貓奴修行">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>貓奴修行</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231d5c52'/%3E%3Cg fill='%23d9a441'%3E%3Ccircle cx='50' cy='58' r='20'/%3E%3Ccircle cx='24' cy='30' r='11'/%3E%3Ccircle cx='50' cy='20' r='11'/%3E%3Ccircle cx='76' cy='30' r='11'/%3E%3C/g%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231d5c52'/%3E%3Cg fill='%23d9a441'%3E%3Ccircle cx='50' cy='58' r='20'/%3E%3Ccircle cx='24' cy='30' r='11'/%3E%3Ccircle cx='50' cy='20' r='11'/%3E%3Ccircle cx='76' cy='30' r='11'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23FFE7D6'/%3E%3Cg fill='%23E0754F'%3E%3Ccircle cx='50' cy='58' r='20'/%3E%3Ccircle cx='24' cy='30' r='11'/%3E%3Ccircle cx='50' cy='20' r='11'/%3E%3Ccircle cx='76' cy='30' r='11'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23FFE7D6'/%3E%3Cg fill='%23E0754F'%3E%3Ccircle cx='50' cy='58' r='20'/%3E%3Ccircle cx='24' cy='30' r='11'/%3E%3Ccircle cx='50' cy='20' r='11'/%3E%3Ccircle cx='76' cy='30' r='11'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;900&family=Fraunces:ital,wght@1,600;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;900&family=M+PLUS+Rounded+1c:wght@500;700;800&family=Fraunces:ital,wght@1,600;900&display=swap" rel="stylesheet">
 <style>
 :root{
-  --cream:#f4edda; --paper:#fbf6e9;
-  --teal:#1d5c52; --teal-dk:#123f38; --night:#0d2b26;
-  --terra:#c05a2e; --mustard:#d9a441; --rose:#c98d83;
-  --ink:#2f2a22; --sub:#7d7361; --line:#e2d7bd;
-  --sans:'Noto Sans TC',sans-serif; --serif:'Noto Serif TC',serif; --disp:'Fraunces',serif;
+  --cream:#FFF4EA; --paper:#FFFDFA;
+  --teal:#E89B6B; --teal-dk:#7A4A38; --night:#5C4638;
+  --terra:#E0754F; --mustard:#FFD09A; --rose:#D9BCE4;
+  --ink:#5C4638; --sub:#A98D7C; --line:#F3E3D3;
+  --peach-1:#FFE7D6; --peach-2:#FFD3BE; --purple:#7B4E8E;
+  --sans:'M PLUS Rounded 1c','Noto Sans TC',sans-serif; --serif:'M PLUS Rounded 1c','Noto Sans TC',sans-serif; --disp:'Fraunces',serif;
+  --clay-card:0 8px 18px rgba(122,74,56,.12), inset 0 2px 0 rgba(255,255,255,.95), inset 0 -5px 9px rgba(214,148,110,.14);
+  --clay-card-sm:0 4px 10px rgba(122,74,56,.1), inset 0 2px 0 rgba(255,255,255,.9), inset 0 -3px 6px rgba(214,148,110,.12);
+  --clay-sel:0 8px 16px rgba(224,117,79,.26), inset 0 2px 0 rgba(255,255,255,.85), inset 0 -5px 9px rgba(193,94,55,.2);
+  --clay-amber:0 8px 16px rgba(224,150,60,.28), inset 0 2px 0 rgba(255,255,255,.9), inset 0 -5px 9px rgba(200,130,40,.2);
+  --clay-pressed:0 2px 6px rgba(122,74,56,.12), inset 0 2px 0 rgba(255,255,255,.6), inset 0 -2px 4px rgba(214,148,110,.1);
 }
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{overflow-x:hidden;max-width:100%}
-body{font-family:var(--sans);color:var(--ink);background:var(--teal-dk);display:flex;justify-content:center}
+body{font-family:var(--sans);color:var(--ink);background:linear-gradient(180deg,#F6E3D3,#EFD2BE);display:flex;justify-content:center}
 h1,h2,h3{font-family:var(--serif)}
 button{font-family:inherit;border:none;background:none;cursor:pointer}
 input,select{font-family:inherit}
 .app{width:100%;max-width:430px;min-height:100vh;background:var(--cream);position:relative;overflow-x:hidden}
 /* @CSS:TABS */
-.quest{display:flex;align-items:center;gap:10px;padding:10px;border:2px solid var(--ink);border-radius:12px;margin-bottom:10px;background:var(--paper);box-shadow:3px 3px 0 rgba(47,42,34,.12);cursor:pointer}
-.quest.done{background:#e5eee4;opacity:.85}
-.quest .box{width:26px;height:26px;flex:none;border:2px solid var(--ink);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;background:var(--paper)}
-.quest.done .box{background:var(--teal);color:var(--cream)}
-.quest .q{flex:1;font-size:13px;line-height:1.4}
-.quest .q small{display:block;color:var(--sub);font-size:11px;margin-top:2px}
-.tag{font-size:10px;background:var(--mustard);border:1.5px solid var(--ink);border-radius:8px;padding:1px 8px;font-weight:700;margin-left:6px;vertical-align:middle}
-.milestone{border:2px solid var(--ink);border-radius:14px;padding:14px;text-align:center;background:linear-gradient(160deg,var(--paper) 60%,var(--cream));box-shadow:4px 4px 0 var(--mustard)}
-.milestone .big{font-size:30px}
-.milestone b{display:block;font-size:14px;margin-top:4px}
-.milestone small{color:var(--sub);font-size:11px}
-.milestone .share{margin-top:8px;font-size:11px;color:var(--terra);font-weight:700;cursor:pointer}
+@keyframes floaty{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-5px) rotate(4deg)}}
+@keyframes squish{0%{transform:scale(1)}40%{transform:scale(.88,.94)}70%{transform:scale(1.05,1.02)}100%{transform:scale(1)}}
+@keyframes fly{0%{transform:translate(0,0) scale(.6);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(1.25) rotate(var(--r));opacity:0}}
+.squish{animation:squish .32s cubic-bezier(.34,1.56,.64,1)}
+.burst{position:fixed;font-size:22px;pointer-events:none;z-index:60;animation:fly 1s ease-out forwards}
+.press{transition:transform .12s cubic-bezier(.34,1.56,.64,1),box-shadow .12s}
+.press:active{transform:translateY(3px) scale(.965)!important;box-shadow:var(--clay-pressed)!important}
+.quest{display:flex;align-items:center;gap:10px;padding:12px;border-radius:18px;margin-bottom:10px;background:linear-gradient(180deg,var(--paper),#FFF3E9);box-shadow:var(--clay-card-sm);cursor:pointer;transition:transform .12s cubic-bezier(.34,1.56,.64,1)}
+.quest:active{transform:translateY(2px) scale(.98)}
+.quest.done{background:linear-gradient(180deg,#F0F7EE,#E2EEDD);opacity:.9}
+.quest .box{width:28px;height:28px;flex:none;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;background:#FFEBDD;box-shadow:inset 0 2px 4px rgba(180,110,80,.2);color:var(--terra)}
+.quest.done .box{background:linear-gradient(180deg,#9DC98A,#7DB56A);color:#fff;box-shadow:0 3px 8px rgba(125,181,106,.4),inset 0 2px 0 rgba(255,255,255,.5)}
+.quest .q{flex:1;font-size:13px;line-height:1.45;font-weight:500}
+.quest .q small{display:block;color:var(--sub);font-size:11px;margin-top:2px;font-weight:500}
+.tag{font-size:10px;background:var(--mustard);border-radius:99px;padding:2px 9px;font-weight:800;margin-left:6px;vertical-align:middle;color:#8A5A2B;box-shadow:inset 0 1px 0 rgba(255,255,255,.7),inset 0 -2px 3px rgba(200,130,40,.2)}
+.milestone{border-radius:22px;padding:16px;text-align:center;background:linear-gradient(160deg,var(--paper) 55%,#FFF0E2);box-shadow:var(--clay-card)}
+.milestone .big{font-size:32px;display:inline-block;animation:floaty 3.4s ease-in-out infinite}
+.milestone b{display:block;font-size:14px;margin-top:4px;font-weight:800}
+.milestone small{color:var(--sub);font-size:11px;font-weight:500}
+.milestone .share{margin-top:8px;font-size:11.5px;color:var(--terra);font-weight:800;cursor:pointer}
 .cat-row{display:flex;align-items:center;gap:12px}
-.avatar{width:50px;height:50px;border-radius:50%;background:var(--mustard);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-size:24px;flex:none}
+.avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(180deg,#FFE2B8,#FFD09A);display:flex;align-items:center;justify-content:center;font-size:25px;flex:none;box-shadow:0 5px 12px rgba(224,150,60,.3),inset 0 2px 0 rgba(255,255,255,.8),inset 0 -4px 7px rgba(200,130,40,.2)}
 .cat-meta{flex:1}
 .cat-meta .name{font-weight:800;font-size:15px}
-.cat-meta .breed{font-size:11px;color:var(--sub)}
-.score .num{font-size:26px;font-weight:900;color:var(--terra);font-family:var(--disp)}
-.score .lbl{font-size:10px;color:var(--sub);text-align:right}
-.meter{height:10px;background:var(--cream);border:1.5px solid var(--ink);border-radius:5px;margin-top:10px;overflow:hidden}
-.meter>div{height:100%;background:repeating-linear-gradient(45deg,var(--terra),var(--terra) 6px,var(--mustard) 6px,var(--mustard) 12px)}
-.minibars{display:flex;gap:4px;align-items:flex-end;height:40px;margin-top:12px}
-.minibars .bar{flex:1;background:var(--line);border-radius:3px 3px 0 0;min-height:3px}
-.minibars .bar.pos{background:var(--mustard)}
-.minibars .bar.neg{background:var(--rose)}
-.insight{display:flex;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13px;line-height:1.55}
+.cat-meta .breed{font-size:11px;color:var(--sub);font-weight:500}
+.score .num{font-size:30px;font-weight:900;color:var(--terra);font-family:var(--disp);font-style:italic}
+.score .lbl{font-size:10px;color:var(--sub);text-align:right;font-weight:700}
+.meter{height:13px;background:#FFE9DA;border-radius:99px;margin-top:10px;overflow:hidden;box-shadow:inset 0 3px 6px rgba(180,110,80,.16)}
+.meter>div{height:100%;border-radius:99px;background:linear-gradient(90deg,#FFCB86,#F9A87C,#EE7E4F);box-shadow:inset 0 -3px 5px rgba(170,70,30,.22);transition:width .8s cubic-bezier(.34,1.3,.64,1)}
+.minibars{display:flex;gap:5px;align-items:flex-end;height:42px;margin-top:12px}
+.minibars .bar{flex:1;background:var(--line);border-radius:6px 6px 3px 3px;min-height:3px}
+.minibars .bar.pos{background:linear-gradient(180deg,#FFCB86,#F5B15C);box-shadow:inset 0 2px 0 rgba(255,255,255,.5)}
+.minibars .bar.neg{background:linear-gradient(180deg,#E3CBEC,#D0AEDF);box-shadow:inset 0 2px 0 rgba(255,255,255,.5)}
+.insight{display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line);font-size:13px;line-height:1.55}
 .insight:last-child{border-bottom:none}
-.empty-state{text-align:center;padding:40px 20px;color:var(--sub)}
-.empty-state .big{font-size:40px;margin-bottom:12px}
+.empty-state{text-align:center;padding:40px 20px;color:var(--sub);font-weight:500}
+.empty-state .big{font-size:44px;margin-bottom:12px;display:inline-block;animation:floaty 3s ease-in-out infinite;filter:drop-shadow(0 8px 6px rgba(122,74,56,.2))}
 .accordion-cat{margin-bottom:14px}
 .accordion-cat > .cat-title{font-weight:800;color:var(--terra);font-size:13px;margin-bottom:6px;letter-spacing:1px}
 .decode{padding:9px 0;border-bottom:1px dashed var(--line);font-size:13px}
@@ -67,67 +81,91 @@ input,select{font-family:inherit}
 .decode-body{padding:6px 0 0 36px;color:var(--sub);font-size:12px;line-height:1.6;display:none}
 .decode-body.open{display:block}
 .trait-bar{display:flex;align-items:center;gap:8px;font-size:12px;margin-top:7px}
-.trait-bar .t{width:78px;color:var(--sub);flex:none}
-.trait-bar .m{flex:1;height:8px;background:var(--cream);border:1.5px solid var(--ink);border-radius:4px;overflow:hidden}
-.trait-bar .m>div{height:100%;background:var(--teal)}
-.breed-card{border:2px solid var(--ink);border-radius:12px;padding:12px;margin-bottom:10px;background:var(--paper);box-shadow:3px 3px 0 rgba(47,42,34,.12)}
+.trait-bar .t{width:78px;color:var(--sub);flex:none;font-weight:600}
+.trait-bar .m{flex:1;height:9px;background:#FFEDE0;border-radius:99px;overflow:hidden;box-shadow:inset 0 2px 4px rgba(180,110,80,.15)}
+.trait-bar .m>div{height:100%;border-radius:99px;background:linear-gradient(90deg,#F5B98F,#E89B6B)}
+.breed-card{border-radius:20px;padding:14px;margin-bottom:10px;background:linear-gradient(180deg,var(--paper),#FFF3E9);box-shadow:var(--clay-card-sm)}
 .breed-card .bh{display:flex;align-items:center;gap:10px;cursor:pointer}
-.breed-card .bh .emoji{font-size:22px}
+.breed-card .bh .emoji{font-size:23px}
 .breed-card .bh .name{font-weight:800;flex:1;font-size:14px}
 .breed-card .bd{display:none;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);font-size:12.5px;line-height:1.7;color:var(--sub)}
 .breed-card .bd.open{display:block}
 .breed-card .pitfall{color:var(--terra)}
 .breed-card ul{margin:4px 0 4px 18px}
 .quiz-entry{display:flex;gap:10px}
-.quiz-entry .qe{flex:1;text-align:center;border:2px solid var(--ink);border-radius:12px;padding:12px 8px;font-size:12px;background:var(--paper);cursor:pointer;box-shadow:3px 3px 0 rgba(47,42,34,.15);line-height:1.5}
-.quiz-entry .qe span{font-size:20px;display:block;margin-bottom:4px}
-.quiz-overlay{position:fixed;inset:0;background:rgba(13,43,38,.75);z-index:40;display:flex;align-items:flex-end;justify-content:center}
-.quiz-panel{background:var(--cream);width:100%;max-width:430px;max-height:85vh;overflow-y:auto;border-radius:20px 20px 0 0;padding:20px;position:relative;box-shadow:0 -8px 30px rgba(0,0,0,.3)}
+.quiz-entry .qe{flex:1;text-align:center;border-radius:20px;padding:14px 8px;font-size:12px;background:linear-gradient(180deg,var(--paper),#FFF3E9);cursor:pointer;box-shadow:var(--clay-card-sm);line-height:1.5;font-weight:700;transition:transform .12s cubic-bezier(.34,1.56,.64,1)}
+.quiz-entry .qe:active{transform:translateY(2px) scale(.97)}
+.quiz-entry .qe span{font-size:22px;display:block;margin-bottom:4px}
+.quiz-overlay{position:fixed;inset:0;background:rgba(92,70,56,.6);backdrop-filter:blur(3px);z-index:40;display:flex;align-items:flex-end;justify-content:center}
+.quiz-panel{background:var(--cream);width:100%;max-width:430px;max-height:85vh;overflow-y:auto;border-radius:28px 28px 0 0;padding:20px;position:relative;box-shadow:0 -10px 34px rgba(0,0,0,.25)}
 .quiz-panel h3{margin:6px 0 12px}
-.quiz-close{position:absolute;right:14px;top:14px;width:30px;height:30px;border:2px solid var(--ink);border-radius:50%;background:var(--paper);font-size:14px;cursor:pointer}
+.quiz-close{position:absolute;right:14px;top:14px;width:32px;height:32px;border-radius:50%;background:linear-gradient(180deg,#fff,#FFF1E4);font-size:14px;cursor:pointer;box-shadow:var(--clay-card-sm);color:var(--teal-dk);font-weight:800}
 .quiz-panel .chips{flex-direction:column}
 .quiz-panel .chips .chip{width:100%;text-align:left}
 .field{margin-bottom:14px}
 .field label{font-size:12px;color:var(--sub);display:block;margin-bottom:4px;font-weight:700}
-.field input,.field select{width:100%;padding:10px;border:2px solid var(--ink);border-radius:8px;background:var(--paper);font-size:14px}
-.field input:focus,.field select:focus{outline:none;border-color:var(--terra)}
+.field input,.field select{width:100%;padding:11px 12px;border:2px solid var(--line);border-radius:14px;background:var(--paper);font-size:14px;color:var(--ink)}
+.field input:focus,.field select:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(232,155,107,.18)}
 .milestone-wall{display:flex;flex-wrap:wrap;gap:8px}
-.milestone-wall .chip.locked{opacity:.4}
-.danger-btn{color:var(--terra);font-size:12px;font-weight:700;cursor:pointer;margin-top:8px;display:inline-block}
-.tilehead{position:relative;padding:18px 18px 14px;color:var(--cream);background:var(--teal);overflow:hidden}
-.tilehead::before{content:"";position:absolute;inset:0;opacity:.16;
-  background-image:
-    radial-gradient(circle at 0 0, var(--mustard) 0 18px, transparent 19px),
-    radial-gradient(circle at 56px 0, var(--mustard) 0 18px, transparent 19px),
-    radial-gradient(circle at 0 56px, var(--mustard) 0 18px, transparent 19px),
-    radial-gradient(circle at 56px 56px, var(--mustard) 0 18px, transparent 19px),
-    radial-gradient(circle at 28px 28px, var(--terra) 0 12px, transparent 13px);
-  background-size:56px 56px}
-.tilehead h1{font-size:20px;position:relative;letter-spacing:1px;display:flex;align-items:center;gap:8px}
-.tilehead .streak{position:absolute;right:16px;top:16px;background:var(--terra);border:2px solid var(--cream);border-radius:14px;padding:5px 10px;text-align:center;box-shadow:2px 2px 0 rgba(0,0,0,.2)}
-.tilehead .streak b{display:block;font-size:16px;line-height:1.1}
-.tilehead .streak span{font-size:8px;letter-spacing:1px}
-.tabs{display:flex;background:var(--teal-dk);position:sticky;top:0;z-index:5}
-.tab{flex:1;text-align:center;padding:10px 2px;font-size:12px;color:#9fbcb2;cursor:pointer;border-bottom:3px solid transparent;transition:color .15s}
-.tab.active{color:var(--cream);border-bottom-color:var(--mustard);font-weight:700;background:rgba(255,255,255,.05)}
-.page{display:none;padding:16px;padding-bottom:32px}
+.milestone-wall .chip.locked{opacity:.38}
+.danger-btn{color:var(--terra);font-size:12px;font-weight:800;cursor:pointer;margin-top:8px;display:inline-block}
+.tilehead{position:relative;padding:20px 18px 16px;color:var(--teal-dk);background:linear-gradient(150deg,var(--peach-1) 0%,var(--peach-2) 100%);overflow:hidden}
+.tilehead::before{content:"🐾";position:absolute;right:-8px;bottom:-20px;font-size:80px;opacity:.13;transform:rotate(-16deg)}
+.tilehead h1{font-size:20px;position:relative;letter-spacing:1px;display:flex;align-items:center;gap:9px;font-weight:800}
+.tilehead .mascot{display:inline-block;font-size:28px;animation:floaty 3.2s ease-in-out infinite;filter:drop-shadow(0 7px 5px rgba(122,74,56,.26))}
+.tilehead .streak{position:absolute;right:14px;top:16px;background:linear-gradient(180deg,#fff,#FFF1E4);border-radius:99px;padding:6px 13px;text-align:center;color:var(--terra);box-shadow:0 6px 14px rgba(224,117,79,.26),inset 0 2px 0 #fff,inset 0 -3px 6px rgba(224,117,79,.12)}
+.tilehead .streak b{display:block;font-size:14px;line-height:1.15;font-weight:800}
+.tilehead .streak span{font-size:8px;letter-spacing:1.5px;font-weight:800}
+.tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:406px;z-index:20;display:flex;padding:8px;margin-bottom:calc(10px + env(safe-area-inset-bottom));background:rgba(255,253,250,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:26px;box-shadow:0 12px 30px rgba(122,74,56,.22),inset 0 2px 0 #fff}
+@media (max-width:430px){.tabs{width:calc(100% - 24px)}}
+.tab{flex:1;text-align:center;padding:7px 0 5px;font-size:10.5px;color:#B99C8C;cursor:pointer;border-radius:18px;font-weight:800;transition:all .15s}
+.tab i{display:block;font-style:normal;font-size:19px;margin-bottom:1px;transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.tab.active{color:#8A5A2B;background:linear-gradient(180deg,#FFE2B8,#FFD09A);box-shadow:0 6px 12px rgba(224,150,60,.26),inset 0 2px 0 rgba(255,255,255,.9),inset 0 -4px 7px rgba(200,130,40,.18)}
+.tab.active i{transform:scale(1.18) translateY(-1px)}
+.page{display:none;padding:16px;padding-bottom:calc(104px + env(safe-area-inset-bottom))}
 .page.active{display:block}
-.card{background:var(--paper);border:2px solid var(--ink);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:4px 4px 0 rgba(47,42,34,.15)}
-.card h3{font-size:14px;margin:0 0 10px;color:var(--teal-dk);letter-spacing:.5px}
+.card{background:linear-gradient(180deg,var(--paper) 0%,#FFF3E9 100%);border-radius:22px;padding:16px;margin-bottom:12px;box-shadow:var(--clay-card)}
+.card h3{font-size:14px;margin:0 0 10px;color:var(--teal-dk);letter-spacing:.5px;font-weight:800}
 .card h3 .deco{color:var(--terra)}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{border:2px solid var(--ink);background:var(--paper);border-radius:18px;padding:7px 11px;font-size:13px;cursor:pointer;user-select:none;box-shadow:2px 2px 0 rgba(47,42,34,.15)}
-.chip.sel{background:var(--mustard);font-weight:700}
-.chip.neg.sel{background:var(--rose)}
-.chip.act.sel{background:#8fb3a5}
-.switcher{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
-.switcher .chip{flex:1;text-align:center;min-width:90px}
-.switcher .chip.sel{background:var(--teal);color:var(--cream)}
-.btn{width:100%;background:var(--terra);color:var(--cream);border:2px solid var(--ink);border-radius:12px;padding:12px;font-size:15px;font-weight:700;margin-top:14px;cursor:pointer;box-shadow:3px 3px 0 rgba(47,42,34,.3);letter-spacing:1px}
-.btn.ghost{background:var(--paper);color:var(--ink)}
-.note{font-size:11px;color:var(--sub);background:var(--cream);border:1px dashed var(--terra);border-radius:10px;padding:9px;margin-top:10px;line-height:1.6}
-.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,120%);background:var(--ink);color:var(--cream);padding:10px 18px;border-radius:20px;font-size:13px;z-index:50;transition:transform .25s ease;box-shadow:0 6px 20px rgba(0,0,0,.3);max-width:80vw;text-align:center}
+.chips{display:flex;flex-wrap:wrap;gap:9px}
+.chip{background:linear-gradient(180deg,#fff,#FFF3E9);border-radius:99px;padding:9px 14px;font-size:13px;cursor:pointer;user-select:none;box-shadow:var(--clay-card-sm);font-weight:700;color:#6B4F3F;transition:transform .12s cubic-bezier(.34,1.56,.64,1),box-shadow .12s}
+.chip:active{transform:translateY(2px) scale(.96);box-shadow:var(--clay-pressed)}
+.chip.sel{background:linear-gradient(180deg,#FBD9C9,#F7BFA6);color:#A14E2E;font-weight:800;box-shadow:var(--clay-sel)}
+.chip.neg.sel{background:linear-gradient(180deg,#E9D5EF,#D9BCE4);color:var(--purple);box-shadow:0 8px 16px rgba(150,100,180,.22),inset 0 2px 0 rgba(255,255,255,.85),inset 0 -5px 9px rgba(120,70,150,.18)}
+.chip.act.sel{background:linear-gradient(180deg,#D9EDD2,#BFDDB4);color:#3E7A2E;box-shadow:0 8px 16px rgba(125,181,106,.25),inset 0 2px 0 rgba(255,255,255,.85),inset 0 -5px 9px rgba(90,140,70,.18)}
+.switcher{display:flex;gap:9px;margin-bottom:14px;flex-wrap:wrap}
+.switcher .chip{flex:1;text-align:center;min-width:90px;padding:11px 8px;font-weight:800;font-size:14px}
+.switcher .chip.sel{background:linear-gradient(180deg,#FFE2B8,#FFD09A);color:#8A5A2B;box-shadow:var(--clay-amber)}
+.btn{width:100%;background:linear-gradient(180deg,#F9A87C 0%,#EE7E4F 100%);color:#fff;border-radius:22px;padding:14px;font-size:15.5px;font-weight:800;margin-top:14px;cursor:pointer;box-shadow:0 10px 22px rgba(224,117,79,.38),inset 0 3px 0 rgba(255,255,255,.45),inset 0 -6px 10px rgba(170,70,30,.26);letter-spacing:1px;transition:transform .12s cubic-bezier(.34,1.56,.64,1),box-shadow .12s}
+.btn:active{transform:translateY(3px) scale(.975);box-shadow:0 4px 10px rgba(224,117,79,.35),inset 0 2px 0 rgba(255,255,255,.3),inset 0 -3px 6px rgba(170,70,30,.2)}
+.btn.ghost{background:linear-gradient(180deg,#fff,#FFF3E9);color:var(--ink);box-shadow:var(--clay-card-sm)}
+.btn.ghost:active{box-shadow:var(--clay-pressed)}
+.note{font-size:11px;color:var(--sub);background:#FFF0E4;border-radius:14px;padding:10px 12px;margin-top:10px;line-height:1.65;font-weight:500;box-shadow:inset 0 2px 4px rgba(180,110,80,.08)}
+.toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translate(-50%,140%);background:var(--night);color:#FFF3E8;padding:11px 20px;border-radius:99px;font-size:13.5px;font-weight:800;z-index:50;transition:transform .3s cubic-bezier(.34,1.56,.64,1);box-shadow:0 10px 24px rgba(0,0,0,.28);max-width:80vw;text-align:center}
 .toast.show{transform:translate(-50%,0)}
+/* 一撳即記 */
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{padding:13px 12px;border-radius:22px;cursor:pointer;text-align:left;background:linear-gradient(180deg,var(--paper),#FFF3E9);box-shadow:var(--clay-card);transition:transform .12s cubic-bezier(.34,1.56,.64,1),box-shadow .12s}
+.tile:active{transform:translateY(3px) scale(.965);box-shadow:var(--clay-pressed)}
+.tile .em{font-size:25px;display:block;margin-bottom:5px}
+.tile .t{font-size:13.5px;font-weight:800;color:#6B4F3F;line-height:1.35}
+.tile .s{font-size:10px;font-weight:700;color:#C9A78F;margin-top:2px}
+.tile.negt{background:linear-gradient(180deg,#FBF7FF,#F0E6F7);box-shadow:0 8px 18px rgba(120,80,150,.13),inset 0 2px 0 rgba(255,255,255,.95),inset 0 -5px 9px rgba(150,110,190,.14)}
+.tile.negt .t{color:var(--purple)}
+.repeat-btn{margin-top:12px;width:100%;padding:12px;border-radius:99px;font-size:13.5px;font-weight:800;color:#A14E2E;cursor:pointer;background:linear-gradient(180deg,#FBD9C9,#F7BFA6);box-shadow:var(--clay-sel);transition:transform .12s cubic-bezier(.34,1.56,.64,1)}
+.repeat-btn:active{transform:translateY(2px) scale(.98)}
+.detail-toggle{margin-top:12px;width:100%;padding:9px;font-size:13px;font-weight:800;color:#B99C8C;cursor:pointer;background:none}
+.detail-wrap{display:none}
+.detail-wrap.open{display:block;animation:slidein .3s ease}
+@keyframes slidein{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+.night{background:linear-gradient(135deg,#6D5A8C,#8E77B5);color:#FFF4E8;border-radius:20px;padding:13px 16px;font-size:13.5px;font-weight:800;display:flex;align-items:center;gap:11px;margin-bottom:14px;cursor:pointer;box-shadow:0 8px 18px rgba(109,90,140,.32),inset 0 2px 0 rgba(255,255,255,.22),inset 0 -5px 9px rgba(60,45,90,.28);transition:transform .12s cubic-bezier(.34,1.56,.64,1)}
+.night:active{transform:translateY(2px) scale(.98)}
+.night .moon{font-size:22px}
+.night small{display:block;font-weight:600;font-size:11.5px;opacity:.85}
+.minicard{display:flex;align-items:center;gap:12px}
+.minicard .mnum{font-family:var(--disp);font-style:italic;font-size:34px;font-weight:900;color:var(--terra);line-height:1}
+.minicard .mlbl{font-size:11.5px;color:var(--sub);font-weight:700}
+.minicard .mheart{margin-left:auto;font-size:28px;filter:drop-shadow(0 5px 4px rgba(224,117,79,.3))}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
@@ -818,15 +856,15 @@ function renderShell() {
   const app = document.getElementById('app');
   app.innerHTML = `
     <div class="tilehead">
-      <h1>🐾 貓奴修行</h1>
+      <h1><span class="mascot">🐈</span>貓奴修行</h1>
       <div class="streak"><b>🔥 ${STATE.streak.current}</b><span>日連續</span></div>
     </div>
     <div class="tabs">
-      <div class="tab" data-tab="record">記錄</div>
-      <div class="tab" data-tab="quests">任務</div>
-      <div class="tab" data-tab="analysis">分析</div>
-      <div class="tab" data-tab="almanac">圖鑑</div>
-      <div class="tab" data-tab="profile">檔案</div>
+      <div class="tab" data-tab="record"><i>🐾</i>記錄</div>
+      <div class="tab" data-tab="quests"><i>🧶</i>任務</div>
+      <div class="tab" data-tab="analysis"><i>💗</i>分析</div>
+      <div class="tab" data-tab="almanac"><i>📖</i>圖鑑</div>
+      <div class="tab" data-tab="profile"><i>🐱</i>檔案</div>
     </div>
     <section class="page" id="tab-record"></section>
     <section class="page" id="tab-quests"></section>
@@ -870,7 +908,7 @@ function renderOnboarding() {
   const breedOptions = Catnu.BREEDS.map(b => `<option value="${b.id}">${b.emoji} ${b.name}</option>`).join('');
 
   app.innerHTML = `
-    <div class="tilehead"><h1>🐾 貓奴修行</h1></div>
+    <div class="tilehead"><h1><span class="mascot">🐈</span>貓奴修行</h1></div>
     <div class="page active">
       <div class="card">
         <h3><span class="deco">◆</span> 歡迎！先幫你嘅貓開個檔案</h3>
@@ -957,18 +995,126 @@ function resetRecordFormState() {
   recordNewActionLabel = '';
 }
 
+/* ── 一撳即記 presets：map 落現有 reactions/actions ids，分析引擎唔使改 ── */
+const QUICK_PRESETS = [
+  { emoji: '😻', title: '佢嚟黐我',     sub: '主動貼近＋呼嚕',   reactions: ['approach', 'purr'], actions: [] },
+  { emoji: '😌', title: '互相慢眨眼',   sub: '慢眨眼',           reactions: ['slowblink'],        actions: [] },
+  { emoji: '🎣', title: '玩咗一輪',     sub: '逗貓棒＋主動貼近', reactions: ['approach'],         actions: ['wand'] },
+  { emoji: '🪮', title: '梳毛時光',     sub: '梳毛＋呼嚕',       reactions: ['purr'],             actions: ['groom'] },
+  { emoji: '🦵', title: '冧爆坐大脾',   sub: '坐大脾＋踩奶',     reactions: ['lap', 'knead'],     actions: [] },
+  { emoji: '😾', title: '佢今日唔妥我', sub: '即刻走開',         reactions: ['walkaway'],         actions: [], neg: true },
+];
+
+let recordDetailOpen = false;
+let nightReviewOpen = false;
+
+function spawnBurst(fromEl, neg) {
+  if (!fromEl || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const r = fromEl.getBoundingClientRect();
+  const icons = neg ? ['💜', '🐾', '💜', '🐾', '💜'] : ['🐾', '💗', '🐾', '✨', '💗', '🐾', '💛', '🐾'];
+  icons.forEach((ic, i) => {
+    const s = document.createElement('span');
+    s.className = 'burst';
+    s.textContent = ic;
+    const ang = Math.PI * (i / (icons.length - 1)) + Math.PI;
+    s.style.left = (r.left + r.width / 2 - 11) + 'px';
+    s.style.top = r.top + 'px';
+    s.style.setProperty('--dx', (Math.cos(ang) * (60 + Math.random() * 60)) + 'px');
+    s.style.setProperty('--dy', (Math.sin(ang) * (55 + Math.random() * 65) - 25) + 'px');
+    s.style.setProperty('--r', (Math.random() * 90 - 45) + 'deg');
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 1050);
+  });
+}
+
+function hasLogToday(state, catId) {
+  const today = todayStr();
+  return state.logs.some(l => l.catId === catId && todayStr(new Date(l.ts)) === today);
+}
+
+function lastLogOf(state, catId) {
+  let last = null;
+  state.logs.forEach(l => { if (l.catId === catId && (!last || l.ts > last.ts)) last = l; });
+  return last;
+}
+
+function logSummary(state, log) {
+  const actions = actionsForRecord(state);
+  const names = []
+    .concat((log.actions || []).map(id => { const a = actions.find(x => x.id === id); return a ? a.label : null; }))
+    .concat((log.reactions || []).map(id => { const r = Catnu.REACTIONS.find(x => x.id === id); return r ? r.label : null; }))
+    .filter(Boolean)
+    .map(s => s.replace(/^\S+\s/, ''));
+  if (!names.length) return '淨係打咗個卡';
+  return names.slice(0, 2).join('＋') + (names.length > 2 ? '⋯' : '');
+}
+
+function commitLog(state, entry, fromEl, toastMsg) {
+  state.logs.push({
+    id: 'log-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+    catId: entry.catId || recordCatId,
+    ts: entry.ts || Date.now(),
+    reactions: entry.reactions || [],
+    actions: entry.actions || [],
+    note: entry.note || '',
+    backfilled: !!entry.backfilled,
+  });
+  Catnu.Store.save(state);
+  spawnBurst(fromEl, entry.neg);
+
+  const unlocked = Catnu.checkNewMilestones(state, Date.now());
+  if (unlocked.length) {
+    state.milestones.push(...unlocked);
+    Catnu.Store.save(state);
+    const parts = unlocked.map(m => { const meta = Catnu.MILESTONE_META[m.id] || {}; return `${meta.emoji || ''} ${meta.label || m.id}`; });
+    Catnu.showToast(`🎉 解鎖里程碑：${parts.join(' ／ ')}`);
+  } else {
+    Catnu.showToast(toastMsg || '✓ 記錄咗喇！');
+  }
+}
+
 function renderRecord(state) {
   const el = document.getElementById('tab-record');
   if (!state.cats.length) {
-    el.innerHTML = '<div class="card" style="text-align:center;padding:30px 16px"><div style="font-size:36px;margin-bottom:10px">🐾</div><b>未有貓貓資料</b><p style="margin-top:8px;font-size:13px;color:var(--sub)">去「檔案」page 加返隻貓先可以記錄。</p></div>';
+    el.innerHTML = '<div class="card empty-state"><div class="big">🐾</div><b>未有貓貓資料</b><p style="margin-top:8px;font-size:13px;color:var(--sub)">去「檔案」page 加返隻貓先可以記錄。</p></div>';
     return;
   }
   if (!recordCatId || !state.cats.some(c => c.id === recordCatId)) recordCatId = state.cats[0].id;
   const actions = actionsForRecord(state);
+  const cat = state.cats.find(c => c.id === recordCatId);
+  const loggedToday = hasLogToday(state, recordCatId);
+  const last = lastLogOf(state, recordCatId);
+  const affection = Catnu.affectionScore(state.logs, recordCatId, Date.now());
+  const todayCount = state.logs.filter(l => l.catId === recordCatId && todayStr(new Date(l.ts)) === todayStr()).length;
+
   el.innerHTML = `
+    ${!loggedToday ? `
+      <div class="night" id="night-banner">
+        <span class="moon">🌙</span>
+        <div>今日仲未記${cat.name}喎<small>快速回顧一下？10 秒搞掂</small></div>
+      </div>
+      <div class="card" id="night-review" style="${nightReviewOpen ? '' : 'display:none'}">
+        <h3><span class="deco">◆</span> 今日${cat.name}對你點呀？</h3>
+        <div class="tiles">
+          <div class="tile" data-night="good"><span class="em">😻</span><div class="t">幾好，有黐我</div><div class="s">記低正面一刻</div></div>
+          <div class="tile" data-night="ok"><span class="em">😐</span><div class="t">一般般啦</div><div class="s">打個卡，唔計分</div></div>
+          <div class="tile negt" data-night="bad"><span class="em">😾</span><div class="t">今日唔多妥</div><div class="s">記低負面一刻</div></div>
+        </div>
+      </div>
+    ` : ''}
     <div class="switcher">
       ${state.cats.map(c => `<div class="chip ${c.id === recordCatId ? 'sel' : ''}" data-cat="${c.id}">${c.emoji} ${c.name}</div>`).join('')}
     </div>
+    <h3 style="margin:2px 4px 10px;color:var(--teal-dk);font-size:14px">一撳即記 <small style="color:var(--sub);font-size:11px;font-weight:700">撳一下＝記錄完成</small></h3>
+    <div class="tiles">
+      ${QUICK_PRESETS.map((p, i) => `
+        <div class="tile ${p.neg ? 'negt' : ''}" data-preset="${i}">
+          <span class="em">${p.emoji}</span><div class="t">${p.title}</div><div class="s">${p.sub}</div>
+        </div>`).join('')}
+    </div>
+    ${last ? `<button class="repeat-btn" type="button" id="record-repeat">⟳ 同上次一樣（${logSummary(state, last)}）</button>` : ''}
+    <button class="detail-toggle" type="button" id="record-detail-toggle">${recordDetailOpen ? '✏️ 收埋詳細 ▴' : '✏️ 記詳細啲 ▾'}</button>
+    <div class="detail-wrap ${recordDetailOpen ? 'open' : ''}" id="record-detail">
     <div class="card">
       <h3><span class="deco">◆</span> 佢對我嘅反應</h3>
       <div class="chips" id="record-reactions">
@@ -1002,9 +1148,50 @@ function renderRecord(state) {
       <button class="btn" type="button" id="record-submit">✓ 記錄呢一刻</button>
       <div class="note">10 秒 tap 完，時間自動記。瞓前可用「補記」一次過補返今日互動。</div>
     </div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="minicard">
+        <div>
+          <div class="mlbl">${cat.name}嘅好感度</div>
+          <span class="mnum">${affection.insufficient ? '--' : affection.score}</span>
+        </div>
+        <div class="mheart">💗</div>
+      </div>
+      <div class="meter"><div style="width:${affection.insufficient ? 0 : affection.score}%"></div></div>
+      <div class="mlbl" style="margin-top:8px">${affection.insufficient ? '修行未夠，記多幾次先有分數' : `今日記咗 ${todayCount} 次 · 詳細分析喺「分析」tab`}</div>
+    </div>
   `;
 
-  el.querySelectorAll('[data-cat]').forEach(c => c.addEventListener('click', () => { recordCatId = c.dataset.cat; renderRecord(state); }));
+  const nightBanner = document.getElementById('night-banner');
+  if (nightBanner) nightBanner.addEventListener('click', () => { nightReviewOpen = !nightReviewOpen; renderRecord(state); });
+  el.querySelectorAll('[data-night]').forEach(t => t.addEventListener('click', () => {
+    const kind = t.dataset.night;
+    const map = {
+      good: { reactions: ['approach'], msg: `記低咗：${cat.name}今日幾好 💗` },
+      ok:   { reactions: [], msg: '打咗卡，聽日繼續努力 🐾' },
+      bad:  { reactions: ['walkaway'], neg: true, msg: `記低咗：${cat.name}今日唔多妥 💜` },
+    }[kind];
+    nightReviewOpen = false;
+    commitLog(state, { reactions: map.reactions, actions: [], note: '晚間回顧', backfilled: true, neg: map.neg }, t, map.msg);
+    renderRecord(state);
+  }));
+
+  el.querySelectorAll('[data-cat]').forEach(c => c.addEventListener('click', () => { recordCatId = c.dataset.cat; nightReviewOpen = false; renderRecord(state); }));
+
+  el.querySelectorAll('[data-preset]').forEach(t => t.addEventListener('click', () => {
+    const p = QUICK_PRESETS[+t.dataset.preset];
+    commitLog(state, { reactions: p.reactions, actions: p.actions, neg: p.neg }, t, `記錄咗「${p.title}」${p.neg ? '💜' : '💗'}`);
+    renderRecord(state);
+  }));
+
+  const repeatBtn = document.getElementById('record-repeat');
+  if (repeatBtn) repeatBtn.addEventListener('click', () => {
+    commitLog(state, { reactions: last.reactions || [], actions: last.actions || [] }, repeatBtn, '⟳ 照上次咁記咗喇！');
+    renderRecord(state);
+  });
+
+  document.getElementById('record-detail-toggle').addEventListener('click', () => { recordDetailOpen = !recordDetailOpen; renderRecord(state); });
+
   el.querySelectorAll('[data-reaction]').forEach(c => c.addEventListener('click', () => {
     const id = c.dataset.reaction;
     recordSelReactions.has(id) ? recordSelReactions.delete(id) : recordSelReactions.add(id);
@@ -1046,24 +1233,10 @@ function renderRecord(state) {
       ts = d.getTime();
     }
     const note = recordNoteOpen ? recordNoteValue.trim() : '';
-    state.logs.push({
-      id: 'log-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
-      catId: recordCatId, ts,
+    commitLog(state, {
       reactions: [...recordSelReactions], actions: [...recordSelActions],
-      note, backfilled: recordBackfill,
-    });
-    Catnu.Store.save(state);
-
-    const unlocked = Catnu.checkNewMilestones(state, Date.now());
-    if (unlocked.length) {
-      state.milestones.push(...unlocked);
-      Catnu.Store.save(state);
-      const parts = unlocked.map(m => { const meta = Catnu.MILESTONE_META[m.id] || {}; return `${meta.emoji || ''} ${meta.label || m.id}`; });
-      Catnu.showToast(`🎉 解鎖里程碑：${parts.join(' ／ ')}`);
-    } else {
-      Catnu.showToast('✓ 記錄咗喇！');
-    }
-
+      note, backfilled: recordBackfill, ts,
+    }, document.getElementById('record-submit'));
     resetRecordFormState();
     renderRecord(state);
   });

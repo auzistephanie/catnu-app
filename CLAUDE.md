@@ -1,6 +1,6 @@
 # CLAUDE.md — 貓奴修行 catnu-app
 
-單一 `index.html` 嘅貓咪 bonding tracker，Stephanie 個人用（唔使 login，數據淨係存喺 localStorage `catnu.v1`）。完整 build spec + 實現計劃喺 `docs/superpowers/plans/2026-07-12-catnu-app.md`。
+單一 `index.html` 嘅貓咪 bonding tracker。2026-07-28 起重新定位：公開俾 20–40 歲女性貓奴用（無 login，數據存各自裝置 localStorage `catnu.v1`）；UI＝「奶茶軟萌」clay 3D（方向 A），品牌 keep「貓奴修行」，tagline “Win your cat's heart, one moment at a time.”。v1 build spec（舊定位）→ `docs/CATNU_BUILD_SPEC.md`；改版明細＋Phase 2 backlog → `CHANGELOG.md` 2026-07-28。
 
 ## ⚙️ Standards（MANDATORY — 正本：`stephanie-personal/docs/ai-governance/06-STANDARDS.md`，改規則只改正本）
 
