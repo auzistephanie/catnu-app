@@ -2,6 +2,8 @@
 
 > 改動記錄出口：新條目一律插喺呢個檔案頂部。CLAUDE.md 只放路由同現行規則。早期開發史 → `docs/superpowers/plans/2026-07-12-catnu-app.md`。
 
+- 2026-07-31：`.gitignore` 加 `*.bak-*` 第二道防線 — 配合 06-STANDARDS §S3「備份一律開喺 `_to_delete/`」，就算漏咗 mv 都唔會畀 `github_push.py` 誤推上 GitHub（2026-07-25 事故嘅根治）。本 repo 冇 governance `backups/`，所以唔需要 negation 例外。
+
 ## 2026-07-28 Phase 2：紀念日＋關係等級＋週報＋share 卡重造＋landing 換皮＋提醒
 
 - **Schema v2（version-dispatch migration）**：`Catnu.migrateState()` v1→v2 自動升級（cats 加 `birthDate`（完整日期，生日倒數用）＋`anniversaries[]` 自訂紀念日），舊數據/舊備份檔照食；`defaultState` schemaVersion=2；還原 validate 兼容 1/2。
