@@ -2,6 +2,13 @@
 
 > 改動記錄出口：新條目一律插喺呢個檔案頂部。CLAUDE.md 只放路由同現行規則。早期開發史 → `docs/superpowers/plans/2026-07-12-catnu-app.md`。
 
+- 2026-08-09：**雙貓PK＋貓格分析卡**（Phase 3，回應「唔夠fun／唔夠吸引」意見）——
+  - `Catnu.twoCatPK(logs, catIdA, catIdB, nowTs)`：本週邊隻正面互動次數多就贏，打平顯示「打成平手」。Analysis tab 新卡「本週雙貓PK」，得 2+ 隻貓先出現，兩隻都冇本週記錄就顯示未夠data提示。
+  - `Catnu.personalityCard(logs, catId, nowTs)`：全期非中性記錄 <20 條顯示未夠data；夠鐘就按黏人指數／負面率／關係等級／夜晚log比例判斷 5 個型格之一（黐身小棉襖／傲嬌型／慢熱型／夜貓子／神秘型 fallback）。檔案 tab 每隻貓加「🔮 生成性格卡」掣，借用現有 share-card canvas 系統加第 4 個 template（`Catnu.sharePersonalityCard`）。
+  - 兩個都係 pure-logic，`tests/phase3.test.mjs` 新增 12 個 test（PK 3 個、personality 9 個，涵蓋 5 個型格分支＋門檻邊界），`node --test tests/*.test.mjs` 53/53 全綠。
+  - 手動驗證：sandbox 冇 root 裝唔到 playwright 全套 system deps，改用 `apt-get download libxdamage1`（唯一缺嘅 so）解壓後 `LD_LIBRARY_PATH` 指過去，headless chromium 起到本機 http server 版本 index.html 實測——seed 2 貓+21條log，Analysis tab PK卡數字啱（Mochi 7次 vs Eheh 3次）、Profile tab 撳「生成性格卡」真係觸發 PNG download 兼內容正確（黏人指數90%／最鍾意梳毛），全程零 console error。
+  - 上一輪同時提出嘅 UI 色系（加sage第二色系）呢次未做，維持單獨提案未落地。
+
 - 2026-08-01（承 07-31 制度複檢）：**`scripts/github_push.py` 修靜默故障** — 舊版 `_PUSH_STATE_DIR` 用 `os.path.dirname(REPO)` 當 stephanie-personal 係隔籬 folder；04-MAINTENANCE §6 將 5 個 repo 搬出 Drive Mirror 後假設崩咗，`makedirs` 靜靜咁喺 `~/Desktop/dev`、`~/dev`、`daily-novel/` 開咗 3 個假 stephanie-personal，concurrent-push 偵測對 6 個 repo 死咗都冇人知（真 state 檔停留喺 7/26–7/30）。改為 `STEPHANIE_PERSONAL_DIR` 環境變數 → Drive 正本絕對路徑 → legacy sibling 三段 resolve，搵唔到就**唔寫兼出聲**（S5「死咗邊個會知」）。12 份 script 一齊改，py_compile 全過，sales-trainer 實跑驗證真 state 有更新。假 folder 已收入 `_to_delete/`。
 
 - 2026-07-31：`.gitignore` 加 `*.bak-*` 第二道防線 — 配合 06-STANDARDS §S3「備份一律開喺 `_to_delete/`」，就算漏咗 mv 都唔會畀 `github_push.py` 誤推上 GitHub（2026-07-25 事故嘅根治）。本 repo 冇 governance `backups/`，所以唔需要 negation 例外。

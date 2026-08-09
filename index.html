@@ -175,6 +175,12 @@ input,select{font-family:inherit}
 .wk-cell{flex:1;text-align:center;background:#FFF1E4;border-radius:16px;padding:12px 6px;box-shadow:inset 0 2px 4px rgba(180,110,80,.08)}
 .wk-cell b{display:block;font-family:var(--disp);font-style:italic;font-size:22px;font-weight:900;color:var(--terra);line-height:1.3}
 .wk-cell span{font-size:10.5px;font-weight:700;color:var(--sub)}
+/* 雙貓 PK */
+.pk-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.pk-name{width:92px;font-size:12px;font-weight:800;color:var(--teal-dk);flex:none}
+.pk-bar{flex:1;height:10px;border-radius:99px;background:#F0E6DC;overflow:hidden}
+.pk-bar div{height:100%;border-radius:99px;background:var(--terra)}
+.pk-num{width:44px;text-align:right;font-size:11px;color:var(--sub);flex:none}
 /* 紀念日 */
 .celebrate{background:linear-gradient(135deg,#FFD98A,#F7B45C);color:#7A4A20;border-radius:20px;padding:14px 16px;font-size:14px;font-weight:800;margin-bottom:14px;cursor:pointer;box-shadow:0 8px 18px rgba(230,160,60,.35),inset 0 2px 0 rgba(255,255,255,.5),inset 0 -5px 9px rgba(180,110,30,.22);transition:transform .12s cubic-bezier(.34,1.56,.64,1)}
 .celebrate:active{transform:translateY(2px) scale(.98)}
@@ -668,6 +674,75 @@ Catnu.affectionScore = function affectionScore(logs, catId, nowTs) {
     ? current.score - previous.score
     : null;
   return { score: current.score, insufficient: current.insufficient, weekChange };
+};
+
+/* @LOGIC:PK — 雙貓 PK（本週邊隻正面互動多）*/
+Catnu.twoCatPK = function twoCatPK(logs, catIdA, catIdB, nowTs) {
+  function weekPositive(catId) {
+    const start = nowTs - 7 * 86400000;
+    let pos = 0, total = 0;
+    for (const e of logs) {
+      if (e.catId !== catId || e.ts <= start || e.ts > nowTs) continue;
+      total++;
+      if (Catnu.entryPolarity(e) === 'positive') pos++;
+    }
+    return { pos, total };
+  }
+  const a = weekPositive(catIdA);
+  const b = weekPositive(catIdB);
+  const winner = a.pos === b.pos ? null : (a.pos > b.pos ? catIdA : catIdB);
+  return { a, b, winner };
+};
+
+/* @LOGIC:PERSONALITY — 貓格分析卡（全期 data，門檻 20 條非中性記錄）*/
+Catnu.PERSONALITY_ARCHETYPES = {
+  clingy:   { emoji: '😻', label: '黐身小棉襖' },
+  tsundere: { emoji: '😼', label: '傲嬌型' },
+  slow:     { emoji: '🐢', label: '慢熱型' },
+  night:    { emoji: '🌙', label: '夜貓子' },
+  mystery:  { emoji: '🔮', label: '神秘型' },
+};
+Catnu.PERSONALITY_MIN_LOGS = 20;
+
+Catnu.personalityCard = function personalityCard(logs, catId, nowTs) {
+  const CLINGY_IDS = ['lap', 'approach', 'knead', 'purr'];
+  const catLogs = logs.filter(e => e.catId === catId);
+  let pos = 0, neg = 0, clingy = 0, reacted = 0, night = 0;
+  const actionCount = {};
+  for (const e of catLogs) {
+    const polarity = Catnu.entryPolarity(e);
+    if (polarity === 'positive') pos++; else if (polarity === 'negative') neg++;
+    if ((e.reactions || []).length) {
+      reacted++;
+      if ((e.reactions || []).some(r => CLINGY_IDS.includes(r))) clingy++;
+    }
+    const hour = new Date(e.ts).getHours();
+    if (hour >= 20 || hour < 6) night++;
+    (e.actions || []).forEach(a => { actionCount[a] = (actionCount[a] || 0) + 1; });
+  }
+  const nonNeutral = pos + neg;
+  if (nonNeutral < Catnu.PERSONALITY_MIN_LOGS) return { insufficient: true, count: nonNeutral };
+
+  const clinginess = reacted ? Math.round(100 * clingy / reacted) : 0;
+  const negRate = nonNeutral ? neg / nonNeutral : 0;
+  const nightRate = catLogs.length ? night / catLogs.length : 0;
+  const affection = Catnu.affectionScore(logs, catId, nowTs);
+  const level = affection.insufficient ? null : Catnu.relationshipLevel(affection.score);
+
+  let topAction = null, topN = 0;
+  Object.entries(actionCount).forEach(([a, n]) => { if (n > topN) { topAction = a; topN = n; } });
+
+  let archetype = 'mystery';
+  if (clinginess >= 70) archetype = 'clingy';
+  else if (negRate >= 0.2 && negRate < 0.4 && level && level.lv >= 3) archetype = 'tsundere';
+  else if (level && level.lv <= 2 && nonNeutral >= Catnu.PERSONALITY_MIN_LOGS) archetype = 'slow';
+  else if (nightRate >= 0.5) archetype = 'night';
+
+  return {
+    insufficient: false, clinginess, negRate: Math.round(negRate * 100),
+    archetype, ...Catnu.PERSONALITY_ARCHETYPES[archetype],
+    topAction, topActionCount: topN,
+  };
 };
 
 Catnu.actionCorrelation = function actionCorrelation(logs, catId, actionId, nowTs) {
@@ -1573,6 +1648,38 @@ function actionLabelOf(state, actionId) {
   return a ? a.label : actionId;
 }
 
+// 只揀頭兩隻貓做 PK（雙貓為主場景；3+隻貓暫時只計頭兩隻，夠用先再擴）
+function renderPKCard(state) {
+  const catA = state.cats[0], catB = state.cats[1];
+  const pk = Catnu.twoCatPK(state.logs, catA.id, catB.id, Date.now());
+  if (pk.a.total === 0 && pk.b.total === 0) {
+    return `
+      <div class="card">
+        <h3><span class="deco">◆</span> 本週雙貓PK</h3>
+        <div class="note">呢個星期都仲未有記錄，去「記錄」page 打卡先會有PK結果。</div>
+      </div>
+    `;
+  }
+  const max = Math.max(pk.a.pos, pk.b.pos, 1);
+  const winnerCat = pk.winner ? state.cats.find(c => c.id === pk.winner) : null;
+  return `
+    <div class="card">
+      <h3><span class="deco">◆</span> 本週雙貓PK</h3>
+      <div class="pk-row">
+        <div class="pk-name">${catA.emoji} ${catA.name}${pk.winner === catA.id ? ' 🏆' : ''}</div>
+        <div class="pk-bar"><div style="width:${Math.round(100 * pk.a.pos / max)}%"></div></div>
+        <div class="pk-num">${pk.a.pos} 次</div>
+      </div>
+      <div class="pk-row">
+        <div class="pk-name">${catB.emoji} ${catB.name}${pk.winner === catB.id ? ' 🏆' : ''}</div>
+        <div class="pk-bar"><div style="width:${Math.round(100 * pk.b.pos / max)}%"></div></div>
+        <div class="pk-num">${pk.b.pos} 次</div>
+      </div>
+      <div class="note" style="margin-top:8px">${winnerCat ? `${winnerCat.name} 本週正面互動較多，另一隻加把勁追返！` : '本週打成平手，勢均力敵！'}</div>
+    </div>
+  `;
+}
+
 function renderAnalysis(state) {
   const el = document.getElementById('tab-analysis');
   if (!state.cats.length) {
@@ -1593,6 +1700,7 @@ function renderAnalysis(state) {
         <b>修行未夠，繼續記錄</b>
         <p style="margin-top:8px;font-size:13px">呢隻貓近 7 日仲未夠 5 條非中性記錄，去「記錄」page 記多幾次先會有分析結果。</p>
       </div>
+      ${state.cats.length >= 2 ? renderPKCard(state) : ''}
     `;
     el.querySelectorAll('[data-cat]').forEach(c => c.addEventListener('click', () => { analysisCatId = c.dataset.cat; renderAnalysis(state); }));
     return;
@@ -1640,6 +1748,7 @@ function renderAnalysis(state) {
       </div>
       <button class="btn ghost" type="button" id="weekly-share" style="margin-top:12px">⤴ 生成週報靚卡</button>
     </div>
+    ${state.cats.length >= 2 ? renderPKCard(state) : ''}
     <div class="card">
       <h3><span class="deco">◆</span> 溝貓建議</h3>
       ${insights.length ? insights.map(i => `<div class="insight"><span>${insightIcon(i)}</span><span>${mdBold(i.text)}</span></div>`).join('') : '<div class="note">暫時未有夠數據嘅發現，繼續記錄啦。</div>'}
@@ -1904,6 +2013,7 @@ function renderProfileCatCard(state, cat) {
         ${renderAnniBox(state, cat)}
         ${cat.notes ? `<div class="note" style="margin-top:10px">${cat.notes}</div>` : ''}
         <button class="btn ghost" type="button" data-edit-cat="${cat.id}" style="margin-top:10px">編輯</button>
+        <button class="btn ghost" type="button" data-personality-cat="${cat.id}" style="margin-top:8px">🔮 生成性格卡</button>
         <span class="danger-btn" data-delete-cat="${cat.id}">刪除呢隻貓</span>
       </div>
     `;
@@ -1988,6 +2098,13 @@ function renderProfile(state) {
   `;
 
   el.querySelectorAll('[data-edit-cat]').forEach(b => b.addEventListener('click', () => { profileEditingCatId = b.dataset.editCat; renderProfile(state); }));
+  el.querySelectorAll('[data-personality-cat]').forEach(b => b.addEventListener('click', () => {
+    const catId = b.dataset.personalityCat;
+    const cat = state.cats.find(c => c.id === catId);
+    const card = Catnu.personalityCard(state.logs, catId, Date.now());
+    if (card.insufficient) { Catnu.showToast(`仲差 ${Catnu.PERSONALITY_MIN_LOGS - card.count} 條記錄先夠生成性格卡`); return; }
+    Catnu.sharePersonalityCard(state, cat, card);
+  }));
   el.querySelectorAll('[data-anni-add]').forEach(b => b.addEventListener('click', () => { profileAnniAddingCatId = b.dataset.anniAdd; renderProfile(state); }));
   el.querySelectorAll('[data-anni-save]').forEach(b => b.addEventListener('click', () => {
     const catId = b.dataset.anniSave;
@@ -2214,6 +2331,27 @@ Catnu.shareAnniversaryCard = function shareAnniversaryCard(state, cat, anni) {
   ctx.fillText('🎂 💗 🎈', 540, 1030);
 
   downloadCanvas(canvas, `catnu-anniversary-${cat.id}-${todayStr()}.png`);
+};
+
+Catnu.sharePersonalityCard = function sharePersonalityCard(state, cat, card) {
+  const { canvas, ctx } = newShareCanvas();
+
+  ctx.font = '170px sans-serif';
+  ctx.fillText(card.emoji, 540, 560);
+
+  ctx.font = 'bold 62px "M PLUS Rounded 1c","Noto Sans TC",sans-serif';
+  ctx.fillStyle = '#E0754F';
+  wrapCenteredText(ctx, `${cat.name}係「${card.label}」`, 540, 700, 740, 74);
+
+  ctx.font = '36px "Noto Sans TC",sans-serif';
+  ctx.fillStyle = '#A98D7C';
+  ctx.fillText(`黏人指數 ${card.clinginess}%`, 540, 840);
+  if (card.topAction) ctx.fillText(`最鍾意：${actionLabelOf(state, card.topAction)}`, 540, 910);
+
+  ctx.font = '46px sans-serif';
+  ctx.fillText('🐾 💗 🐾', 540, 1030);
+
+  downloadCanvas(canvas, `catnu-personality-${cat.id}-${todayStr()}.png`);
 };
 
 /* @APP:BOOT */
