@@ -11,3 +11,10 @@ _to_delete/
 
 # 改舊檔前嘅備份（S3 規則產物，唔推上 GitHub — 同 lock 檔/_to_delete 同類）
 *.bak-*
+
+# Google Drive Mirror 衝突副本（兩機並行時 Drive 會自動整多份 "xxx (1).ext"）
+# 一律唔准推上 GitHub（2026-08-16 加，10 個副本曾差啲夾帶）
+* (1)*
+* (2)*
+* (3)*
+*conflicted copy*
