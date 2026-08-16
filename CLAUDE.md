@@ -26,7 +26,7 @@ python3 -m http.server 8934     # 本機睇 index.html / landing.html
 
 Vercel project `catnu-app`（static，`vercel.json` 唔需要特別設定），git auto-deploy from `main`。`index.html` = 個 app，`landing.html` = 對外 landing page。手機「加到主畫面」靠 `apple-mobile-web-app-capable` + inline SVG icon。Repo 喺 GitHub 係 **public**（Stephanie 確認過唔緊要，唔使刻意收埋）。
 
-## ✅ 完成前檢查（本 repo 專屬 DoD；通用四格 → 02-JUDGMENT §R2）
+## ✅ 完成前檢查（本 repo 專屬 DoD；通用四格 → STANDARDS.md §S2）
 
 1. 改咗 pure-logic zone → `node --test tests/*.test.mjs` 真跑全綠，貼 output
 2. UI 有改 → 瀏覽器實開 `index.html`／`landing.html`，行返 plan 文件該 task 嘅 manual verification steps
