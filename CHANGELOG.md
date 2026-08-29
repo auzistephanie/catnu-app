@@ -2,6 +2,13 @@
 
 > 改動記錄出口：新條目一律插喺呢個檔案頂部。CLAUDE.md 只放路由同現行規則。早期開發史 → `docs/superpowers/plans/2026-07-12-catnu-app.md`。
 
+- 2026-08-29：**公開 beta 完整度 sprint：3 日新手旅程＋早期訊號＋溫柔 streak** ——
+  - 新用戶開完貓檔即進入 3 日修行：按實際有記錄嘅日數顯示進度，每次快速記錄後即時更新，唔再要捱過完全冇回報嘅空數據期。
+  - `Catnu.beginnerJourney()` 只喺首 3 個日曆日出現；同一正面反應至少 2 次先顯示「早期訊號」，明確講明未係正式統計結論，原本 5 條非中性記錄門檻維持不變。
+  - streak 每星期加一張自動休息券：漏一日保留 streak，同週第二次漏日或連漏兩日仍會歸零；任務頁會顯示休息券狀態。
+  - 核心 nav、首次分流、快速記錄 tile、晚間回顧同任務卡改用原生 button，補 tab ARIA 狀態；landing footer 移除 placeholder email，改為公開 beta／local-only 說明。
+  - 驗證：`node --test tests/*.test.mjs` 59/59 全綠；390px 實際由首次開檔 → 連記 2 次慢眨眼 → 早期訊號 → 任務休息券完整行一次，無橫 scroll、零 console error。
+
 - 2026-08-09：**雙貓PK＋貓格分析卡**（Phase 3，回應「唔夠fun／唔夠吸引」意見）——
   - `Catnu.twoCatPK(logs, catIdA, catIdB, nowTs)`：本週邊隻正面互動次數多就贏，打平顯示「打成平手」。Analysis tab 新卡「本週雙貓PK」，得 2+ 隻貓先出現，兩隻都冇本週記錄就顯示未夠data提示。
   - `Catnu.personalityCard(logs, catId, nowTs)`：全期非中性記錄 <20 條顯示未夠data；夠鐘就按黏人指數／負面率／關係等級／夜晚log比例判斷 5 個型格之一（黐身小棉襖／傲嬌型／慢熱型／夜貓子／神秘型 fallback）。檔案 tab 每隻貓加「🔮 生成性格卡」掣，借用現有 share-card canvas 系統加第 4 個 template（`Catnu.sharePersonalityCard`）。

@@ -2,12 +2,13 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { loadCatnu } from './helpers/load-app.mjs';
 
-test('checkStreakBreak: one full day skipped -> current resets to 0', () => {
+test('checkStreakBreak: one full day skipped -> weekly rest day preserves current', () => {
   const Catnu = loadCatnu();
   const streak = { current: 5, best: 5, lastDoneDate: '2026-07-01' };
   const result = Catnu.checkStreakBreak(streak, '2026-07-03');
-  assert.equal(result.current, 0);
+  assert.equal(result.current, 5);
   assert.equal(result.best, 5);
+  assert.equal(result.restUsedDate, '2026-07-02');
 });
 
 test('checkStreakBreak: done yesterday -> not broken yet', () => {
