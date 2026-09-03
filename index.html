@@ -199,6 +199,33 @@ input,select{font-family:inherit}
 .anni-item{font-size:12px;font-weight:700;color:var(--sub);margin-top:5px}
 .anni-item .anni-del{color:var(--terra);cursor:pointer;font-weight:900;margin-left:6px}
 .anni-item.dim{opacity:.7;font-weight:500}
+/* 持續使用：關係故事／互動歷史／自訂目標／備份安心 */
+.story-card{background:linear-gradient(145deg,#FFF1DC,#F3E8F8);position:relative;overflow:hidden}
+.story-card::after{content:'💗';position:absolute;right:-8px;top:-14px;font-size:58px;opacity:.07;transform:rotate(14deg)}
+.story-head{display:flex;align-items:center;justify-content:space-between;gap:8px;position:relative;z-index:1}
+.story-head span{font-size:10px;font-weight:800;color:var(--terra);background:rgba(255,255,255,.65);padding:4px 8px;border-radius:99px}
+.story-title{font-size:18px;line-height:1.45;color:var(--teal-dk);margin:12px 0 7px;position:relative;z-index:1}
+.story-copy{font-size:12px;line-height:1.7;color:#795E4E;position:relative;z-index:1}
+.story-moment{display:flex;gap:10px;align-items:flex-start;margin-top:12px;padding:11px 12px;background:rgba(255,255,255,.68);border-radius:15px;position:relative;z-index:1}
+.story-moment .sm-icon{font-size:21px;flex:none}.story-moment b{display:block;font-size:12px}.story-moment small{display:block;font-size:10.5px;color:var(--sub);line-height:1.5;margin-top:2px}
+.story-next{margin-top:10px;padding:10px 12px;border-radius:14px;background:#EAF2E5;color:#55704C;font-size:11.5px;line-height:1.55;font-weight:700;position:relative;z-index:1}
+.story-disclaimer{font-size:9.5px;color:var(--sub);margin-top:7px;line-height:1.45;position:relative;z-index:1}
+.recent-log{display:grid;grid-template-columns:68px 1fr auto;gap:8px;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line)}
+.recent-log:last-of-type{border-bottom:none}.recent-log time{font-size:10px;color:var(--sub)}.recent-log b{font-size:12px;line-height:1.4}.recent-log span{font-size:10px;font-weight:800}.recent-log .pos{color:#54834D}.recent-log .neg{color:var(--purple)}.recent-log .neutral{color:var(--sub)}
+.history-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.history-back{font-size:12px;font-weight:800;color:var(--terra);padding:8px 0}.history-count{font-size:10px;color:var(--terra);background:#FFE7D6;padding:5px 9px;border-radius:99px;font-weight:800}
+.history-filters{display:flex;gap:7px;overflow-x:auto;padding:2px 1px 10px}.history-filter{white-space:nowrap;padding:8px 12px;border-radius:99px;background:linear-gradient(180deg,#fff,#FFF3E9);box-shadow:var(--clay-card-sm);font-size:11.5px;font-weight:800}.history-filter.sel{background:linear-gradient(180deg,#FFE2B8,#FFD09A);color:#8A5A2B}
+.history-day{font-size:11px;font-weight:800;color:var(--sub);margin:11px 2px 5px}
+.history-entry{width:100%;padding:11px 8px;border-radius:16px;margin-bottom:6px;background:linear-gradient(180deg,var(--paper),#FFF6EE)}
+.history-entry-main{width:100%;text-align:left;display:grid;grid-template-columns:14px 1fr 24px;gap:9px;align-items:center}
+.history-dot{width:11px;height:11px;border-radius:50%;background:#C7B8AD}.history-dot.positive{background:#89B276}.history-dot.negative{background:#A985BB}
+.history-entry time,.history-entry b,.history-entry small{display:block}.history-entry time{font-size:9.5px;color:var(--sub)}.history-entry b{font-size:12px;line-height:1.4;margin:2px 0}.history-entry small{font-size:10.5px;color:var(--sub);line-height:1.45}.history-entry .chev{font-size:20px;color:var(--sub)}
+.history-detail{display:block;margin:8px 0 0 23px;padding-top:7px;border-top:1px dashed var(--line);font-size:11px;color:var(--sub);line-height:1.55}.history-delete{display:block;color:var(--terra);font-size:11px;font-weight:800;margin-top:8px;padding:5px 0}.history-undo{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--night);color:#FFF3E8;padding:11px 13px;border-radius:15px;margin-bottom:10px;font-size:11px;font-weight:700}.history-undo button{color:#FFD09A;font-weight:900;padding:5px}
+.goal-picker{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:10px 0}.goal-choice{padding:9px 5px;border-radius:14px;background:linear-gradient(180deg,#fff,#FFF3E9);box-shadow:var(--clay-card-sm);font-size:10.5px;font-weight:800;color:var(--sub)}.goal-choice.sel{background:linear-gradient(180deg,#FFE2B8,#FFD09A);color:#8A5A2B;box-shadow:var(--clay-amber)}
+.goal-message{background:#F0E6F7;color:var(--purple);border-radius:14px;padding:10px 12px;font-size:11.5px;line-height:1.5;font-weight:700;margin-bottom:10px}
+.backup-nudge{width:100%;display:flex;align-items:center;gap:10px;text-align:left;background:#F0E6F7;color:var(--purple);border-radius:17px;padding:11px 13px;margin-bottom:12px;font-size:11.5px;font-weight:800;box-shadow:0 6px 14px rgba(123,78,142,.14)}.backup-nudge span{font-size:20px}.backup-nudge small{display:block;font-size:10px;font-weight:600;opacity:.78;margin-top:2px}
+.backup-status{display:flex;gap:11px;align-items:flex-start;padding:12px;border-radius:16px;background:#FFF0E4;margin-bottom:10px}.backup-status .ico{font-size:24px}.backup-status b{display:block;font-size:13px}.backup-status small{display:block;color:var(--sub);font-size:10.5px;line-height:1.5;margin-top:2px}
+.beta-list{list-style:none;display:grid;gap:7px;font-size:11.5px;line-height:1.5}.beta-list li{display:flex;gap:8px}.beta-list span{color:var(--terra);font-weight:900;width:16px;flex:none}
+.restore-overlay{position:fixed;inset:0;background:rgba(92,70,56,.58);backdrop-filter:blur(3px);z-index:70;display:flex;align-items:flex-end;justify-content:center}.restore-panel{width:100%;max-width:430px;background:var(--cream);border-radius:28px 28px 0 0;padding:20px;padding-bottom:calc(20px + env(safe-area-inset-bottom));box-shadow:0 -10px 34px rgba(0,0,0,.24)}.restore-panel h3{font-size:17px;margin-bottom:7px}.restore-summary{background:var(--paper);border-radius:17px;padding:13px;margin:12px 0;font-size:12px;line-height:1.7;box-shadow:var(--clay-card-sm)}.restore-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.restore-actions .btn{margin-top:0;padding:12px;font-size:13px}
 /* mascot SVG 動畫 */
 .mascot svg{display:block;overflow:visible}
 .mascot .eye{transform-origin:center;transform-box:fill-box;animation:blink 4.2s infinite}
@@ -538,6 +565,67 @@ Catnu.weeklyReport = function weeklyReport(logs, catId, nowTs) {
   };
 };
 
+/* @LOGIC:CONTINUITY — 每週故事／timeline／每日目標／備份狀態 */
+Catnu.weeklyStory = function weeklyStory(logs, catId, nowTs) {
+  const start = nowTs - 7 * 86400000;
+  const entries = logs
+    .filter(l => l.catId === catId && l.ts > start && l.ts <= nowTs)
+    .slice()
+    .sort((a, b) => b.ts - a.ts);
+  if (!entries.length) return { insufficient: true, count: 0, tone: 'empty', highlight: null };
+
+  const positive = entries.filter(e => Catnu.entryPolarity(e) === 'positive');
+  const negative = entries.filter(e => Catnu.entryPolarity(e) === 'negative');
+  const weekly = Catnu.weeklyReport(logs, catId, nowTs);
+  let tone = 'steady';
+  if (negative.length > positive.length) tone = 'boundary';
+  else if (weekly.posRateChange !== null && weekly.posRateChange >= 10) tone = 'warming';
+  else if (positive.length >= 2 || (weekly.posRate !== null && weekly.posRate >= 60)) tone = 'bonding';
+
+  return {
+    insufficient: false,
+    count: entries.length,
+    positiveCount: positive.length,
+    negativeCount: negative.length,
+    posRate: weekly.posRate,
+    posRateChange: weekly.posRateChange,
+    topAction: weekly.topAction,
+    tone,
+    highlight: positive[0] || entries[0],
+  };
+};
+
+Catnu.timelineEntries = function timelineEntries(logs, catId) {
+  return logs
+    .filter(l => !catId || catId === 'all' || l.catId === catId)
+    .slice()
+    .sort((a, b) => b.ts - a.ts);
+};
+
+Catnu.questGoalStatus = function questGoalStatus(quests, requestedGoal) {
+  const rawGoal = Number(requestedGoal);
+  const goal = Number.isFinite(rawGoal) ? Math.max(1, Math.min(3, Math.round(rawGoal))) : 2;
+  const doneCount = (quests || []).filter(q => q.done).length;
+  return { goal, doneCount, remaining: Math.max(0, goal - doneCount), reached: doneCount >= goal };
+};
+
+Catnu.backupStatus = function backupStatus(settings, nowTs) {
+  settings = settings || {};
+  const lastBackupAt = Number.isFinite(settings.lastBackupAt) ? settings.lastBackupAt : null;
+  const anchor = lastBackupAt || (Number.isFinite(settings.createdAt) ? settings.createdAt : nowTs);
+  const daysAgo = Math.max(0, Math.floor((nowTs - anchor) / 86400000));
+  return { lastBackupAt, daysAgo, due: daysAgo >= 30, never: lastBackupAt === null };
+};
+
+Catnu.backupSummary = function backupSummary(state, fallbackTs) {
+  return {
+    cats: Array.isArray(state.cats) ? state.cats.length : 0,
+    logs: Array.isArray(state.logs) ? state.logs.length : 0,
+    milestones: Array.isArray(state.milestones) ? state.milestones.length : 0,
+    backupAt: Number.isFinite(state.settings && state.settings.lastBackupAt) ? state.settings.lastBackupAt : fallbackTs,
+  };
+};
+
 /* @LOGIC:MIGRATE — schema version-dispatch（v1 → v2 加 birthDate＋anniversaries）*/
 Catnu.migrateState = function migrateState(parsed) {
   if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.cats)) return null;
@@ -549,6 +637,8 @@ Catnu.migrateState = function migrateState(parsed) {
   });
   if (!parsed.settings || typeof parsed.settings !== 'object') parsed.settings = { createdAt: Date.now() };
   if (!Number.isFinite(parsed.settings.createdAt)) parsed.settings.createdAt = Date.now();
+  parsed.settings.dailyGoal = Catnu.questGoalStatus([], parsed.settings.dailyGoal).goal;
+  if (!Number.isFinite(parsed.settings.lastBackupAt)) parsed.settings.lastBackupAt = null;
   if (!parsed.streak || typeof parsed.streak !== 'object') parsed.streak = { current: 0, best: 0, lastDoneDate: '' };
   return parsed;
 };
@@ -1081,7 +1171,7 @@ function defaultState() {
     streak: { current: 0, best: 0, lastDoneDate: '' },
     milestones: [],
     customActions: [],
-    settings: { createdAt: Date.now() },
+    settings: { createdAt: Date.now(), dailyGoal: 2, lastBackupAt: null },
   };
 }
 
@@ -1130,6 +1220,10 @@ function todayStr(d) {
   return `${y}-${m}-${day}`;
 }
 
+function esc(value) {
+  return String(value == null ? '' : value).replace(/[&<>'"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[ch]);
+}
+
 Catnu.showToast = function showToast(msg) {
   const el = document.getElementById('toast');
   if (!el) return;
@@ -1167,6 +1261,10 @@ function renderShell() {
 
 function switchTab(name) {
   if (!document.getElementById(`tab-${name}`)) return; // onboarding 期間（例如測驗結果撳品種）冇 tabs，唔好爆
+  // Timeline 係「記錄」入面嘅子頁；撳任何頂部 tab 都應返去該 tab 根頁，
+  // 否則 aria-selected 已轉但畫面仍會停留喺 timeline。
+  recordHistoryOpen = false;
+  recordHistoryDetailId = null;
   CURRENT_TAB = name;
   document.querySelectorAll('.tab').forEach(el => {
     const active = el.dataset.tab === name;
@@ -1305,6 +1403,11 @@ let recordBackfillTime = '';
 let recordAddActionOpen = false;
 let recordNewActionEmoji = '';
 let recordNewActionLabel = '';
+let recordHistoryOpen = false;
+let recordHistoryCatId = 'all';
+let recordHistoryDetailId = null;
+let recordHistoryUndo = null;
+let recordHistoryUndoTimer = null;
 
 function actionsForRecord(state) {
   return Catnu.ACTIONS.concat(state.customActions.map(c => ({ id: c.id, label: `${c.emoji} ${c.label}` })));
@@ -1376,6 +1479,93 @@ function logSummary(state, log) {
   return names.slice(0, 2).join('＋') + (names.length > 2 ? '⋯' : '');
 }
 
+function historyPolarity(log) {
+  const polarity = Catnu.entryPolarity(log);
+  if (polarity === 'positive') return { cls: 'positive', label: '＋正面', icon: '💗' };
+  if (polarity === 'negative') return { cls: 'negative', label: '留意界線', icon: '💜' };
+  return { cls: 'neutral', label: '觀察', icon: '🐾' };
+}
+
+function historyDayLabel(dateKey) {
+  const today = todayStr();
+  const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+  if (dateKey === today) return '今日';
+  if (dateKey === todayStr(yesterday)) return '昨日';
+  return new Date(dateKey + 'T12:00:00').toLocaleDateString('zh-HK', { month: 'long', day: 'numeric', weekday: 'short' });
+}
+
+function renderRecentHistory(state, catId) {
+  const entries = Catnu.timelineEntries(state.logs, catId).slice(0, 2);
+  return `
+    <div class="card" style="margin-top:14px">
+      <h3><span class="deco">◆</span> 最近互動<span class="tag">新</span></h3>
+      ${entries.length ? entries.map(log => {
+        const p = historyPolarity(log);
+        return `<div class="recent-log"><time>${new Date(log.ts).toLocaleDateString('zh-HK', { month: 'numeric', day: 'numeric' })} ${new Date(log.ts).toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit', hour12: false })}</time><b>${esc(logSummary(state, log))}</b><span class="${p.cls === 'negative' ? 'neg' : p.cls === 'positive' ? 'pos' : 'neutral'}">${p.label}</span></div>`;
+      }).join('') : '<div class="note">第一條互動會由呢度開始，之後每個細節都搵得返。</div>'}
+      <button class="btn ghost" type="button" id="history-open" style="margin-top:10px">睇全部互動歷史 →</button>
+    </div>`;
+}
+
+function renderHistory(state, el) {
+  const entries = Catnu.timelineEntries(state.logs, recordHistoryCatId);
+  let lastDate = '';
+  const rows = entries.map(log => {
+    const key = todayStr(new Date(log.ts));
+    const day = key !== lastDate ? `<div class="history-day">${historyDayLabel(key)}</div>` : '';
+    lastDate = key;
+    const p = historyPolarity(log);
+    const cat = state.cats.find(c => c.id === log.catId);
+    const open = recordHistoryDetailId === log.id;
+    return `${day}<div class="history-entry">
+      <button class="history-entry-main" type="button" data-history-id="${esc(log.id)}" aria-expanded="${open}">
+        <span class="history-dot ${p.cls}"></span>
+        <span><time>${new Date(log.ts).toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit', hour12: false })} · ${esc(cat ? cat.name : '已刪除貓咪')}</time><b>${p.icon} ${esc(logSummary(state, log))}</b><small>${p.label}${log.backfilled ? ' · 補記' : ''}</small></span>
+        <span class="chev">${open ? '⌄' : '›'}</span>
+      </button>
+      ${open ? `<div class="history-detail">${log.note ? `備註：${esc(log.note)}<br>` : ''}反應 ${(log.reactions || []).length} 個 · 動作 ${(log.actions || []).length} 個<button class="history-delete" type="button" data-history-delete="${esc(log.id)}">刪除呢條記錄</button></div>` : ''}
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="history-head"><button class="history-back" type="button" id="history-back">← 返回記錄</button><span class="history-count">${entries.length} 條</span></div>
+    ${recordHistoryUndo ? `<div class="history-undo">已刪除一條互動記錄<button type="button" id="history-undo">復原</button></div>` : ''}
+    <div class="history-filters" role="group" aria-label="篩選貓咪">
+      <button class="history-filter ${recordHistoryCatId === 'all' ? 'sel' : ''}" type="button" data-history-cat="all" aria-pressed="${recordHistoryCatId === 'all'}">全部</button>
+      ${state.cats.map(c => `<button class="history-filter ${recordHistoryCatId === c.id ? 'sel' : ''}" type="button" data-history-cat="${esc(c.id)}" aria-pressed="${recordHistoryCatId === c.id}">${esc(c.emoji)} ${esc(c.name)}</button>`).join('')}
+    </div>
+    ${rows || '<div class="card empty-state"><div class="big">🐾</div><b>呢度未有記錄</b><p style="margin-top:8px;font-size:12px">返回記錄頁，留低第一個相處時刻。</p></div>'}
+  `;
+
+  document.getElementById('history-back').addEventListener('click', () => { recordHistoryOpen = false; recordHistoryDetailId = null; renderRecord(state); });
+  el.querySelectorAll('[data-history-cat]').forEach(b => b.addEventListener('click', () => { recordHistoryCatId = b.dataset.historyCat; recordHistoryDetailId = null; renderHistory(state, el); }));
+  el.querySelectorAll('[data-history-id]').forEach(b => b.addEventListener('click', (e) => {
+    if (e.target.closest('[data-history-delete]')) return;
+    recordHistoryDetailId = recordHistoryDetailId === b.dataset.historyId ? null : b.dataset.historyId;
+    renderHistory(state, el);
+  }));
+  el.querySelectorAll('[data-history-delete]').forEach(b => b.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const index = state.logs.findIndex(l => l.id === b.dataset.historyDelete);
+    if (index < 0) return;
+    recordHistoryUndo = { log: state.logs[index], index };
+    state.logs.splice(index, 1);
+    Catnu.Store.save(state);
+    recordHistoryDetailId = null;
+    clearTimeout(recordHistoryUndoTimer);
+    recordHistoryUndoTimer = setTimeout(() => { recordHistoryUndo = null; if (recordHistoryOpen) renderHistory(state, el); }, 10000);
+    renderHistory(state, el);
+  }));
+  const undo = document.getElementById('history-undo');
+  if (undo) undo.addEventListener('click', () => {
+    state.logs.splice(Math.min(recordHistoryUndo.index, state.logs.length), 0, recordHistoryUndo.log);
+    Catnu.Store.save(state);
+    recordHistoryUndo = null;
+    clearTimeout(recordHistoryUndoTimer);
+    renderHistory(state, el);
+  });
+}
+
 function commitLog(state, entry, fromEl, toastMsg) {
   state.logs.push({
     id: 'log-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
@@ -1423,6 +1613,10 @@ function renderRecord(state) {
     el.innerHTML = '<div class="card empty-state"><div class="big">🐾</div><b>未有貓貓資料</b><p style="margin-top:8px;font-size:13px;color:var(--sub)">去「檔案」page 加返隻貓先可以記錄。</p></div>';
     return;
   }
+  if (recordHistoryOpen) {
+    renderHistory(state, el);
+    return;
+  }
   if (!recordCatId || !state.cats.some(c => c.id === recordCatId)) recordCatId = state.cats[0].id;
   const actions = actionsForRecord(state);
   const cat = state.cats.find(c => c.id === recordCatId);
@@ -1430,12 +1624,14 @@ function renderRecord(state) {
   const last = lastLogOf(state, recordCatId);
   const affection = Catnu.affectionScore(state.logs, recordCatId, Date.now());
   const todayCount = state.logs.filter(l => l.catId === recordCatId && todayStr(new Date(l.ts)) === todayStr()).length;
+  const backup = Catnu.backupStatus(state.settings, Date.now());
   const journey = Catnu.beginnerJourney(state.logs, recordCatId, state.settings.beginnerStartedAt, Date.now());
   const annis = Catnu.upcomingAnniversaries(cat, Date.now());
   const todayAnni = annis.find(a => a.daysUntil === 0);
   const soonAnni = !todayAnni ? annis.find(a => a.daysUntil > 0 && a.daysUntil <= 7) : null;
 
   el.innerHTML = `
+    ${backup.due ? `<button class="backup-nudge" type="button" id="backup-nudge"><span>☁️</span><div>${backup.never ? '你嘅記錄仲未備份' : `上次備份已經 ${backup.daysAgo} 日`}<small>資料只存呢個瀏覽器，撳入去下載安心備份。</small></div></button>` : ''}
     ${renderBeginnerJourney(state, cat, journey)}
     ${todayAnni ? `
       <div class="celebrate" id="celebrate-banner">🎉 今日係${cat.name}嘅${todayAnni.label}${todayAnni.key !== 'birthday' && todayAnni.years ? `（${todayAnni.years} 周年）` : ''}！
@@ -1514,7 +1710,12 @@ function renderRecord(state) {
       <div class="meter"><div style="width:${affection.insufficient ? 0 : affection.score}%"></div></div>
       <div class="mlbl" style="margin-top:8px">${affection.insufficient ? '修行未夠，記多幾次先有分數' : `今日記咗 ${todayCount} 次 · 詳細分析喺「分析」tab`}</div>
     </div>
+    ${renderRecentHistory(state, recordCatId)}
   `;
+
+  const backupNudge = document.getElementById('backup-nudge');
+  if (backupNudge) backupNudge.addEventListener('click', () => switchTab('profile'));
+  document.getElementById('history-open').addEventListener('click', () => { recordHistoryOpen = true; recordHistoryCatId = 'all'; renderRecord(state); });
 
   const celebrateBanner = document.getElementById('celebrate-banner');
   if (celebrateBanner) celebrateBanner.addEventListener('click', () => {
@@ -1645,6 +1846,16 @@ function renderShellStreak(state) {
   if (b) b.textContent = `🔥 ${state.streak.current}`;
 }
 
+function completeDailyGoalIfReached(state, today, quests) {
+  const status = Catnu.questGoalStatus(quests, state.settings.dailyGoal);
+  if (!status.reached || state.streak.lastDoneDate === today) return false;
+  state.streak = Catnu.completeQuestsForDay(state.streak, today);
+  const unlocked = Catnu.checkNewMilestones(state, Date.now());
+  if (unlocked.length) state.milestones.push(...unlocked);
+  Catnu.Store.save(state);
+  return true;
+}
+
 function renderQuests(state) {
   const el = document.getElementById('tab-quests');
   if (!state.cats.length) {
@@ -1657,22 +1868,31 @@ function renderQuests(state) {
     Catnu.Store.save(state);
   }
   const quests = state.quests[today].catQuests;
+  const reachedNow = completeDailyGoalIfReached(state, today, quests);
   const doneCount = quests.filter(q => q.done).length;
+  const goalStatus = Catnu.questGoalStatus(quests, state.settings.dailyGoal);
+  const achievedToday = state.streak.lastDoneDate === today;
   const rest = Catnu.restDayStatus(state.streak, today);
   const catName = id => (state.cats.find(c => c.id === id) || {}).name || '';
   const latestMilestone = state.milestones.slice().sort((a, b) => b.unlockedAt - a.unlockedAt)[0];
 
   el.innerHTML = `
     <div class="card">
-      <h3><span class="deco">◆</span> 今日溝貓任務<span class="tag">${doneCount}/3</span></h3>
+      <h3><span class="deco">◆</span> 今日溝貓任務<span class="tag">${Math.min(doneCount, goalStatus.goal)}/${goalStatus.goal}</span></h3>
       <div style="font-size:12px;color:var(--sub);margin:-4px 0 10px">🔥 連續 ${state.streak.current} 日 · 🏆 最佳 ${state.streak.best} 日 · ${rest.available ? '☁️ 休息券 1 張' : '☁️ 今週休息券已用'}</div>
+      <div class="goal-picker" role="group" aria-label="每日目標">
+        <button class="goal-choice ${goalStatus.goal === 1 ? 'sel' : ''}" type="button" data-daily-goal="1" aria-pressed="${goalStatus.goal === 1}">輕鬆 · 1</button>
+        <button class="goal-choice ${goalStatus.goal === 2 ? 'sel' : ''}" type="button" data-daily-goal="2" aria-pressed="${goalStatus.goal === 2}">平衡 · 2</button>
+        <button class="goal-choice ${goalStatus.goal === 3 ? 'sel' : ''}" type="button" data-daily-goal="3" aria-pressed="${goalStatus.goal === 3}">挑戰 · 3</button>
+      </div>
+      <div class="goal-message">${achievedToday ? '今日已達標，streak 保住咗 🔥' : `仲差 ${goalStatus.remaining} 個就達標；其餘任務可以當 bonus。`}</div>
       ${quests.map(q => `
-        <button class="quest ${q.done ? 'done' : ''}" type="button" data-qid="${q.id}">
+        <button class="quest ${q.done ? 'done' : ''}" type="button" data-qid="${q.id}" aria-pressed="${q.done}">
           <span class="box">${q.done ? '✓' : ''}</span>
           <span class="q">${catName(q.catId)}：${q.text}<small>${sourceLabel(q.source)}</small></span>
         </button>
       `).join('')}
-      <div class="note">任務由分析引擎＋品種特性生成。每週有一次休息日：漏一日會自動保住 streak；同週再漏先會歸零。</div>
+      <div class="note">每日仍然有 3 個任務，你可以揀完成 1／2／3 個就達標。每週有一次休息日：漏一日會自動保住 streak；同週再漏先會歸零。</div>
       <button class="btn ghost" type="button" id="ics-btn" style="margin-top:10px">🔔 加入每日提醒（行事曆）</button>
     </div>
     ${latestMilestone ? `
@@ -1688,18 +1908,23 @@ function renderQuests(state) {
     ` : ''}
   `;
 
+  if (reachedNow) {
+    renderShellStreak(state);
+    Catnu.showToast(`🔥 今日完成 ${goalStatus.goal} 個任務，Streak +1`);
+  }
+
+  el.querySelectorAll('[data-daily-goal]').forEach(button => button.addEventListener('click', () => {
+    state.settings.dailyGoal = Number(button.dataset.dailyGoal);
+    Catnu.Store.save(state);
+    renderQuests(state);
+    renderShellStreak(state);
+  }));
+
   el.querySelectorAll('[data-qid]').forEach(card => {
     card.addEventListener('click', () => {
       const q = quests.find(x => x.id === card.dataset.qid);
       q.done = !q.done;
       Catnu.Store.save(state);
-      if (quests.every(x => x.done)) {
-        state.streak = Catnu.completeQuestsForDay(state.streak, today);
-        const unlocked = Catnu.checkNewMilestones(state, Date.now());
-        if (unlocked.length) state.milestones.push(...unlocked);
-        Catnu.Store.save(state);
-        Catnu.showToast('🔥 今日任務全部完成！Streak +1');
-      }
       renderQuests(state);
       renderShellStreak(state);
     });
@@ -1731,6 +1956,43 @@ function mdBold(text) { return text.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>'); }
 function actionLabelOf(state, actionId) {
   const a = actionsForRecord(state).find(x => x.id === actionId);
   return a ? a.label : actionId;
+}
+
+function renderWeeklyStoryCard(state, cat, story) {
+  if (story.insufficient) {
+    return `<div class="card story-card"><div class="story-head"><h3 style="margin:0"><span class="deco">◆</span> 今週關係故事</h3><span>近 7 日</span></div><div class="story-title">第一段故事，由一條互動開始 🐾</div><div class="story-copy">記低下一次慢眨眼、呼嚕或者行開，呢度就會慢慢串返成你同${esc(cat.name)}嘅每週回顧。</div></div>`;
+  }
+  const title = {
+    warming: `${esc(cat.name)} 今週同你更親近咗 🧡`,
+    bonding: `${esc(cat.name)} 同你建立緊新默契 💗`,
+    boundary: `你開始讀懂 ${esc(cat.name)} 嘅界線 💜`,
+    steady: `${esc(cat.name)} 同你慢慢儲緊故事 🐾`,
+  }[story.tone];
+  const copy = story.tone === 'boundary'
+    ? `今週 ${story.count} 次互動入面，有 ${story.negativeCount} 次提醒你要俾多啲空間。識得收手同等待，本身就係建立信任。`
+    : story.tone === 'warming'
+      ? `今週正面率比上週高 ${story.posRateChange}%。你做嘅細小改變，開始喺${esc(cat.name)}嘅反應入面睇得見。`
+      : `今週 ${story.count} 次互動入面，有 ${story.positiveCount} 次係正面時刻。重複有效嘅節奏，關係會慢慢穩定落嚟。`;
+  const next = story.topAction
+    ? `下週溫柔一步：再試一次「${esc(actionLabelOf(state, story.topAction))}」，留意佢會唔會主動靠近。`
+    : '下週溫柔一步：揀一個 10 秒互動再記低，故事會慢慢清楚。';
+  const highlight = story.highlight;
+  const hp = historyPolarity(highlight);
+  return `
+    <div class="card story-card">
+      <div class="story-head"><h3 style="margin:0"><span class="deco">◆</span> 今週關係故事</h3><span>近 7 日</span></div>
+      <div class="story-title">${title}</div>
+      <div class="story-copy">${copy}</div>
+      <div class="wk-grid" style="margin-top:12px;position:relative;z-index:1">
+        <div class="wk-cell"><b>${story.count}</b><span>互動記錄</span></div>
+        <div class="wk-cell"><b>${story.posRate == null ? '--' : story.posRate + '%'}</b><span>正面率</span></div>
+        <div class="wk-cell"><b style="font-size:15px;line-height:1.9">${story.posRateChange == null ? '--' : (story.posRateChange >= 0 ? '+' : '') + story.posRateChange + '%'}</b><span>比上週</span></div>
+      </div>
+      <div class="story-moment"><span class="sm-icon">${hp.icon}</span><div><b>今週一刻 · ${new Date(highlight.ts).toLocaleDateString('zh-HK', { weekday: 'short' })}</b><small>${esc(logSummary(state, highlight))}${highlight.note ? ` · ${esc(highlight.note)}` : ''}</small></div></div>
+      <div class="story-next">${next}</div>
+      <div class="story-disclaimer">只根據你自己嘅記錄整理，唔係醫療或行為診斷。</div>
+      <button class="btn ghost" type="button" id="weekly-share" style="margin-top:10px;position:relative;z-index:1">⤴ 生成週報靚卡</button>
+    </div>`;
 }
 
 // 只揀頭兩隻貓做 PK（雙貓為主場景；3+隻貓暫時只計頭兩隻，夠用先再擴）
@@ -1776,10 +2038,13 @@ function renderAnalysis(state) {
   const switcherHtml = `<div class="switcher">${state.cats.map(c => `<div class="chip ${c.id === analysisCatId ? 'sel' : ''}" data-cat="${c.id}">${c.emoji} ${c.name}</div>`).join('')}</div>`;
   const now = Date.now();
   const affection = Catnu.affectionScore(state.logs, cat.id, now);
+  const weekly = Catnu.weeklyReport(state.logs, cat.id, now);
+  const story = Catnu.weeklyStory(state.logs, cat.id, now);
 
   if (affection.insufficient) {
     el.innerHTML = `
       ${switcherHtml}
+      ${renderWeeklyStoryCard(state, cat, story)}
       <div class="card empty-state">
         <div class="big">🙀</div>
         <b>修行未夠，繼續記錄</b>
@@ -1787,13 +2052,14 @@ function renderAnalysis(state) {
       </div>
       ${state.cats.length >= 2 ? renderPKCard(state) : ''}
     `;
+    const earlyShare = document.getElementById('weekly-share');
+    if (earlyShare) earlyShare.addEventListener('click', () => Catnu.shareWeeklyCard(state, cat, weekly));
     el.querySelectorAll('[data-cat]').forEach(c => c.addEventListener('click', () => { analysisCatId = c.dataset.cat; renderAnalysis(state); }));
     return;
   }
 
   const insights = Catnu.generateInsights(state.logs, cat, now);
   const level = Catnu.relationshipLevel(affection.score);
-  const weekly = Catnu.weeklyReport(state.logs, cat.id, now);
   const dayBars = [];
   const localMidnight = new Date(now); // day buckets must follow local calendar days,
   localMidnight.setHours(0, 0, 0, 0);  // not UTC midnight — todayStr()/streak logic do the same
@@ -1811,6 +2077,7 @@ function renderAnalysis(state) {
 
   el.innerHTML = `
     ${switcherHtml}
+    ${renderWeeklyStoryCard(state, cat, story)}
     <div class="card">
       <div class="cat-row">
         <div class="avatar">${cat.emoji}</div>
@@ -1823,15 +2090,6 @@ function renderAnalysis(state) {
       <div class="meter"><div style="width:${affection.score}%"></div></div>
       ${level ? `<div class="lvl-line">🏅 Lv.${level.lv} <b>${level.title}</b> ${level.emoji}<span class="lvl-next">${level.next ? `仲差 ${level.next.pointsNeeded} 分升 Lv.${level.next.lv}「${level.next.title}」` : '頂級！繼續寵佢 👑'}</span></div>` : ''}
       <div class="minibars">${dayBars.map(b => `<div class="bar ${b.hasData ? (b.pct >= 50 ? 'pos' : 'neg') : ''}" style="height:${b.hasData ? Math.max(b.pct, 8) : 4}%"></div>`).join('')}</div>
-    </div>
-    <div class="card">
-      <h3><span class="deco">◆</span> ${cat.name}週報<span class="tag">近 7 日</span></h3>
-      <div class="wk-grid">
-        <div class="wk-cell"><b>${weekly.count}</b><span>互動記錄</span></div>
-        <div class="wk-cell"><b>${weekly.posRate == null ? '--' : weekly.posRate + '%'}</b><span>正面率${weekly.posRateChange == null ? '' : (weekly.posRateChange >= 0 ? ` ↑+${weekly.posRateChange}` : ` ↓${weekly.posRateChange}`)}</span></div>
-        <div class="wk-cell"><b style="font-size:14px;line-height:2">${weekly.topAction ? actionLabelOf(state, weekly.topAction) : '--'}</b><span>今週做得最多</span></div>
-      </div>
-      <button class="btn ghost" type="button" id="weekly-share" style="margin-top:12px">⤴ 生成週報靚卡</button>
     </div>
     ${state.cats.length >= 2 ? renderPKCard(state) : ''}
     <div class="card">
@@ -2126,6 +2384,34 @@ function renderProfileCatCard(state, cat) {
   `;
 }
 
+function showRestorePreview(restoredState, fallbackTs) {
+  const old = document.querySelector('.restore-overlay');
+  if (old) old.remove();
+  const summary = Catnu.backupSummary(restoredState, fallbackTs);
+  const overlay = document.createElement('div');
+  overlay.className = 'restore-overlay';
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('aria-labelledby', 'restore-title');
+  overlay.innerHTML = `
+    <div class="restore-panel">
+      <h3 id="restore-title">還原前先核對</h3>
+      <div style="font-size:11.5px;color:var(--sub);line-height:1.6">確認係你想要嗰份備份。還原後會完全覆蓋目前瀏覽器入面嘅資料。</div>
+      <div class="restore-summary">
+        備份日期：${new Date(summary.backupAt).toLocaleDateString('zh-HK')}<br>
+        ${summary.cats} 隻貓 · ${summary.logs} 條互動 · ${summary.milestones} 個里程碑
+      </div>
+      <div class="restore-actions"><button class="btn ghost" type="button" id="restore-cancel">取消</button><button class="btn" type="button" id="restore-confirm">確認還原</button></div>
+    </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById('restore-cancel').addEventListener('click', () => overlay.remove());
+  document.getElementById('restore-confirm').addEventListener('click', () => {
+    Catnu.Store.save(restoredState);
+    location.reload();
+  });
+  document.getElementById('restore-cancel').focus();
+}
+
 // Shared by both the 檔案 tab's "⤒ 還原" control and the onboarding screen's
 // (a wiped/first-run user has no cats yet, so they can't reach 檔案 at all).
 function wireRestoreInput(inputEl) {
@@ -2137,9 +2423,9 @@ function wireRestoreInput(inputEl) {
       try {
         const parsed = JSON.parse(reader.result);
         if (![1, 2].includes(parsed.schemaVersion) || !Array.isArray(parsed.cats) || !Array.isArray(parsed.logs)) throw new Error('bad schema');
-        if (!Catnu.migrateState(parsed)) throw new Error('bad schema');
-        Catnu.Store.save(parsed);
-        location.reload();
+        const migrated = Catnu.migrateState(parsed);
+        if (!migrated) throw new Error('bad schema');
+        showRestorePreview(migrated, file.lastModified || Date.now());
       } catch (err) {
         Catnu.showToast('還原失敗：檔案格式唔啱');
       }
@@ -2162,6 +2448,9 @@ function renderMilestoneWall(state) {
 
 function renderProfile(state) {
   const el = document.getElementById('tab-profile');
+  const backup = Catnu.backupStatus(state.settings, Date.now());
+  const backupTitle = backup.never ? '未有備份紀錄' : (backup.due ? `上次備份已經 ${backup.daysAgo} 日` : `最近備份：${new Date(backup.lastBackupAt).toLocaleDateString('zh-HK')}`);
+  const backupCopy = backup.never ? '如果換機、清瀏覽器資料或用無痕模式，記錄可能會消失。' : (backup.due ? '建議今日下載一份新備份，保持安心。' : `備份仍然新鮮；${Math.max(0, 30 - backup.daysAgo)} 日後先再提醒你。`);
   el.innerHTML = `
     ${state.cats.map(c => renderProfileCatCard(state, c)).join('')}
     ${profileAdding ? `
@@ -2174,11 +2463,21 @@ function renderProfile(state) {
     ` : `<button class="btn ghost" type="button" id="add-cat-btn">＋加貓</button>`}
     ${renderMilestoneWall(state)}
     <div class="card">
-      <h3><span class="deco">◆</span> 數據備份</h3>
-      <button class="btn ghost" type="button" id="export-btn">⤓ 匯出 JSON</button>
+      <h3><span class="deco">◆</span> 數據安心</h3>
+      <div class="backup-status"><span class="ico">☁️</span><div><b>${backupTitle}</b><small>${backupCopy}</small></div></div>
+      <button class="btn" type="button" id="export-btn" style="margin-top:0">⤓ 下載今日備份</button>
       <label class="btn ghost" style="display:block;text-align:center;margin-top:10px" for="import-input">⤒ 還原</label>
       <input type="file" id="import-input" accept="application/json" style="display:none">
-      <div class="note">還原會完全覆蓋現有數據，記得先匯出備份。</div>
+      <div class="note">每 30 日先溫柔提醒一次。還原前會顯示備份內容，確認後先覆蓋現有資料。</div>
+    </div>
+    <div class="card">
+      <h3><span class="deco">◆</span> 公開 beta 說明<span class="tag">Local only</span></h3>
+      <ul class="beta-list">
+        <li><span>✓</span>免費、唔使 login</li>
+        <li><span>✓</span>資料只存目前使用嘅瀏覽器</li>
+        <li><span>✓</span>可以自己匯出 JSON 同還原</li>
+        <li><span>—</span>暫未支援跨裝置同步；換機前記得備份</li>
+      </ul>
     </div>
   `;
 
@@ -2249,6 +2548,8 @@ function renderProfile(state) {
   });
 
   document.getElementById('export-btn').addEventListener('click', () => {
+    state.settings.lastBackupAt = Date.now();
+    Catnu.Store.save(state);
     const dateStr = todayStr().replace(/-/g, '');
     const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -2257,6 +2558,8 @@ function renderProfile(state) {
     a.download = `catnu-backup-${dateStr}.json`;
     a.click();
     URL.revokeObjectURL(url);
+    renderProfile(state);
+    Catnu.showToast('✓ 今日備份已下載，記得保留個 JSON 檔');
   });
   wireRestoreInput(document.getElementById('import-input'));
 }
