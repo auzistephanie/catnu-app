@@ -119,6 +119,8 @@ python3 scripts/github_push.py --check
 - **要停低問**：不可逆 **＋** 出咗 repo（真人／客戶收到訊息、live flow 變咗、錢郁咗、刪 production 資料）
 - **唔使問，做完報告就得**：可逆 ＋ 喺 repo 入面 ＋ 冇對外影響（改檔、修 bug、加 gitignore、清雜檔、事實更正）
 
+**本 repo 專屬（2026-09-15 起，撞過鎖定方向先加）**：換皮／資訊架構級改動（重寫視覺系統、換 boot function、換走鎖定咗嘅品牌 CSS token）算方向性決定，即使冇碰 login／錢／live 資料，都要先問先做——`CLAUDE.md` 鎖定咗「奶茶軟萌 clay 3D」，唔好由零起第二套視覺系統。
+
 **測試永不掂真客**：涉及 live 系統（SleekFlow／WhatsApp／CRM）嘅測試，一律用名入面有
 「Testing」嘅假 contact，**唔准帶真客 email／phone／contact ID 落 live API**，就算淨係打一個 curl 都算。
 

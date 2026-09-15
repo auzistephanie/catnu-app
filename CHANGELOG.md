@@ -1,5 +1,28 @@
 # CHANGELOG — catnu-app
 
+## 2026-09-16 — 3-tier avatar system (photo → AI clay preset → default), mascot fallback dropped
+
+- 頭像方案由 2 層加做 3 層：主（用戶上傳相，center-crop）／次（未上傳相前，喺 9 款 Pollinations 生成嘅 clay figurine 貓頭 preset 揀一款起手，落地做 `images/avatars/cat-avatar-<name>.png`，one-off 生成、bundle 埋 app，冇 runtime 叫外部 API）／底（完全未揀時，預設用第一款 preset「ginger」）。
+- 眨眼 mascot（方案 A）喺實測時發現：64×64 flat SVG 放大去 110px 頭像位，同 9 張精緻 clay 圖擺埋一齊睇好核突——已跟用家即時反饋換走，唔再用嚟做頭像 fallback（`MASCOT_SVG` constant 本身冇刪，其餘地方冇用返）。
+- 手誤執到嘅小 bug 一併修：新手加貓表單揀咗 avatar preset 之後標題會錯誤跳去「調整外觀與初步印象」（編輯字眼），改用 `rEditing` 而唔係 `c` 判斷 edit／add／promise 三態。
+- 驗證：`node --test tests/*.test.mjs` 75/75 全綠；瀏覽器實測：9 款 preset 縮圖正常顯示（修正咗 `.r-app button` specificity 蓋過 preset 縮圖 padding 令圖被壓扁嘅樣式 bug）、揀 preset 即時反映喺大頭像同 switcher、上傳真相會蓋過 preset 並隱藏 preset 列、reload 後 localStorage 持久化、零 console error。
+- `AGENTS.md` 補咗一句 repo 專屬規則：換皮／資訊架構級改動算方向性決定，要先問先做。
+
+## 2026-09-15 — Redesign re-skinned to locked clay 3D direction
+
+- 診斷發現 2026-09-13 redesign preview 跟咗第三方參考（`Catily`）由零寫咗一套獨立 CSS，令鎖定咗嘅「奶茶軟萌 clay 3D（方向 A）」變死碼；資訊架構（Today/Memories/Cats/Picks/Settings、household mode）保留，只換返視覺層，原封不動沿用 `--terra`／`--mustard`／`--clay-card` 等鎖定 token，冇改色值。
+- 移除 Codex 寫嘅 `rAvatar()` SVG 跑分頭像生成器（被評核突）；頭像改用方案 B（用戶自己上傳相，center-crop 做圓形頭像）做主，未上傳相前 fallback 返鎖定嗰隻眨眼 mascot（方案 A）。cat schema 由 `avatar:{shape,colour,pattern}` 改做 `avatarPhoto`（dataURL 或 null），移除淨係為咗生成頭像存在嘅 appearance/colour/pattern 表單同相關翻譯字串。
+- 補返俾 Codex 刪走嘅 Google Fonts link（Fraunces／M PLUS Rounded 1c／Noto Sans TC），clay 3D 設計靠呢幾隻字。
+- 驗證：`node --test tests/*.test.mjs` 75/75 全綠；瀏覽器實測 375px：新手 onboarding（含上傳頭像、square-crop 預覽、儲存後頭像喺 switcher／profile／nav 同步顯示、reload 後 localStorage 持久化）、3 隻貓 household 模式（family art 混合已上傳相＋mascot fallback）、Today／Memories／Cats／Picks／Settings 五個分頁、backup 下載 dialog，全部 clay 3D 視覺，零 console error。
+
+## 2026-09-13 — Catnu first redesign preview
+
+- Added an additive local redesign on top of `catnu.v1`: mobile-first Today, Memories, Cats, Picks, and Settings surfaces with zh-HK, zh-TW, zh-CN, and English UI.
+- Added safe cat profile migration for owner impressions, observed traits, confidence, feedback, avatar appearance archetypes, region, and language. Existing cats, logs, quests, milestones, and backup/restore data remain available.
+- Added household mode with active-cat switching, one rotating daily observation for the household, linked multi-cat moments using one photo asset, relationship notes, and individual/shared demo Picks.
+- Picks are region-aware but provider-free demo data only; sponsorship is disclosed and billing, affiliate APIs, AI analysis, cloud sync, and external writes remain disabled.
+- Validation: 75 Node tests pass; browser preview checked for no-photo onboarding, 3-cat family flow, one-question workload, shared photo memory, feedback revision, v1 restore, four locales, region/language separation, and 390px mobile layout.
+
 > 改動記錄出口：新條目一律插喺呢個檔案頂部。CLAUDE.md 只放路由同現行規則。早期開發史 → `docs/superpowers/plans/2026-07-12-catnu-app.md`。
 
 - 2026-09-03：**持續使用體驗 sprint：每週故事＋互動歷史＋自訂每日目標＋備份安全感** ——
