@@ -1,5 +1,15 @@
 # CHANGELOG — catnu-app
 
+## 2026-09-16 — 追返 redesign 跌咗嘅 reaction/action 記錄／milestones／核心分析
+
+- 發現 2026-09-13／09-15 兩輪 redesign（Today/Memories/Cats/Picks/Settings）雖然只話「換皮」，其實靜靜雞拎走咗底層資料收集能力：`initApp()`／`commitLog()`／`renderAnalysis()` 呢套 classic UI 已經係死碼（`window.addEventListener('DOMContentLoaded', initRedesign)` 先係真正入口），令 REACTIONS/ACTIONS chip 記錄、milestones 解鎖、streak、好感度分析全部有 pure-logic 冇 UI 掛住。同 Stephanie 核實方向後，追返落新皮膚（範圍：核心就夠，性格卡分享／PK卡／紀念日慶祝／3日新手修行／備份提示留做 backlog）。
+- Today tab 加返「一撳即記」：6 個 QUICK_PRESETS tiles＋展開式 REACTIONS/ACTIONS chip picker，寫入 `state.logs`；新 `rCommitLog()` 對應 classic `commitLog()`，household「全家」view 一致用返同一隻 daily-rotating 貓（`Catnu.dailyCat`），唔再固定用 `cats[0]`。
+- Milestones／streak：`initRedesign()`＋`rCommitLog()` 都會 `Catnu.checkNewMilestones`，解鎖彈 toast；header 加返 🔥 streak 徽章；Cats tab 頂部加返（reuse 現成）`renderMilestoneWall()`。
+- Cats tab 每隻貓卡加返核心分析：好感度分數＋meter、關係等級、（reuse 現成）本週關係故事卡＋生成週報靚卡掣、溝貓建議（`Catnu.generateInsights`）。
+- `copyRows` 補返缺咗嘅 `approach` reaction id，另加 12 個新 UI chrome key（一撳即記標題、展開/收埋、milestone 牆標題等），4 locale 齊全；CSS 加一小段 `.r-app` scope 覆蓋（`.tile`/`.btn`/`.detail-toggle`），修正 `.r-app button` reset 蓋過 classic 組件視覺嘅問題。
+- 驗證：`node --test tests/*.test.mjs` 75/75 全綠（冇改 pure-logic zone）；瀏覽器實測單貓／雙貓 household 情況記錄、milestone 解鎖、好感度/關係故事/insights 顯示、生成週報靚卡 PNG download、en/zh-TW/zh-CN 語言切換、375px viewport，全部零 console error。
+- 明確冇做（backlog）：性格卡分享按鈕、雙貓PK卡、紀念日慶祝 banner、3 日新手修行卡、備份到期提示、quests／每日目標揀選。原有「4 個新吸引力功能」plan（`docs/superpowers/plans/2026-09-15-catnu-engagement-features.md`）留返落一輪先做。
+
 ## 2026-09-16 — 3-tier avatar system (photo → AI clay preset → default), mascot fallback dropped
 
 - 頭像方案由 2 層加做 3 層：主（用戶上傳相，center-crop）／次（未上傳相前，喺 9 款 Pollinations 生成嘅 clay figurine 貓頭 preset 揀一款起手，落地做 `images/avatars/cat-avatar-<name>.png`，one-off 生成、bundle 埋 app，冇 runtime 叫外部 API）／底（完全未揀時，預設用第一款 preset「ginger」）。
