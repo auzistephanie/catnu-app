@@ -1,5 +1,17 @@
 # CHANGELOG — catnu-app
 
+## 2026-09-17 — 記住上次揀嗰隻貓＋Today hero 更搶眼
+
+實開 app 收到兩批反饋：(1) 每次 reload 都彈返去「全家」view，唔會記住你上次揀緊邊隻貓；(2) 成個 app 想更 eye catching（顏色更大膽、動畫互動更多、頭像更大更突出）。
+
+- **記住上次揀嗰隻貓**：`STATE.settings.lastActiveCat` 喺撳貓咪 switcher 嗰刻即時存低；`initRedesign()` 開 app 時讀返呢個值（要係 'all' 或者仲存在嘅貓先算有效，唔係就 fallback 返舊邏輯：單貓自動揀佢、多貓預設全家）。
+- **Switcher 同 hero 標題唔再撞字**：switcher pill 改用返本來冇用開嘅 `all`（「全家」）copy key，同 hero 大標題（「🏡 我哋一家」）分返開，唔再兩行一樣嘅字疊埋一齊；hero kicker 改用返 `promise`（品牌 tagline）取代重複嘅「我哋一家」。
+- **貓咪頭像放大＋郁多咗**：hero 單貓頭像 110→140px，全家合照頭像 85→100px；加咗 `floaty` 浮動動畫＋白邊光暈陰影，同 `.mascot` 果種若隱若現嘅生氣感一致。
+- **CTA 掣更搶眼**：hero 個「送佢一個慢眨眼」掣由素色改用 `.r-primary` 嘅 terra 漸變實色，同背景對比更強。
+- **milestone 牆解鎖 chip 加返高亮**：已解鎖嘅 chip 用返 `.chip.sel` 嘅珊瑚色高亮（之前同未解鎖嘅淨係靠透明度分，冇乜慶祝感）。
+- 全部改動維持喺鎖定嘅 `--terra`/`--mustard`/clay 3D 色票之內，冇新增/改動底層色值 token。
+- 驗證：`node --test tests/*.test.mjs` 88/88 全綠；瀏覽器實測撳貓咪 switcher → reload → 記住返同一隻貓；hero 頭像／CTA／milestone chip 視覺確認，零 console error。
+
 ## 2026-09-16 — 刪走「貓咪之間」relationship 表格（Cats tab）
 
 先試過幫「貓咪之間」（揀兩隻貓＋relax together/own space）加可見 label＋說明句，Stephanie 實開 app 睇完反饋「still not that useful」——呢個 form 撳完儲存淨係變成一行靜態文字，同 app 其餘「記錄 → 睇到洞察」嘅玩法完全唔一致（唔似 milestone 牆／時間軸／關係故事咁會反映返出嚟），決定直接刪走 UI，唔留低雞肋功能。
