@@ -1,5 +1,16 @@
 # CHANGELOG — catnu-app
 
+## 2026-09-16 — 4 個新吸引力功能：行為小知識／呢排嘅暗號／關係時間軸／月度回顧冊
+
+跟 `docs/superpowers/plans/2026-09-15-catnu-engagement-features.md`（改咗落腳點去 Today/Cats tab，原份 plan 假設嘅classic 分析/圖鑑/檔案 tab 已經係死碼）落實 4 個貼合「溫柔了解、唔係診斷」定位嘅本地 pure-logic 功能，冇叫外部 AI、冇加遊戲化機制：
+
+- **貓行為小知識**：`Catnu.BEHAVIOR_FACTS`（18 條，對齊全部 REACTIONS/ACTIONS id）＋`Catnu.behaviorFact(id)`。Today tab 一撳即記／詳細記錄之後，若果係嗰隻貓歷史上第一次出現嘅 reaction/action，彈一張可撳走嘅小知識卡（`rFactPending`／`rCommitLog()` 內判斷）；Cats tab 加「行為小百科」，只列出已記錄過嘅 id（`rFactsWall()`）。
+- **「呢排嘅暗號」**：`Catnu.recentSignal(logs, catId, nowTs, {windowDays})` 比較近 14 日 vs 之前 14 日，邊個 positive reaction 有 ≥1.5x 升跌或者新出現 3 次以上，唔夠 5 條記錄或者冇明顯變化就 return null。Cats tab 每隻貓「本週關係故事」卡下面加呢張卡，帶「淨係觀察趨勢，唔係行為診斷」disclaimer。
+- **關係時間軸**：`Catnu.timelineEvents(state, catId)` 合併已解鎖 milestones、相處 100/365/500/1000 日 highlight（避免同已解鎖 milestone 重複）、同紀念日，由新到舊排序。Cats tab 每隻貓卡加可收合 `<details>` 時間軸，reuse milestone-wall 嘅 clay chip 視覺，冇資料顯示暖場文案。
+- **月度回顧冊**：`Catnu.monthlyRecap(state, catId, monthKey)` 計算總互動、正面率、最常做動作、解鎖里程碑、相處日數增量。`initRedesign()` 開 app 時 check 一次（`checkMonthlyRecap()`，靠 `state.settings.recapSeenMonth` 避免同月重複彈），有上個月數據先喺 Today tab 出溫和 banner，撳入去彈 dialog 睇數據 + 撳掣先生成第 4 款 share-card canvas template（`Catnu.shareMonthlyRecapCard`，reuse `newShareCanvas`/`drawShareCardBase` 底框）。
+- `copyRows` 加 15 個新 UI chrome key（4 locale 齊全），generated 內文（fact 句子、signal 訊息）同其餘 insights/story 一樣維持廣東話 only，唔算新缺口。
+- 驗證：`node --test tests/*.test.mjs` **88/88 全綠**（新增 `tests/engagement.test.mjs` 13 個 test，覆蓋 behaviorFact 存在/唔存在、recentSignal 4 種情況、timelineEvents 排序/多貓篩選/空陣列、monthlyRecap 3 種資料情況；vm 跨 realm array 用 `[...arr]` 先 deepEqual，同 `store.test.mjs` 既有做法一致）；瀏覽器實測：新 reaction 觸發 fact 卡＋撳走唔再彈、Cats tab 行為小百科／呢排嘅暗號／關係時間軸（有資料＋新貓空狀態）全部顯示正確、月度回顧 banner→dialog→生成 PNG download、en/zh-TW/zh-CN 4 locale 同 375px viewport，全程零 console error。
+
 ## 2026-09-16 — 追返 redesign 跌咗嘅 reaction/action 記錄／milestones／核心分析
 
 - 發現 2026-09-13／09-15 兩輪 redesign（Today/Memories/Cats/Picks/Settings）雖然只話「換皮」，其實靜靜雞拎走咗底層資料收集能力：`initApp()`／`commitLog()`／`renderAnalysis()` 呢套 classic UI 已經係死碼（`window.addEventListener('DOMContentLoaded', initRedesign)` 先係真正入口），令 REACTIONS/ACTIONS chip 記錄、milestones 解鎖、streak、好感度分析全部有 pure-logic 冇 UI 掛住。同 Stephanie 核實方向後，追返落新皮膚（範圍：核心就夠，性格卡分享／PK卡／紀念日慶祝／3日新手修行／備份提示留做 backlog）。
