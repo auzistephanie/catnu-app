@@ -1,5 +1,10 @@
 # CHANGELOG — catnu-app
 
+## 2026-09-16 — 「貓咪之間」表格加返可見標籤＋說明句
+
+實開 app 睇效果時發現 Cats tab 嘅「貓咪之間」（記兩隻貓相處傾向）表格得返 aria-label，畫面上完全冇字解釋兩個貓咪落拉選單係揀緊乜、下面個 kind 落拉揀緊乜，睇落好難明。加咗一句說明（`relationshipDesc`）＋每個落拉選單頂加可見 `<label>`（第一隻貓／第二隻貓／佢哋通常），已記錄嘅relationship 清單都加返「已記低」小標題分隔。純 UI copy／markup 改動，冇碰 pure-logic。
+驗證：`node --test tests/*.test.mjs` 88/88 全綠；瀏覽器實測新增文字／label 正確顯示、撳「儲存」新增一條 relationship 記錄正常出現喺「已記低」清單，零 console error。
+
 ## 2026-09-16 — 4 個新吸引力功能：行為小知識／呢排嘅暗號／關係時間軸／月度回顧冊
 
 跟 `docs/superpowers/plans/2026-09-15-catnu-engagement-features.md`（改咗落腳點去 Today/Cats tab，原份 plan 假設嘅classic 分析/圖鑑/檔案 tab 已經係死碼）落實 4 個貼合「溫柔了解、唔係診斷」定位嘅本地 pure-logic 功能，冇叫外部 AI、冇加遊戲化機制：
