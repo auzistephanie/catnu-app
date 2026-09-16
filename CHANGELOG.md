@@ -1,9 +1,12 @@
 # CHANGELOG — catnu-app
 
-## 2026-09-16 — 「貓咪之間」表格加返可見標籤＋說明句
+## 2026-09-16 — 刪走「貓咪之間」relationship 表格（Cats tab）
 
-實開 app 睇效果時發現 Cats tab 嘅「貓咪之間」（記兩隻貓相處傾向）表格得返 aria-label，畫面上完全冇字解釋兩個貓咪落拉選單係揀緊乜、下面個 kind 落拉揀緊乜，睇落好難明。加咗一句說明（`relationshipDesc`）＋每個落拉選單頂加可見 `<label>`（第一隻貓／第二隻貓／佢哋通常），已記錄嘅relationship 清單都加返「已記低」小標題分隔。純 UI copy／markup 改動，冇碰 pure-logic。
-驗證：`node --test tests/*.test.mjs` 88/88 全綠；瀏覽器實測新增文字／label 正確顯示、撳「儲存」新增一條 relationship 記錄正常出現喺「已記低」清單，零 console error。
+先試過幫「貓咪之間」（揀兩隻貓＋relax together/own space）加可見 label＋說明句，Stephanie 實開 app 睇完反饋「still not that useful」——呢個 form 撳完儲存淨係變成一行靜態文字，同 app 其餘「記錄 → 睇到洞察」嘅玩法完全唔一致（唔似 milestone 牆／時間軸／關係故事咁會反映返出嚟），決定直接刪走 UI，唔留低雞肋功能。
+移除 `rCats()` 入面成個 relationship `<section>`（form＋已記錄清單）、`rRender()` 入面 `#r-relation` 嘅 submit handler、依賴住嘅 copyRows key（relationship／relationshipDesc／catA／catB／relationshipKind／relationshipLogTitle／together／space）、同已經冇人用嘅 `rOptions()` helper。**冇改 `state.relationships` 呢個 data field／`Catnu.validateBackup` 嘅相關驗證**——留住舊備份格式相容性，`tests/redesign.test.mjs` 嗰個「malformed relationship records」test 唔使改。
+驗證：`node --test tests/*.test.mjs` 88/88 全綠；瀏覽器實測 Cats tab 每隻貓卡直接由「觀察歷史」跳去「加一隻貓」，冇晒相關 UI，零 console error。
+
+## 2026-09-16 — 「貓咪之間」表格加返可見標籤＋說明句（後續喺同日已刪走呢個功能，見上）
 
 ## 2026-09-16 — 4 個新吸引力功能：行為小知識／呢排嘅暗號／關係時間軸／月度回顧冊
 
