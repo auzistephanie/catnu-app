@@ -176,6 +176,23 @@ input,select{font-family:inherit}
 .minicard .mlbl{font-size:11.5px;color:var(--sub);font-weight:700}
 .minicard .mheart{margin-left:auto;font-size:28px;filter:drop-shadow(0 5px 4px rgba(224,117,79,.3))}
 /* 關係等級 */
+.voice-line{font-family:var(--disp);font-size:19px;font-weight:800;line-height:1.35;color:var(--ink);margin-top:4px}
+.voice-sub{margin-top:10px;font-size:12.5px;font-weight:800;color:var(--terra)}
+.voice-note{display:block;margin-top:8px;color:var(--sub);font-size:11px;line-height:1.4}
+.cat-hero{position:relative;display:flex;align-items:center;gap:12px;margin:2px 0 14px;min-height:64px}
+.cat-hero-av{flex:none;display:inline-block;transform-origin:50% 90%}
+.cat-hero-txt{display:flex;flex-direction:column;gap:2px;transition:opacity .2s}
+.cat-hero-txt.hide{opacity:0}
+.cat-hero-txt b{font-family:var(--disp);font-size:18px;font-weight:900}
+.cat-hero-txt small{color:var(--sub);font-size:12px;font-weight:700}
+.cat-bubble{position:absolute;left:76px;right:0;top:50%;transform:translateY(-50%);padding:10px 14px;border-radius:18px 18px 18px 6px;background:var(--paper);box-shadow:var(--clay-card-sm);font-size:14px;font-weight:800;line-height:1.35;color:var(--ink);animation:bubbleIn .25s ease-out}
+.cat-bubble.out{opacity:0;transition:opacity .3s}
+@keyframes bubbleIn{from{opacity:0;transform:translateY(-50%) scale(.92)}to{opacity:1;transform:translateY(-50%) scale(1)}}
+.cat-hero-av.purr{animation:purrWiggle .8s ease-in-out}
+.cat-hero-av.shy{animation:shyShrink .8s ease-in-out}
+@keyframes purrWiggle{0%{transform:rotate(0) scale(1)}20%{transform:rotate(-6deg) scale(1.06)}40%{transform:rotate(5deg) scale(1.06)}60%{transform:rotate(-4deg) scale(1.04)}80%{transform:rotate(2deg) scale(1.02)}100%{transform:rotate(0) scale(1)}}
+@keyframes shyShrink{0%{transform:scale(1)}35%{transform:scale(.92)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion: reduce){.cat-bubble{animation:bubbleFade .4s ease-out!important}@keyframes bubbleFade{from{opacity:0}to{opacity:1}}.cat-hero-av{animation:none!important}}
 .lvl-line{margin-top:10px;font-size:12.5px;font-weight:800;color:#8A6A55;background:#FFF1E4;border-radius:12px;padding:8px 12px;display:flex;align-items:center;gap:7px;box-shadow:inset 0 2px 4px rgba(180,110,80,.08)}
 .lvl-line b{color:var(--terra)}
 .lvl-line .lvl-next{margin-left:auto;color:#C9A78F;font-weight:700;font-size:11.5px}
@@ -572,6 +589,96 @@ Catnu.relationshipLevel = function relationshipLevel(score) {
     lv: cur.lv, title: cur.title, emoji: cur.emoji,
     next: nxt ? { lv: nxt.lv, title: nxt.title, pointsNeeded: nxt.min - score } : null,
   };
+};
+
+/* @LOGIC:CATVOICE — 用隻貓嘅口吻講好感度／回應 tile（只係呈現文字，唔郁計分） */
+Catnu.CAT_VOICE = {
+  'zh-HK': {
+    none: ['你多啲陪我，我就會話你知我諗咩'],
+    1: ['我仲喺度觀察緊你…', '你行開少少先'],
+    2: ['都算你啦，今日畀少少面你', '你把聲…我認得'],
+    3: ['其實…你都幾好嘅', '今日可以坐近少少'],
+    4: ['呢個禮拜我幾鍾意你', '你返嚟我會去門口等'],
+    5: ['我最鍾意你，唔好話俾其他貓知', '你係我嘅人'],
+  },
+  'zh-TW': {
+    none: ['你多陪陪我，我就會告訴你我在想什麼'],
+    1: ['我還在觀察你…', '你先走開一點點'],
+    2: ['算你啦，今天給你一點面子', '你的聲音…我認得'],
+    3: ['其實…你還不錯啦', '今天可以坐近一點點'],
+    4: ['這個禮拜我滿喜歡你的', '你回來我會去門口等'],
+    5: ['我最喜歡你了，不要告訴其他貓', '你是我的人'],
+  },
+  'zh-CN': {
+    none: ['你多陪陪我，我就会告诉你我在想什么'],
+    1: ['我还在观察你…', '你先走开一点点'],
+    2: ['算你啦，今天给你一点面子', '你的声音…我认得'],
+    3: ['其实…你还不错啦', '今天可以坐近一点点'],
+    4: ['这个星期我挺喜欢你的', '你回来我会去门口等'],
+    5: ['我最喜欢你了，不要告诉其他猫', '你是我的人'],
+  },
+  en: {
+    none: ['Spend more time with me and I’ll tell you what I think'],
+    1: ['I’m still watching you…', 'Maybe give me a little space'],
+    2: ['Fine, I’ll give you some face today', 'I know your voice…'],
+    3: ['Actually… you’re kind of alright', 'You can sit a bit closer today'],
+    4: ['I’ve liked you quite a lot this week', 'I’ll wait at the door when you’re back'],
+    5: ['You’re my favourite — don’t tell the other cats', 'You’re my human'],
+  },
+};
+
+// score: 0–100 或 null（資料不足）；seed: 任何字串（通常係日期）→ 同一日同一分段永遠同一句
+Catnu.catVoice = function catVoice(score, seed, locale) {
+  const table = Catnu.CAT_VOICE[locale] || Catnu.CAT_VOICE['zh-HK'];
+  const level = Catnu.relationshipLevel(score);
+  const pool = level ? table[level.lv] : table.none;
+  let h = 0;
+  const str = String(seed == null ? '' : seed);
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  return pool[h % pool.length];
+};
+
+Catnu.TILE_REPLIES = {
+  'zh-HK': {
+    cuddle: ['呼嚕呼嚕…再摸多陣', '你係我嘅', '唔准走'],
+    slowblink: ['（慢慢眨返你一下）', '我信你㗎', '…（眨）'],
+    play: ['喵！再嚟一轉！', '我捉到喇！', '仲未攰！'],
+    groom: ['舒服…呢度呢度', '下巴都要', '我靚唔靚'],
+    lap: ['呢度係我嘅位', '暖笠笠', '你唔准郁'],
+    neg: ['今日唔想俾人掂…', '等陣先啦', '我自己靜一陣就好'],
+  },
+  'zh-TW': {
+    cuddle: ['呼嚕呼嚕…再摸一下', '你是我的', '不准走'],
+    slowblink: ['（慢慢眨一下眼回你）', '我相信你', '…（眨）'],
+    play: ['喵！再來一次！', '我抓到了！', '還沒累！'],
+    groom: ['好舒服…這裡這裡', '下巴也要', '我漂不漂亮'],
+    lap: ['這是我的位子', '暖呼呼', '你不准動'],
+    neg: ['今天不想被摸…', '等一下嘛', '我自己靜一靜就好'],
+  },
+  'zh-CN': {
+    cuddle: ['呼噜呼噜…再摸一下', '你是我的', '不准走'],
+    slowblink: ['（慢慢眨一下眼回你）', '我相信你', '…（眨）'],
+    play: ['喵！再来一次！', '我抓到了！', '还没累！'],
+    groom: ['好舒服…这里这里', '下巴也要', '我漂不漂亮'],
+    lap: ['这是我的位子', '暖烘烘', '你不准动'],
+    neg: ['今天不想被摸…', '等一下嘛', '我自己静一静就好'],
+  },
+  en: {
+    cuddle: ['Purr purr… a little more', 'You’re mine', 'Don’t go'],
+    slowblink: ['(slow blink back at you)', 'I trust you', '…(blink)'],
+    play: ['Meow! One more round!', 'I caught it!', 'Not tired yet!'],
+    groom: ['So nice… right there', 'Chin too, please', 'Do I look pretty?'],
+    lap: ['This is my spot', 'So warm', 'Don’t you move'],
+    neg: ['Not in the mood to be touched today…', 'Later, okay?', 'I just need a quiet moment'],
+  },
+};
+
+Catnu.tileReply = function tileReply(tileId, locale, rand) {
+  const table = Catnu.TILE_REPLIES[locale] || Catnu.TILE_REPLIES['zh-HK'];
+  const pool = table[tileId];
+  if (!pool) return '';
+  const r = typeof rand === 'function' ? rand() : Math.random();
+  return pool[Math.min(pool.length - 1, Math.floor(r * pool.length))];
 };
 
 /* @LOGIC:ANNIVERSARY — 紀念日／相處日數 */
@@ -1634,12 +1741,12 @@ function resetRecordFormState() {
 
 /* ── 一撳即記 presets：map 落現有 reactions/actions ids，分析引擎唔使改 ── */
 const QUICK_PRESETS = [
-  { emoji: '😻', title: '佢嚟黐我',     sub: '主動貼近＋呼嚕',   reactions: ['approach', 'purr'], actions: [] },
-  { emoji: '😌', title: '互相慢眨眼',   sub: '慢眨眼',           reactions: ['slowblink'],        actions: [] },
-  { emoji: '🎣', title: '玩咗一輪',     sub: '逗貓棒＋主動貼近', reactions: ['approach'],         actions: ['wand'] },
-  { emoji: '🪮', title: '梳毛時光',     sub: '梳毛＋呼嚕',       reactions: ['purr'],             actions: ['groom'] },
-  { emoji: '🦵', title: '冧爆坐大脾',   sub: '坐大脾＋踩奶',     reactions: ['lap', 'knead'],     actions: [] },
-  { emoji: '😾', title: '佢今日唔妥我', sub: '即刻走開',         reactions: ['walkaway'],         actions: [], neg: true },
+  { id: 'cuddle', emoji: '😻', title: '佢嚟黐我',     sub: '主動貼近＋呼嚕',   reactions: ['approach', 'purr'], actions: [] },
+  { id: 'slowblink', emoji: '😌', title: '互相慢眨眼',   sub: '慢眨眼',           reactions: ['slowblink'],        actions: [] },
+  { id: 'play', emoji: '🎣', title: '玩咗一輪',     sub: '逗貓棒＋主動貼近', reactions: ['approach'],         actions: ['wand'] },
+  { id: 'groom', emoji: '🪮', title: '梳毛時光',     sub: '梳毛＋呼嚕',       reactions: ['purr'],             actions: ['groom'] },
+  { id: 'lap', emoji: '🦵', title: '冧爆坐大脾',   sub: '坐大脾＋踩奶',     reactions: ['lap', 'knead'],     actions: [] },
+  { id: 'neg', emoji: '😾', title: '佢今日唔妥我', sub: '即刻走開',         reactions: ['walkaway'],         actions: [], neg: true },
 ];
 
 let recordDetailOpen = false;
@@ -2992,7 +3099,7 @@ const copyRows = {
  history:['最近觀察','最近觀察','最近观察','Recent observations'], more:['睇更多記錄','查看更多記錄','查看更多记录','Show more records'],
  feed:['餵食／小食','餵食／點心','喂食／零食','Food / treats'], groom:['梳毛','梳毛','梳毛','Grooming'], hold:['抱抱','抱抱','抱抱','Holding'], pet:['摸頭／下巴','摸頭／下巴','摸头／下巴','Head / chin strokes'], callname:['叫名字','叫名字','叫名字','Calling their name'], litter:['整理貓砂','整理貓砂','整理猫砂','Litter care'], talk:['傾偈','說話','说话','Talking'], approach:['主動貼近','主動貼近','主动贴近','Approaching you'], slowblink:['慢眨眼','慢眨眼','慢眨眼','Slow blink'], purr:['呼嚕','呼嚕','呼噜','Purring'], knead:['踩奶','踏踏','踩奶','Kneading'], belly:['露肚','露肚','露肚','Showing belly'], lap:['坐大髀','坐腿上','坐腿上','Sitting on lap'], walkaway:['走開','走開','走开','Walking away'], flatears:['耳仔向後','耳朵向後','耳朵向后','Ears back'], hiss:['嘶聲／拍打','嘶聲／拍打','嘶声／拍打','Hissing / swatting'], bite:['咬／抓','咬／抓','咬／抓','Biting / scratching'],
 
- quickLog:['一撳即記','一撳即記','一按即记','Quick log'], logExpand:['✏️ 記詳細啲 ▾','✏️ 記詳細啲 ▾','✏️ 记详细点 ▾','✏️ Add more detail ▾'], logCollapse:['✏️ 收埋詳細 ▴','✏️ 收埋詳細 ▴','✏️ 收起详细 ▴','✏️ Hide details ▴'], logReactionsHeading:['佢對我嘅反應','牠對我的反應','它对我的反应','Their reaction to me'], logActionsHeading:['我啱啱做咗咩','我剛剛做了什麼','我刚刚做了什么','What I just did'], logSubmit:['✓ 記錄呢一刻','✓ 記錄這一刻','✓ 记录这一刻','✓ Log this moment'], affectionLabel:['好感度','好感度','好感度','Affection'], affectionInsufficient:['修行未夠，記多幾次先有分數','記錄還不夠，多記幾次才有分數','记录还不够，多记几次才有分数','Not enough records yet — log a few more to see a score'], insightsHeading:['溝貓建議','相處建議','相处建议','Suggestions'], insightsEmpty:['暫時未有夠數據嘅發現，繼續記錄啦。','暫時還沒有足夠數據的發現，繼續記錄吧。','暂时还没有足够数据的发现，继续记录吧。','Not enough data for findings yet — keep logging.'], milestoneWall:['里程碑牆','里程碑牆','里程碑墙','Milestones'], milestoneUnlocked:['🎉 解鎖里程碑：','🎉 解鎖里程碑：','🎉 解锁里程碑：','🎉 Milestone unlocked: '], milestoneMany:['🎉 {who} 解鎖咗 {n} 個新回憶 · 去睇','🎉 {who} 解鎖了 {n} 個新回憶 · 去看看','🎉 {who} 解锁了 {n} 个新回忆 · 去看看','🎉 {who} unlocked {n} new memories · take a look'], storageFull:['部機儲存空間唔夠，試下揀款預設頭像','這部裝置的儲存空間不足，試試選預設頭像','这台设备的存储空间不足，试试选预设头像','Not enough storage on this device — try a preset avatar instead'], milestoneYou:['你哋','你們','你们','You two'],
+ quickLog:['一撳即記','一撳即記','一按即记','Quick log'], logExpand:['✏️ 記詳細啲 ▾','✏️ 記詳細啲 ▾','✏️ 记详细点 ▾','✏️ Add more detail ▾'], logCollapse:['✏️ 收埋詳細 ▴','✏️ 收埋詳細 ▴','✏️ 收起详细 ▴','✏️ Hide details ▴'], logReactionsHeading:['佢對我嘅反應','牠對我的反應','它对我的反应','Their reaction to me'], logActionsHeading:['我啱啱做咗咩','我剛剛做了什麼','我刚刚做了什么','What I just did'], logSubmit:['✓ 記錄呢一刻','✓ 記錄這一刻','✓ 记录这一刻','✓ Log this moment'], affectionLabel:['好感度','好感度','好感度','Affection'], affectionInsufficient:['修行未夠，記多幾次先有分數','記錄還不夠，多記幾次才有分數','记录还不够，多记几次才有分数','Not enough records yet — log a few more to see a score'], insightsHeading:['溝貓建議','相處建議','相处建议','Suggestions'], insightsEmpty:['暫時未有夠數據嘅發現，繼續記錄啦。','暫時還沒有足夠數據的發現，繼續記錄吧。','暂时还没有足够数据的发现，继续记录吧。','Not enough data for findings yet — keep logging.'], milestoneWall:['里程碑牆','里程碑牆','里程碑墙','Milestones'], milestoneUnlocked:['🎉 解鎖里程碑：','🎉 解鎖里程碑：','🎉 解锁里程碑：','🎉 Milestone unlocked: '], milestoneMany:['🎉 {who} 解鎖咗 {n} 個新回憶 · 去睇','🎉 {who} 解鎖了 {n} 個新回憶 · 去看看','🎉 {who} 解锁了 {n} 个新回忆 · 去看看','🎉 {who} unlocked {n} new memories · take a look'], storageFull:['部機儲存空間唔夠，試下揀款預設頭像','這部裝置的儲存空間不足，試試選預設頭像','这台设备的存储空间不足，试试选预设头像','Not enough storage on this device — try a preset avatar instead'], voiceTitle:['{name} 想同你講','{name} 想跟你說','{name} 想跟你说','{name} wants to tell you'], affectionNote:['好感度＝近 7 日正面反應加權比率；只係觀察，唔係診斷','好感度＝近 7 日正面反應加權比率；只是觀察，不是診斷','好感度＝近 7 日正面反应加权比率；只是观察，不是诊断','Affection = weighted share of positive reactions over the last 7 days; an observation, not a diagnosis'], heroDays:['相處第 {n} 日','相處第 {n} 天','相处第 {n} 天','Day {n} together'], milestoneYou:['你哋','你們','你们','You two'],
 
  factTitle:['識多啲隻貓 🐾','認識多一點你的貓 🐾','认识多一点你的猫 🐾','Getting to know them 🐾'], factDismiss:['知道喇','知道了','知道了','Got it'], factsWallTitle:['行為小百科','行為小百科','行为小百科','Behaviour notes'],
  signalTitle:['呢排嘅暗號','這陣子的訊號','这阵子的信号','Recent signals'], signalDisclaimer:['淨係觀察趨勢，唔係行為診斷。','僅為趨勢觀察，並非行為診斷。','仅为趋势观察，并非行为诊断。','Just a trend observation, not a behavioural diagnosis.'],
@@ -3044,11 +3151,16 @@ Catnu.insight = (state,id) => {
 Catnu.commerce = {providers:{HK:'demo',TW:'demo',CN:'demo',OTHER:'demo'},live:false};
 Catnu.entitlements = {tier:'free',multiCat:true,billing:false,plans:['monthly','annual','lifetime'],flags:{advancedFamilyInsights:false,affiliate:false,sponsoredDemo:true}};
 let rTab='today', rActive='all', rAdding=false, rEditing=null, rDraft=null, rPersisted=null, rHistoryLimit=20, rLoadBlocked=false, rOriginalRaw=null;
+let rReact=null, rBubbleTimer=null;
 let rLogReactions=new Set(), rLogActions=new Set(), rLogDetailOpen=false, rFactPending=null, rRecapBanner=null;
 function rLogWidget(catId){
   const reactions=Catnu.REACTIONS.map(r=>`<span class="chip ${r.polarity<0?'neg':''} ${rLogReactions.has(r.id)?'sel':''}" data-log-reaction="${r.id}">${r.label.split(' ')[0]} ${esc(rt(r.id))}</span>`).join('');
   const actions=Catnu.ACTIONS.map(a=>`<span class="chip act ${rLogActions.has(a.id)?'sel':''}" data-log-action="${a.id}">${a.label.split(' ')[0]} ${esc(rt(a.id))}</span>`).join('');
-  return `<section class="r-card"><h2>${rt('quickLog')}</h2><div class="tiles">${QUICK_PRESETS.map((p,i)=>`<button type="button" class="tile ${p.neg?'negt':''}" data-log-preset="${i}" data-log-cat="${esc(catId)}"><span class="em">${p.emoji}</span><span class="t">${esc(p.title)}</span><span class="s">${esc(p.sub)}</span></button>`).join('')}</div><button type="button" class="detail-toggle" data-log-detail-toggle>${rt(rLogDetailOpen?'logCollapse':'logExpand')}</button>${rLogDetailOpen?`<div><p style="font-weight:800;margin:10px 0 6px">${rt('logReactionsHeading')}</p><div class="chips">${reactions}</div><p style="font-weight:800;margin:10px 0 6px">${rt('logActionsHeading')}</p><div class="chips">${actions}</div><button type="button" class="btn" data-log-submit data-log-cat="${esc(catId)}">${rt('logSubmit')}</button></div>`:''}</section>`;
+  const heroCat=STATE.cats.find(c=>c.id===catId);
+  const react=rReact&&rReact.catId===catId?rReact:null;
+  const heroDays=heroCat?Catnu.daysTogether(heroCat.homeDate,Date.now()):null;
+  const hero=heroCat?`<div class="cat-hero"><span class="cat-hero-av ${react?(react.neg?'shy':'purr'):''}" id="r-hero-av">${rAvatar(heroCat,64)}</span><div class="cat-hero-txt ${react?'hide':''}"><b>${esc(heroCat.name)}</b>${heroDays?`<small>${rt('heroDays').replace('{n}',heroDays)}</small>`:''}</div>${react?`<div class="cat-bubble" role="status">${esc(react.text)}</div>`:''}</div>`:'';
+  return `<section class="r-card"><h2>${rt('quickLog')}</h2>${hero}<div class="tiles">${QUICK_PRESETS.map((p,i)=>`<button type="button" class="tile ${p.neg?'negt':''}" data-log-preset="${i}" data-log-cat="${esc(catId)}"><span class="em">${p.emoji}</span><span class="t">${esc(p.title)}</span><span class="s">${esc(p.sub)}</span></button>`).join('')}</div><button type="button" class="detail-toggle" data-log-detail-toggle>${rt(rLogDetailOpen?'logCollapse':'logExpand')}</button>${rLogDetailOpen?`<div><p style="font-weight:800;margin:10px 0 6px">${rt('logReactionsHeading')}</p><div class="chips">${reactions}</div><p style="font-weight:800;margin:10px 0 6px">${rt('logActionsHeading')}</p><div class="chips">${actions}</div><button type="button" class="btn" data-log-submit data-log-cat="${esc(catId)}">${rt('logSubmit')}</button></div>`:''}</section>`;
 }
 function announceMilestones(unlocked){
   if(!unlocked.length)return;
@@ -3063,15 +3175,22 @@ function rCommitLog(entry,fromEl){
   const priorLogs=STATE.logs.filter(l=>l.catId===catId);
   const newIds=[...(entry.reactions||[]),...(entry.actions||[])].filter(id=>!priorLogs.some(l=>(l.reactions||[]).includes(id)||(l.actions||[]).includes(id)));
   STATE.logs.push({id:'log-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),catId,ts:Date.now(),reactions:entry.reactions||[],actions:entry.actions||[],note:'',backfilled:false});
-  spawnBurst(fromEl,entry.neg);
   const unlocked=Catnu.checkNewMilestones(STATE,Date.now());
   if(unlocked.length)STATE.milestones.push(...unlocked);
   if(!rSave())return;
+  const reply=entry.tileId?Catnu.tileReply(entry.tileId,STATE.settings.locale):'';
+  rReact=reply?{catId,text:reply,neg:!!entry.neg}:null;
   if(unlocked.length)announceMilestones(unlocked);
-  else Catnu.showToast(rt('saved'));
+  else if(!reply)Catnu.showToast(rt('saved'));
   const firstFactId=newIds.find(id=>Catnu.behaviorFact(id));
   rFactPending=firstFactId?{id:firstFactId,fact:Catnu.behaviorFact(firstFactId)}:null;
   rRender();
+  if(rReact){
+    if(!rReact.neg)spawnBurst(document.getElementById('r-hero-av'),false);
+    rReact=null;
+    clearTimeout(rBubbleTimer);
+    rBubbleTimer=setTimeout(()=>{const b=document.querySelector('.cat-bubble');if(!b)return;b.classList.add('out');document.querySelector('.cat-hero-txt')?.classList.remove('hide');setTimeout(()=>b.remove(),350);},1800);
+  }
 }
 function rFactsWall(){
   const recordedIds=new Set();
@@ -3126,7 +3245,7 @@ function rCatForm(){const c=rDraft||STATE.cats.find(c=>c.id===rEditing);const ph
 function rMomentForm(){return `<section class="r-card"><h2>${rt('moment')}</h2><form id="r-moment"><label>${rt('note')}<textarea name="note" maxlength="500"></textarea></label><label>${rt('photo')}<input type="file" name="photo" accept="image/*" capture="environment"></label><fieldset><legend>${rt('linked')}</legend>${STATE.cats.map(c=>`<label class="r-check"><input type="checkbox" name="cats" value="${esc(c.id)}" ${rActive==='all'||rActive===c.id?'checked':''}>${esc(c.name)}</label>`).join('')}</fieldset><button class="r-primary">${rt('save')}</button></form></section>`;}
 function rToday(){const cat=Catnu.dailyCat(STATE,todayStr());const answered=STATE.observations.some(o=>o.date===todayStr());const question=Catnu.dailyQuestion(STATE,todayStr());return `<section class="r-hero"><span class="r-kicker">${rt('promise')}</span>${rActive==='all'&&STATE.cats.length>1?`<div class="r-family-art">${STATE.cats.map(c=>rAvatar(c,100)).join('')}</div>`:rAvatar(STATE.cats.find(c=>c.id===rActive)||cat,140)}<h2>${rActive==='all'&&STATE.cats.length>1?rt('family'):esc((STATE.cats.find(c=>c.id===rActive)||cat).name)}</h2><p>${rt('question')} · ${esc(cat.name)}</p><button class="r-primary" data-action="blink">${rt('blink')}</button></section>${rRecapBanner?`<button type="button" class="backup-nudge" data-recap-open><span>📖</span><div>${esc(rt('recapReady').replace('{month}',rRecapMonthLabel(rRecapBanner.monthKey,STATE.settings.locale)))}<small>${rt('recapSub')}</small></div></button>`:''}${rLogWidget(rActive!=='all'?rActive:cat.id)}${rFactPending?`<section class="r-card" id="r-fact-card"><h2 style="font-size:16px">${rt('factTitle')}</h2><p>${esc(rFactPending.fact)}</p><button type="button" data-fact-dismiss>${rt('factDismiss')}</button></section>`:''}<section class="r-card"><p>${rt('rotate')}</p><h2>${rt(answered?'done':{'quiet-approach':'ask','toy-interest':'playAsk','settle-rest':'restAsk'}[question])}</h2>${answered?'':`<div class="r-answer">${['yes','no','skip'].map(k=>`<button data-answer="${k}">${rt(k==='no'&&question!=='quiet-approach'?'notToday':k)}</button>`).join('')}</div>`}</section>${rMomentForm()}`;}
 function rMemories(){const moments=STATE.moments.filter(m=>rActive==='all'||m.catIds.includes(rActive));return `${rMomentForm()}${moments.slice().reverse().map(m=>{const asset=STATE.assets.find(a=>a.id===m.assetId);return `<article class="r-card">${asset&&/^data:image\/(jpeg|png|webp);base64,/.test(asset.data)?`<img class="r-photo" src="${esc(asset.data)}" alt="${esc(m.note)}">`:''}<p>${esc(m.note)}</p><small>${esc(m.date)} · ${m.catIds.map(id=>esc(STATE.cats.find(c=>c.id===id)?.name||'')).join(' · ')}</small></article>`;}).join('')||`<section class="r-hero">${rAvatar(STATE.cats[0])}<p>${rt('empty')}</p></section>`}<section class="r-card"><h2>${rt('legacy')}</h2>${STATE.logs.filter(l=>rActive==='all'||l.catId===rActive).slice().reverse().slice(0,rHistoryLimit).map(l=>`<p>${esc(l.note||l.notes||'')} <span>${esc([...(l.actions||[]),...(l.reactions||[])].map(id=>copyRows[id]?rt(id):STATE.customActions?.find(a=>a.id===id)?.label||id).join(' · '))}</span><small>${esc(new Date(l.ts||l.timestamp||Date.now()).toLocaleDateString(STATE.settings.locale))}</small></p>`).join('')}<small>${STATE.logs.length}</small>${STATE.logs.length>rHistoryLimit?`<button data-action="more">${rt('more')}</button>`:''}</section>`;}
-function rCatAnalysis(cat){const now=Date.now();const affection=Catnu.affectionScore(STATE.logs,cat.id,now);const level=affection.insufficient?null:Catnu.relationshipLevel(affection.score);const story=Catnu.weeklyStory(STATE.logs,cat.id,now);const insights=Catnu.generateInsights(STATE.logs,cat,now);return `<div class="minicard"><div><div class="mlbl">${rt('affectionLabel')}</div><span class="mnum">${affection.insufficient?'--':affection.score}</span></div><div class="mheart">💗</div></div><div class="meter"><div style="width:${affection.insufficient?0:affection.score}%"></div></div>${affection.insufficient?`<div class="mlbl" style="margin-top:8px">${rt('affectionInsufficient')}</div>`:(level?`<div class="lvl-line">🏅 Lv.${level.lv} <b>${esc(level.title)}</b> ${level.emoji}<span class="lvl-next">${level.next?`仲差 ${level.next.pointsNeeded} 分升 Lv.${level.next.lv}「${esc(level.next.title)}」`:'頂級！繼續寵佢 👑'}</span></div>`:'')}${renderWeeklyStoryCard(STATE,cat,story)}<div class="r-card" style="margin:12px 0 0;padding:14px"><h2 style="font-size:15px;margin:0 0 8px">${rt('insightsHeading')}</h2>${insights.length?insights.map(i=>`<div class="insight"><span>${insightIcon(i)}</span><span>${mdBold(i.text)}</span></div>`).join(''):`<div class="note">${rt('insightsEmpty')}</div>`}</div>${(()=>{const signal=Catnu.recentSignal(STATE.logs,cat.id,now);return signal?`<div class="r-card" style="margin:12px 0 0;padding:14px"><h2 style="font-size:15px;margin:0 0 6px">${rt('signalTitle')}</h2><p style="margin:0">${esc(signal.message)}</p><small>${rt('signalDisclaimer')}</small></div>`:'';})()}${rTimelineBlock(cat)}`;}
+function rCatAnalysis(cat){const now=Date.now();const affection=Catnu.affectionScore(STATE.logs,cat.id,now);const level=affection.insufficient?null:Catnu.relationshipLevel(affection.score);const story=Catnu.weeklyStory(STATE.logs,cat.id,now);const insights=Catnu.generateInsights(STATE.logs,cat,now);return `<div class="minicard"><div><div class="mlbl">${rt('voiceTitle').replace('{name}',esc(cat.name))}</div><div class="voice-line">${esc(Catnu.catVoice(affection.insufficient?null:affection.score,todayStr(),STATE.settings.locale))}</div></div><div class="mheart">💗</div></div><div class="voice-sub">${affection.insufficient?`${rt('affectionLabel')} --`:`${rt('affectionLabel')} ${affection.score}${level?` · Lv.${level.lv} ${esc(level.title)}`:''}`}</div><div class="meter"><div style="width:${affection.insufficient?0:affection.score}%"></div></div>${affection.insufficient?`<div class="mlbl" style="margin-top:8px">${rt('affectionInsufficient')}</div>`:(level?`<div class="lvl-line"><span class="lvl-next" style="margin-left:0">${level.next?`仲差 ${level.next.pointsNeeded} 分升 Lv.${level.next.lv}「${esc(level.next.title)}」`:'頂級！繼續寵佢 👑'}</span></div>`:'')}<small class="voice-note">ⓘ ${rt('affectionNote')}</small>${renderWeeklyStoryCard(STATE,cat,story)}<div class="r-card" style="margin:12px 0 0;padding:14px"><h2 style="font-size:15px;margin:0 0 8px">${rt('insightsHeading')}</h2>${insights.length?insights.map(i=>`<div class="insight"><span>${insightIcon(i)}</span><span>${mdBold(i.text)}</span></div>`).join(''):`<div class="note">${rt('insightsEmpty')}</div>`}</div>${(()=>{const signal=Catnu.recentSignal(STATE.logs,cat.id,now);return signal?`<div class="r-card" style="margin:12px 0 0;padding:14px"><h2 style="font-size:15px;margin:0 0 6px">${rt('signalTitle')}</h2><p style="margin:0">${esc(signal.message)}</p><small>${rt('signalDisclaimer')}</small></div>`:'';})()}${rTimelineBlock(cat)}`;}
 function rCats(){return `${renderMilestoneWall(STATE)}${rFactsWall()}<p>${rt('compare')}</p>${STATE.cats.filter(c=>rActive==='all'||c.id===rActive).map(c=>{const i=Catnu.insight(STATE,c.id);return `<article class="r-card r-profile" data-cat-id="${esc(c.id)}">${rAvatar(c)}<h2>${esc(c.name)}</h2><p>${rt('original')} · ${c.ownerPerception.map(rt).join(' / ')||rt('pending')}</p><p>${rt('observed')} · ${i.revised?rt('revised'):Catnu.observedTraits(STATE,c.id).map(t=>rt(t.trait)).join(' / ')||rt('pending')}</p>${rCatAnalysis(c)}<small>${rt('confidence')}: ${rt(i.confidence)} (${i.count})</small>${i.count?`<p>${rt('feedback')}</p><div class="r-answer">${['accurate','unsure','inaccurate'].map(k=>`<button data-feedback="${k}" data-id="${esc(c.id)}">${rt(k)}</button>`).join('')}</div>`:''}<details><summary>${rt('history')}</summary>${STATE.observations.filter(o=>o.catId===c.id).slice(-5).reverse().map(o=>`<p><small>${esc(o.date)} · ${rt({'quiet-approach':'ask','toy-interest':'playAsk','settle-rest':'restAsk'}[o.question]||'ask')} · ${rt(o.answer==='no'?'notToday':o.answer)}</small></p>`).join('')}</details><button data-edit="${esc(c.id)}">${rt('edit')}</button></article>`;}).join('')}<button class="r-primary" data-action="add">${rt('add')}</button>`;}
 Catnu.getDemoPicks=(state,catId)=>{
  const household=catId==='all';const insight=household?null:Catnu.insight(state,catId);
@@ -3150,7 +3269,7 @@ const avatarFile=app.querySelector('#r-avatar-file');if(avatarFile)avatarFile.on
 app.querySelectorAll('.r-avatar-preset').forEach(b=>b.onclick=()=>{rCaptureDraft();rDraft.avatarPreset=b.dataset.preset;rRender();});
 app.querySelectorAll('[data-answer]').forEach(b=>b.onclick=()=>{if(STATE.observations.some(o=>o.date===todayStr()))return;STATE.observations.push({catId:Catnu.dailyCat(STATE,todayStr()).id,date:todayStr(),answer:b.dataset.answer,question:Catnu.dailyQuestion(STATE,todayStr())});if(rSave()){rRender();Catnu.showToast(rt('saved'));}});
 app.querySelectorAll('[data-feedback]').forEach(b=>b.onclick=()=>{STATE.insightFeedback.push({catId:b.dataset.id,answer:b.dataset.feedback,ts:Date.now()});if(rSave()){rRender();Catnu.showToast(rt('saved'));}});
-app.querySelectorAll('[data-log-preset]').forEach(b=>b.onclick=()=>{const p=QUICK_PRESETS[+b.dataset.logPreset];rCommitLog({catId:b.dataset.logCat,reactions:p.reactions,actions:p.actions,neg:p.neg},b);});
+app.querySelectorAll('[data-log-preset]').forEach(b=>b.onclick=()=>{const p=QUICK_PRESETS[+b.dataset.logPreset];rCommitLog({catId:b.dataset.logCat,reactions:p.reactions,actions:p.actions,neg:p.neg,tileId:p.id},b);});
 const logToggle=app.querySelector('[data-log-detail-toggle]');if(logToggle)logToggle.onclick=()=>{rLogDetailOpen=!rLogDetailOpen;rRender();};
 app.querySelectorAll('[data-log-reaction]').forEach(c=>c.onclick=()=>{const id=c.dataset.logReaction;rLogReactions.has(id)?rLogReactions.delete(id):rLogReactions.add(id);rRender();});
 app.querySelectorAll('[data-log-action]').forEach(c=>c.onclick=()=>{const id=c.dataset.logAction;rLogActions.has(id)?rLogActions.delete(id):rLogActions.add(id);rRender();});

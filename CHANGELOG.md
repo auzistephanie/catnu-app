@@ -1,5 +1,15 @@
 # CHANGELOG — catnu-app
 
+## 2026-10-05 — 「以隻貓為中心」UX 升級 4 項
+
+Brief：`docs/briefs/2026-10-05-cat-centric-ux-brief.md`。全部做喺 `initRedesign` 嗰套 `r-` UI，舊 `initApp()` 係 dead code 冇郁。
+
+- **#1 toast 爆版**：新 `announceMilestones()`（`rCommitLog` ＋開 app 解鎖共用）；1 個照舊（有 catId 加貓名），2 個或以上變「🎉 {貓名／你哋} 解鎖咗 N 個新回憶 · 去睇」，撳落去「貓咪」tab 里程碑牆。`showToast(msg,onTap)` 加可選點擊；`.toast` 限 2 行。
+- **#2 avatar**：2026-09-15 已有 `avatarPhoto`／`avatarPreset`／`rAvatar`，**沿用現有欄位，冇加新 schema／v3**。補：相縮到 256px／JPEG q0.8（9MB 雜訊相實測 +28KB）、`rSave` 撞 `QuotaExceededError` 出 `storageFull` 溫和 toast、9 張 preset PNG 縮到 256px＋調色盤量化（每張 9–13KB，原檔 → `_to_delete/avatars-orig-20261006/`）。未揀頭像維持現狀 fallback 第一款 preset（brief 話底層係 emoji，同現有行為有出入，Stephanie 決定維持現狀）；冇加 `avatarSrc` helper。
+- **#4 貓口吻**：`Catnu.CAT_VOICE`／`catVoice(score,seed,locale)`（按 relationshipLevel 5 段＋冇數據，seed＝日期，同日固定）、`Catnu.TILE_REPLIES`／`tileReply(id,locale,rand)`（6 塊 tile 各 3 句），四個 locale 齊。貓貓 tab 好感度卡改「{貓名} 想同你講」＋大字貓口吻＋「好感度 N · Lv.X」副線；「近 7 日正面反應加權比率」搬去卡底 ⓘ 小字。`QUICK_PRESETS` 加 `id`。
+- **#3 記錄回應**：記錄卡頂加貓 hero（64px 頭像＋名＋相處第 N 日）；撳 tile 後頭像呼嚕（負面 tile 只縮一縮、冇心心）＋貓口吻泡泡 1.8s，新泡泡取代舊泡泡；正面心心由頭像飄出；`prefers-reduced-motion` 只淡入泡泡。冇泡泡路徑（詳細表格）仍出「記錄咗」toast。`rCommitLog` 寫入數據冇改。
+- **驗證**：`tests/phase5.test.mjs` 加 3 個 test，`node --test tests/*.test.mjs` **91/91 全綠**。瀏覽器實測（seed 2 貓＋40 log，375px／1280px）：無橫 scroll；toast 2 行、撳落去跳去里程碑牆；6 塊 tile 逐塊有對應泡泡；連撳 3 下得 1 個泡泡；9 張 preset 全部 load 到；零 app console error。
+
 ## 2026-09-17 — 記住上次揀嗰隻貓＋Today hero 更搶眼
 
 實開 app 收到兩批反饋：(1) 每次 reload 都彈返去「全家」view，唔會記住你上次揀緊邊隻貓；(2) 成個 app 想更 eye catching（顏色更大膽、動畫互動更多、頭像更大更突出）。
