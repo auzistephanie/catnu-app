@@ -148,7 +148,9 @@ input,select{font-family:inherit}
 .beginner-progress{height:10px;background:#FFE3D2;border-radius:99px;overflow:hidden;margin:10px 0 8px;box-shadow:inset 0 2px 4px rgba(180,110,80,.14)}
 .beginner-progress>span{display:block;height:100%;background:linear-gradient(90deg,#F9A87C,#EE7E4F);border-radius:99px}
 .beginner-signal{margin-top:10px;padding:10px 12px;border-radius:14px;background:#F0E6F7;color:var(--purple);font-size:12px;line-height:1.55;font-weight:700}
-.toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translate(-50%,140%);background:var(--night);color:#FFF3E8;padding:11px 20px;border-radius:99px;font-size:13.5px;font-weight:800;z-index:50;transition:transform .3s cubic-bezier(.34,1.56,.64,1);box-shadow:0 10px 24px rgba(0,0,0,.28);max-width:80vw;text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translate(-50%,140%);background:var(--night);color:#FFF3E8;padding:11px 20px;border-radius:99px;font-size:13.5px;font-weight:800;z-index:50;transition:transform .3s cubic-bezier(.34,1.56,.64,1);box-shadow:0 10px 24px rgba(0,0,0,.28);max-width:80vw;max-height:3.4em;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;text-align:center}
+.toast.tap{cursor:pointer}
+.r-app .toast.tap.show{pointer-events:auto}
 .toast.show{transform:translate(-50%,0)}
 /* 一撳即記 */
 .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -1427,13 +1429,15 @@ function esc(value) {
   return String(value == null ? '' : value).replace(/[&<>'"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[ch]);
 }
 
-Catnu.showToast = function showToast(msg) {
+Catnu.showToast = function showToast(msg, onTap) {
   const el = document.getElementById('toast');
   if (!el) return;
   el.textContent = msg;
+  el.classList.toggle('tap', typeof onTap === 'function');
+  el.onclick = typeof onTap === 'function' ? () => { el.classList.remove('show'); onTap(); } : null;
   el.classList.add('show');
   clearTimeout(Catnu._toastTimer);
-  Catnu._toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+  Catnu._toastTimer = setTimeout(() => el.classList.remove('show'), typeof onTap === 'function' ? 4200 : 2400);
 };
 
 function renderShell() {
@@ -2988,7 +2992,7 @@ const copyRows = {
  history:['最近觀察','最近觀察','最近观察','Recent observations'], more:['睇更多記錄','查看更多記錄','查看更多记录','Show more records'],
  feed:['餵食／小食','餵食／點心','喂食／零食','Food / treats'], groom:['梳毛','梳毛','梳毛','Grooming'], hold:['抱抱','抱抱','抱抱','Holding'], pet:['摸頭／下巴','摸頭／下巴','摸头／下巴','Head / chin strokes'], callname:['叫名字','叫名字','叫名字','Calling their name'], litter:['整理貓砂','整理貓砂','整理猫砂','Litter care'], talk:['傾偈','說話','说话','Talking'], approach:['主動貼近','主動貼近','主动贴近','Approaching you'], slowblink:['慢眨眼','慢眨眼','慢眨眼','Slow blink'], purr:['呼嚕','呼嚕','呼噜','Purring'], knead:['踩奶','踏踏','踩奶','Kneading'], belly:['露肚','露肚','露肚','Showing belly'], lap:['坐大髀','坐腿上','坐腿上','Sitting on lap'], walkaway:['走開','走開','走开','Walking away'], flatears:['耳仔向後','耳朵向後','耳朵向后','Ears back'], hiss:['嘶聲／拍打','嘶聲／拍打','嘶声／拍打','Hissing / swatting'], bite:['咬／抓','咬／抓','咬／抓','Biting / scratching'],
 
- quickLog:['一撳即記','一撳即記','一按即记','Quick log'], logExpand:['✏️ 記詳細啲 ▾','✏️ 記詳細啲 ▾','✏️ 记详细点 ▾','✏️ Add more detail ▾'], logCollapse:['✏️ 收埋詳細 ▴','✏️ 收埋詳細 ▴','✏️ 收起详细 ▴','✏️ Hide details ▴'], logReactionsHeading:['佢對我嘅反應','牠對我的反應','它对我的反应','Their reaction to me'], logActionsHeading:['我啱啱做咗咩','我剛剛做了什麼','我刚刚做了什么','What I just did'], logSubmit:['✓ 記錄呢一刻','✓ 記錄這一刻','✓ 记录这一刻','✓ Log this moment'], affectionLabel:['好感度','好感度','好感度','Affection'], affectionInsufficient:['修行未夠，記多幾次先有分數','記錄還不夠，多記幾次才有分數','记录还不够，多记几次才有分数','Not enough records yet — log a few more to see a score'], insightsHeading:['溝貓建議','相處建議','相处建议','Suggestions'], insightsEmpty:['暫時未有夠數據嘅發現，繼續記錄啦。','暫時還沒有足夠數據的發現，繼續記錄吧。','暂时还没有足够数据的发现，继续记录吧。','Not enough data for findings yet — keep logging.'], milestoneWall:['里程碑牆','里程碑牆','里程碑墙','Milestones'], milestoneUnlocked:['🎉 解鎖里程碑：','🎉 解鎖里程碑：','🎉 解锁里程碑：','🎉 Milestone unlocked: '],
+ quickLog:['一撳即記','一撳即記','一按即记','Quick log'], logExpand:['✏️ 記詳細啲 ▾','✏️ 記詳細啲 ▾','✏️ 记详细点 ▾','✏️ Add more detail ▾'], logCollapse:['✏️ 收埋詳細 ▴','✏️ 收埋詳細 ▴','✏️ 收起详细 ▴','✏️ Hide details ▴'], logReactionsHeading:['佢對我嘅反應','牠對我的反應','它对我的反应','Their reaction to me'], logActionsHeading:['我啱啱做咗咩','我剛剛做了什麼','我刚刚做了什么','What I just did'], logSubmit:['✓ 記錄呢一刻','✓ 記錄這一刻','✓ 记录这一刻','✓ Log this moment'], affectionLabel:['好感度','好感度','好感度','Affection'], affectionInsufficient:['修行未夠，記多幾次先有分數','記錄還不夠，多記幾次才有分數','记录还不够，多记几次才有分数','Not enough records yet — log a few more to see a score'], insightsHeading:['溝貓建議','相處建議','相处建议','Suggestions'], insightsEmpty:['暫時未有夠數據嘅發現，繼續記錄啦。','暫時還沒有足夠數據的發現，繼續記錄吧。','暂时还没有足够数据的发现，继续记录吧。','Not enough data for findings yet — keep logging.'], milestoneWall:['里程碑牆','里程碑牆','里程碑墙','Milestones'], milestoneUnlocked:['🎉 解鎖里程碑：','🎉 解鎖里程碑：','🎉 解锁里程碑：','🎉 Milestone unlocked: '], milestoneMany:['🎉 {who} 解鎖咗 {n} 個新回憶 · 去睇','🎉 {who} 解鎖了 {n} 個新回憶 · 去看看','🎉 {who} 解锁了 {n} 个新回忆 · 去看看','🎉 {who} unlocked {n} new memories · take a look'], milestoneYou:['你哋','你們','你们','You two'],
 
  factTitle:['識多啲隻貓 🐾','認識多一點你的貓 🐾','认识多一点你的猫 🐾','Getting to know them 🐾'], factDismiss:['知道喇','知道了','知道了','Got it'], factsWallTitle:['行為小百科','行為小百科','行为小百科','Behaviour notes'],
  signalTitle:['呢排嘅暗號','這陣子的訊號','这阵子的信号','Recent signals'], signalDisclaimer:['淨係觀察趨勢，唔係行為診斷。','僅為趨勢觀察，並非行為診斷。','仅为趋势观察，并非行为诊断。','Just a trend observation, not a behavioural diagnosis.'],
@@ -3046,6 +3050,14 @@ function rLogWidget(catId){
   const actions=Catnu.ACTIONS.map(a=>`<span class="chip act ${rLogActions.has(a.id)?'sel':''}" data-log-action="${a.id}">${a.label.split(' ')[0]} ${esc(rt(a.id))}</span>`).join('');
   return `<section class="r-card"><h2>${rt('quickLog')}</h2><div class="tiles">${QUICK_PRESETS.map((p,i)=>`<button type="button" class="tile ${p.neg?'negt':''}" data-log-preset="${i}" data-log-cat="${esc(catId)}"><span class="em">${p.emoji}</span><span class="t">${esc(p.title)}</span><span class="s">${esc(p.sub)}</span></button>`).join('')}</div><button type="button" class="detail-toggle" data-log-detail-toggle>${rt(rLogDetailOpen?'logCollapse':'logExpand')}</button>${rLogDetailOpen?`<div><p style="font-weight:800;margin:10px 0 6px">${rt('logReactionsHeading')}</p><div class="chips">${reactions}</div><p style="font-weight:800;margin:10px 0 6px">${rt('logActionsHeading')}</p><div class="chips">${actions}</div><button type="button" class="btn" data-log-submit data-log-cat="${esc(catId)}">${rt('logSubmit')}</button></div>`:''}</section>`;
 }
+function announceMilestones(unlocked){
+  if(!unlocked.length)return;
+  const catName=id=>STATE.cats.find(c=>c.id===id)?.name||'';
+  if(unlocked.length===1){const m=unlocked[0];const meta=Catnu.MILESTONE_META[m.id]||{};const who=catName(m.catId);Catnu.showToast(`${rt('milestoneUnlocked')}${who?who+'・':''}${meta.emoji||''} ${meta.label||m.id}`);return;}
+  const names=[...new Set(unlocked.map(m=>catName(m.catId)).filter(Boolean))];
+  const who=names.length===1?names[0]:rt('milestoneYou');
+  Catnu.showToast(rt('milestoneMany').replace('{who}',who).replace('{n}',unlocked.length),()=>{rTab='cats';rRender();});
+}
 function rCommitLog(entry,fromEl){
   const catId=entry.catId||(rActive!=='all'?rActive:STATE.cats[0].id);
   const priorLogs=STATE.logs.filter(l=>l.catId===catId);
@@ -3055,7 +3067,7 @@ function rCommitLog(entry,fromEl){
   const unlocked=Catnu.checkNewMilestones(STATE,Date.now());
   if(unlocked.length)STATE.milestones.push(...unlocked);
   if(!rSave())return;
-  if(unlocked.length){const parts=unlocked.map(m=>{const meta=Catnu.MILESTONE_META[m.id]||{};return `${meta.emoji||''} ${meta.label||m.id}`;});Catnu.showToast(`${rt('milestoneUnlocked')}${parts.join(' ／ ')}`);}
+  if(unlocked.length)announceMilestones(unlocked);
   else Catnu.showToast(rt('saved'));
   const firstFactId=newIds.find(id=>Catnu.behaviorFact(id));
   rFactPending=firstFactId?{id:firstFactId,fact:Catnu.behaviorFact(firstFactId)}:null;
@@ -3177,7 +3189,7 @@ Catnu.validateBackup = parsed => {
  return true;
 };
 function rCaptureDraft(){const form=document.getElementById('r-cat-form');if(!form)return;const f=new FormData(form);const existing=rEditing?STATE.cats.find(c=>c.id===rEditing):null;const avatarPhoto=(rDraft&&rDraft.avatarPhoto!==undefined)?rDraft.avatarPhoto:(existing?.avatarPhoto||null);const avatarPreset=(rDraft&&rDraft.avatarPreset!==undefined)?rDraft.avatarPreset:(existing?.avatarPreset||null);rDraft={name:f.get('name'),avatarPhoto,avatarPreset,ownerPerception:f.getAll('traits'),birthDate:f.get('birthDate')||'',homeDate:f.get('homeDate')||''};}
-function initRedesign(){rOriginalRaw=localStorage.getItem(STORAGE_KEY);if(rOriginalRaw){try{const parsed=JSON.parse(rOriginalRaw);rLoadBlocked=!Catnu.validateBackup(parsed)||!Catnu.migrateState(parsed);}catch(e){rLoadBlocked=true;}}STATE=Catnu.prepareRedesign(rLoadBlocked?defaultState():Catnu.Store.load());if(!rLoadBlocked){const unlocked=Catnu.checkNewMilestones(STATE,Date.now());if(unlocked.length){STATE.milestones.push(...unlocked);Catnu.Store.save(STATE);}if(STATE.cats.length){rRecapBanner=checkMonthlyRecap(STATE);if(rRecapBanner)Catnu.Store.save(STATE);}}rPersisted=JSON.stringify(STATE);const savedActive=STATE.settings.lastActiveCat;const savedActiveValid=savedActive==='all'||STATE.cats.some(c=>c.id===savedActive);rActive=STATE.cats.length===1?STATE.cats[0].id:(savedActiveValid?savedActive:'all');rRender();}
+function initRedesign(){let bootUnlocked=[];rOriginalRaw=localStorage.getItem(STORAGE_KEY);if(rOriginalRaw){try{const parsed=JSON.parse(rOriginalRaw);rLoadBlocked=!Catnu.validateBackup(parsed)||!Catnu.migrateState(parsed);}catch(e){rLoadBlocked=true;}}STATE=Catnu.prepareRedesign(rLoadBlocked?defaultState():Catnu.Store.load());if(!rLoadBlocked){const unlocked=Catnu.checkNewMilestones(STATE,Date.now());if(unlocked.length){STATE.milestones.push(...unlocked);Catnu.Store.save(STATE);bootUnlocked=unlocked;}if(STATE.cats.length){rRecapBanner=checkMonthlyRecap(STATE);if(rRecapBanner)Catnu.Store.save(STATE);}}rPersisted=JSON.stringify(STATE);const savedActive=STATE.settings.lastActiveCat;const savedActiveValid=savedActive==='all'||STATE.cats.some(c=>c.id===savedActive);rActive=STATE.cats.length===1?STATE.cats[0].id:(savedActiveValid?savedActive:'all');rRender();announceMilestones(bootUnlocked);}
 
 window.addEventListener('DOMContentLoaded', initRedesign);
 })();
