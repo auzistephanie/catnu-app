@@ -99,3 +99,37 @@ test('新 selectable controls 暴露 aria-pressed 狀態', () => {
   assert.match(html, /data-history-cat="all" aria-pressed=/);
   assert.match(html, /data-qid="\$\{q\.id\}" aria-pressed=/);
 });
+
+test('catVoice: 5 個分段＋冇數據各自揀返對應句子（四個 locale）', () => {
+  const cases = [[null, 'none'], [10, 1], [39, 1], [40, 2], [54, 2], [55, 3], [69, 3], [70, 4], [84, 4], [85, 5], [100, 5]];
+  for (const locale of Catnu.LOCALES) {
+    for (const [score, key] of cases) {
+      assert.ok(Catnu.CAT_VOICE[locale][key].includes(Catnu.catVoice(score, '2026-10-05', locale)), `${locale} ${score}`);
+    }
+  }
+  assert.ok(Catnu.CAT_VOICE['zh-HK'].none.includes(Catnu.catVoice(undefined, 'x')));
+});
+
+test('catVoice: 同日同分數固定同一句；每段至少兩句、不同日可以輪換', () => {
+  for (const locale of Catnu.LOCALES) {
+    assert.equal(Catnu.catVoice(88, '2026-10-05', locale), Catnu.catVoice(88, '2026-10-05', locale));
+    for (const k of [1, 2, 3, 4, 5]) assert.ok(Catnu.CAT_VOICE[locale][k].length >= 2);
+  }
+  const seen = new Set(Array.from({ length: 14 }, (_, i) => Catnu.catVoice(88, `2026-10-${String(i + 1).padStart(2, '0')}`, 'zh-HK')));
+  assert.equal(seen.size, 2);
+});
+
+test('TILE_REPLIES: 每個 tile id 每個 locale 都有 3 句；tileReply 可按 rand 決定', () => {
+  const ids = ['cuddle', 'slowblink', 'play', 'groom', 'lap', 'neg'];
+  const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  for (const id of ids) assert.match(html, new RegExp(`\\{ id: '${id}', emoji:`));
+  for (const locale of Catnu.LOCALES) {
+    for (const id of ids) {
+      assert.equal(Catnu.TILE_REPLIES[locale][id].length, 3, `${locale} ${id}`);
+      assert.ok(Catnu.TILE_REPLIES[locale][id].every(t => t.length > 0));
+    }
+  }
+  assert.equal(Catnu.tileReply('play', 'zh-HK', () => 0), '喵！再嚟一轉！');
+  assert.equal(Catnu.tileReply('play', 'zh-HK', () => 0.999), '仲未攰！');
+  assert.equal(Catnu.tileReply('nope', 'zh-HK'), '');
+});
