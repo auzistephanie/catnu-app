@@ -1,5 +1,17 @@
 # CHANGELOG — catnu-app
 
+## 2026-10-11 — 貓咪小實驗＋摸摸地圖＋貓咪說明書
+
+Plan：`docs/superpowers/plans/2026-10-11-cat-lab-touch-map-manual.md`。定位：「唔係翻譯機，係你隻貓嘅說明書」——有研究根據、教你讀懂自己隻貓；唔用 AI、唔遊戲化、唔係診斷。
+
+- **貓咪小實驗**（`Catnu.EXPERIMENTS`／`experimentSummary`／`nextExperiment`）：4 個 1 分鐘家居觀察，各附研究出處——認唔認得自己個名（Saito 2019）、慢眨眼對話（Humphrey 2020）、佢最鍾意咩（Vitale Shreve 2017）、返屋企重逢（Vitale 2019）。貓咪 tab 每隻貓有「🔬 貓咪小實驗 · 已試 n／4」；今日 tab 溫和提示下一個未試過嘅實驗，做齊就消失。每個結果都寫明「冇反應都好正常」。
+- **摸摸地圖**（`Catnu.TOUCH_ZONES`／`touchMap`）：側面貓 SVG 8 個部位，撳部位記低反應（頂返我／接受／走開）。每部位只計最近 10 次；≥2 次先下判斷：走開 ≥50% → 唔好摸（淡紫）、頂返我 ≥50% → 佢鍾意（珊瑚）、其餘可以接受。背脊／尾巴根／肚／手腳虛線提示（Haywood 2021 CAT 指引）。部位可用 Tab＋Enter 操作，有 aria-label。
+- **貓咪說明書**（`Catnu.catManual`＋`Catnu.shareCatManualCard`）：彙整摸摸地圖、實驗最新結果、最受落／要溫柔啲嘅動作（`actionCorrelation`）、最常見愛意表現；至少 2 類內容先出（避免得一段好單薄），唔夠就叫用戶先試多啲。可下載 1080×1350 PNG 交俾 cat sitter。
+- **資料**：state 新增 `experiments`、`touches` 兩個 array（additive，冇升 schemaVersion）；`prepareRedesign` 補空 array，`validateBackup` 驗證貓 id／實驗類型與結果／部位／反應，舊備份冇呢兩個 key 照過。
+- 其他：`wrapCenteredText` 回傳行數；英文 locale 用英文標點（`rPunct()`）；details 重 render 後保持展開（`rOpenDetails`）。
+- **驗證**：新增 `tests/lab.test.mjs` 14 個 test，`node --test tests/*.test.mjs` **105/105 全綠**。瀏覽器（375px＋桌面）實測：舊資料（2 貓 51 條記錄）正常載入；今日提示→實驗 dialog→記錄→提示轉下一個→做齊消失；貓咪 tab 實驗進度＋最新結果；摸摸地圖撳部位／Enter 鍵記錄、顏色＋圖例正確；說明書內容、冇資料時唔出下載掣、PNG 排版正常；英文版冇中文殘留；全部展開狀態對比度 0 個不達標；含新資料嘅備份通過還原驗證；零 console error、冇橫向 scroll。
+- **刻意未做**：刪除單條實驗／摸摸記錄、實驗提醒、landing 文案（建議下一輪做「唔係翻譯機，係你隻貓嘅說明書」）。
+
 ## 2026-10-11 — Clay 3D 文字對比度修正（WCAG AA）
 
 - **查核**：`--ink` 全過（≥8:1）；`--sub`（`#A98D7C`，2.8–3.1:1）、`--terra`（`#E0754F`，2.8–3.0:1）、`.btn` 白字（淺端漸變 1.92:1）、硬編碼 `#C9A78F`（2.05:1）／`#B99C8C`（2.35:1）、`.chip.sel`／`.repeat-btn` 字色 `#A14E2E`（3.56:1）全部跌穿 AA 一般文字 4.5:1。

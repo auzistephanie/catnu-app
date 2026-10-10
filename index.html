@@ -320,6 +320,25 @@ input,select{font-family:inherit}
 .r-app .r-avatar-preset{width:46px;height:46px;padding:0;border-radius:50%;overflow:hidden;background:linear-gradient(180deg,#FFE2B8,var(--mustard));box-shadow:var(--clay-card-sm);min-height:0}
 .r-avatar-preset img{width:100%;height:100%;object-fit:cover;display:block}
 .r-avatar-preset.selected{box-shadow:var(--clay-amber),0 0 0 3px var(--terra)}
+.r-lab,.r-touch{margin-top:12px;background:#FFF8F1;border-radius:16px;padding:10px 12px}
+.r-lab summary,.r-touch summary{font-weight:800;cursor:pointer;color:var(--teal-dk)}
+.lab-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line)}
+.lab-row:last-of-type{border-bottom:none}
+.lab-emoji{font-size:22px;flex:none}
+.lab-txt{flex:1;min-width:0}.lab-txt b{display:block;font-size:13.5px}.lab-txt small{color:var(--sub);font-size:11.5px}
+.lab-row button{flex:none}
+.lab-note,.lab-sci{font-size:12px;color:var(--sub);margin-top:8px;line-height:1.6}
+.lab-results{display:flex;flex-direction:column;gap:8px;margin:8px 0}
+.touch-svg{display:block;width:100%;max-width:340px;margin:8px auto 4px}
+.touch-svg .tz{stroke:var(--ink);stroke-width:2;cursor:pointer;transition:fill .2s}
+.touch-svg .tz:focus-visible{outline:none;stroke:var(--terra);stroke-width:4}
+.tz-loves{fill:#F7BFA6}.tz-ok{fill:#FFE2C6}.tz-avoid{fill:#D9BCE4}.tz-unknown{fill:#FFFDFA}
+.tz-caution.tz-unknown{stroke-dasharray:5 4}
+.touch-svg .deco{fill:#FFFDFA;stroke:var(--ink);stroke-width:2;pointer-events:none}
+.touch-svg .deco-line{fill:none;stroke:var(--ink);stroke-width:10;stroke-linecap:round;pointer-events:none}
+.touch-legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.touch-legend .chip{font-size:12px;padding:6px 10px}
+.manual-sec{margin:10px 0}.manual-sec b{display:block;color:var(--terra);font-size:13px}.manual-sec span{font-size:14px}
 @media(max-width:420px){.r-app{padding-left:14px;padding-right:14px}.r-card{padding:16px}.r-hero{padding:18px}.r-hero h2{font-size:22px}}
 /* 追返 reaction/action 記錄／milestones／核心分析：重用 classic .tile/.btn/.detail-toggle，
    但要贏返 .r-app button 嘅 reset（class+type specificity 高過淨 class 嘅 .tile/.btn） */
@@ -1472,6 +1491,90 @@ Catnu.monthlyRecap = function monthlyRecap(state, catId, monthKey) {
     daysTogetherDelta,
   };
 };
+/* @LOGIC:LAB — 貓咪小實驗（每個實驗對應一份研究；結果文字喺 copyRows 嘅 res_<result>）*/
+Catnu.EXPERIMENTS = [
+  { id: 'name',    emoji: '📛', results: ['strong', 'subtle', 'none'] },
+  { id: 'blink',   emoji: '😌', results: ['returned', 'approached', 'none'] },
+  { id: 'prefer',  emoji: '🎁', results: ['social', 'food', 'toy', 'none'] },
+  { id: 'reunion', emoji: '🚪', results: ['greet', 'nearby', 'carryon'] },
+];
+
+Catnu.experimentSummary = function experimentSummary(experiments, catId) {
+  const out = {};
+  for (const def of Catnu.EXPERIMENTS) {
+    const rows = experiments.filter(x => x.catId === catId && x.type === def.id);
+    const counts = Object.fromEntries(def.results.map(r => [r, 0]));
+    rows.forEach(x => { if (counts[x.result] !== undefined) counts[x.result]++; });
+    const last = rows.reduce((best, x) => (!best || x.ts > best.ts ? x : best), null);
+    out[def.id] = { count: rows.length, counts, latest: last ? { result: last.result, date: last.date } : null };
+  }
+  return out;
+};
+
+Catnu.nextExperiment = function nextExperiment(experiments, catId) {
+  const def = Catnu.EXPERIMENTS.find(e => !experiments.some(x => x.catId === catId && x.type === e.id));
+  return def ? def.id : null;
+};
+
+/* @LOGIC:TOUCH — 摸摸地圖（參考 Haywood 2021 CAT 指引；caution＝好多貓都敏感嘅位置）*/
+Catnu.TOUCH_ZONES = [
+  { id: 'cheek', caution: false }, { id: 'chin', caution: false }, { id: 'earbase', caution: false }, { id: 'head', caution: false },
+  { id: 'back', caution: true }, { id: 'tailbase', caution: true }, { id: 'belly', caution: true }, { id: 'paws', caution: true },
+];
+Catnu.TOUCH_REACTIONS = ['more', 'ok', 'stop'];
+Catnu.TOUCH_WINDOW = 10;
+
+Catnu.touchMap = function touchMap(touches, catId) {
+  const out = {};
+  for (const z of Catnu.TOUCH_ZONES) {
+    const rows = touches.filter(t => t.catId === catId && t.zone === z.id)
+      .sort((p, q) => q.ts - p.ts).slice(0, Catnu.TOUCH_WINDOW);
+    const n = rows.length;
+    const more = rows.filter(t => t.reaction === 'more').length;
+    const ok = rows.filter(t => t.reaction === 'ok').length;
+    const stop = rows.filter(t => t.reaction === 'stop').length;
+    let verdict = 'unknown';
+    if (n >= 2) verdict = stop / n >= 0.5 ? 'avoid' : more / n >= 0.5 ? 'loves' : 'ok';
+    out[z.id] = { n, more, ok, stop, verdict, caution: z.caution };
+  }
+  return out;
+};
+
+/* @LOGIC:MANUAL — 貓咪說明書：將摸摸地圖＋實驗＋互動分析整理成一頁（唔係診斷）*/
+Catnu.MANUAL_MIN_SECTIONS = 2; // 至少 2 類內容先出說明書，避免得一段好單薄
+
+Catnu.catManual = function catManual(state, catId, nowTs) {
+  if (!(state.cats || []).some(c => c.id === catId)) return null;
+  const map = Catnu.touchMap(state.touches || [], catId);
+  const zoneIds = Catnu.TOUCH_ZONES.map(z => z.id);
+  const touchLoves = zoneIds.filter(z => map[z].verdict === 'loves');
+  const touchAvoid = zoneIds.filter(z => map[z].verdict === 'avoid');
+
+  const summary = Catnu.experimentSummary(state.experiments || [], catId);
+  const experiments = Object.fromEntries(Catnu.EXPERIMENTS.map(e => [e.id, summary[e.id].latest ? summary[e.id].latest.result : null]));
+
+  const logs = state.logs || [];
+  const bestActions = [], warnActions = [];
+  for (const a of Catnu.ACTIONS) {
+    const r = Catnu.actionCorrelation(logs, catId, a.id, nowTs);
+    if (r.positiveFinding) bestActions.push(a.id);
+    else if (r.negativeWarning) warnActions.push(a.id);
+  }
+
+  const counts = {};
+  logs.filter(l => l.catId === catId).forEach(l => (l.reactions || []).forEach(r => {
+    if (Catnu.REACTION_POLARITY[r] > 0) counts[r] = (counts[r] || 0) + 1;
+  }));
+  const topReactions = Object.entries(counts)
+    .sort((p, q) => q[1] - p[1] || (p[0] < q[0] ? -1 : 1)).slice(0, 3).map(([id]) => id);
+
+  const expDone = Object.values(experiments).filter(Boolean).length;
+  const groups = [touchLoves.length, touchAvoid.length, expDone, bestActions.length, warnActions.length, topReactions.length];
+  const filled = groups.reduce((a, b) => a + b, 0);
+  const sections = groups.filter(n => n > 0).length;
+  return { catId, touchLoves, touchAvoid, experiments, bestActions, warnActions, topReactions, filled, sections, ready: sections >= Catnu.MANUAL_MIN_SECTIONS };
+};
+
 /* @APP:STORE */
 const STORAGE_KEY = 'catnu.v1';
 
@@ -2900,6 +3003,7 @@ function wrapCenteredText(ctx, text, cx, y, maxWidth, lineHeight) {
   }
   if (line) lines.push(line);
   lines.forEach((l, i) => ctx.fillText(l, cx, y + i * lineHeight));
+  return lines.length;
 }
 
 /* ── Share 卡（奶茶 clay 視覺，1080×1350 IG portrait；三款共用底框）── */
@@ -3087,6 +3191,28 @@ Catnu.shareMonthlyRecapCard = function shareMonthlyRecapCard(state, cat, recap, 
   downloadCanvas(canvas, `catnu-monthly-${cat.id}-${monthKey}.png`);
 };
 
+Catnu.shareCatManualCard = function shareCatManualCard(cat, title, sections, footer) {
+  const { canvas, ctx } = newShareCanvas();
+  ctx.textAlign = 'center';
+  ctx.font = 'bold 54px "M PLUS Rounded 1c","Noto Sans TC",sans-serif';
+  ctx.fillStyle = '#7A4A38';
+  let y = 340 + (wrapCenteredText(ctx, title, 540, 340, 760, 64) - 1) * 64 + 90;
+  for (const [heading, body] of sections) {
+    if (y > 1090) break;
+    ctx.font = 'bold 32px "Noto Sans TC",sans-serif';
+    ctx.fillStyle = '#A6573A';
+    ctx.fillText(heading, 540, y);
+    ctx.font = '32px "Noto Sans TC",sans-serif';
+    ctx.fillStyle = '#5C4638';
+    y += 48;
+    y += wrapCenteredText(ctx, body, 540, y, 740, 44) * 44 + 34;
+  }
+  ctx.font = '24px "Noto Sans TC",sans-serif';
+  ctx.fillStyle = '#6E5A4E';
+  wrapCenteredText(ctx, footer, 540, 1150, 760, 32);
+  downloadCanvas(canvas, `catnu-guide-${cat.id}-${todayStr()}.png`);
+};
+
 /* @APP:BOOT */
 // Local redesign: additive schema; legacy logs and quests remain intact.
 Catnu.LOCALES = ['zh-HK','zh-TW','zh-CN','en'];
@@ -3124,12 +3250,47 @@ const copyRows = {
  original:['你原本覺得','你原本覺得','你原本觉得','Your first impression'], observed:['我哋逐漸發現','我們逐漸發現','我们逐渐发现','What we’re noticing'], pending:['仲有好多可以慢慢了解','還有很多可以慢慢理解','还有很多可以慢慢了解','Still getting to know you'], confidence:['觀察信心','觀察信心','观察信心','Observation confidence'], low:['初步','初步','初步','Early'], growing:['累積中','累積中','积累中','Growing'], feedback:['呢個印象準唔準？','這個印象準確嗎？','这个印象准确吗？','Does this impression feel right?'], accurate:['幾準','準確','准确','Feels right'], unsure:['未肯定','不確定','不确定','Not sure'], inaccurate:['唔太似','不太像','不太像','Not quite'], revised:['你嘅回饋提醒我哋，暫時唔下定論','你的回饋提醒我們，暫時不下定論','你的反馈提醒我们，暂时不下定论','Your feedback reminds us to keep this open.'],
  compare:['每隻貓，都有自己嘅節奏','每隻貓，都有自己的步調','每只猫，都有自己的节奏','Every cat has their own rhythm'], demo:['示範好物 · 冇接商店或付款','示範好物 · 尚未連接商店或付款','示范好物 · 尚未连接商店或付款','Demo picks · no store connection or checkout'], sponsored:['贊助示範','贊助示範','赞助示范','Sponsored demo'], wand:['逗貓棒','逗貓棒','逗猫棒','Teaser wand'], bed:['貓窩','貓窩','猫窝','Cat bed'], scratch:['大型抓板','大型抓板','大型抓板','Large scratcher'], match:['配合已觀察到嘅親近偏好','符合已觀察到的親近偏好','符合已观察到的亲近偏好','Matches observed interest in shared interaction'], neutral:['了解多啲之後，再調整推薦','了解更多之後，再調整推薦','了解更多之后，再调整推荐','Suggestions improve as we learn more'], shared:['家庭共享用品；每隻貓仍需要自己嘅空間','家庭共享用品；每隻貓仍需要自己的空間','家庭共享用品；每只猫仍需要自己的空间','Shared household item; each cat still needs their own space'],
  backup:['下載完整備份','下載完整備份','下载完整备份','Download full backup'], restore:['還原備份','還原備份','恢复备份','Restore backup'], confirmRestore:['將取代呢個瀏覽器目前資料。確認還原？','將取代這個瀏覽器目前資料。確認還原？','将替换此浏览器当前数据。确认恢复？','Replace current browser data with this backup?'], error:['未能儲存，請檢查檔案或裝置空間','無法儲存，請檢查檔案或裝置空間','无法保存，请检查文件或设备空间','Could not save. Check the file or device storage.'],
- free:['Free · 多貓免費使用','Free · 多貓免費使用','Free · 多猫免费使用','Free · multiple cats included'], future:['Cat+ 訂閱／年費／終身及進階家庭洞察：未來架構，尚未開售','Cat+ 訂閱／年繳／終身與進階家庭洞察：未來架構，尚未販售','Cat+ 订阅／年费／终身及高级家庭洞察：未来架构，尚未开售','Cat+ monthly / annual / lifetime and advanced family insights: future only'], legacy:['保留的互動記錄','保留的互動記錄','保留的互动记录','Preserved interaction records'], edit:['調整外觀與初步印象','調整外觀與初步印象','调整外观与初步印象','Edit appearance and first impression'], linked:['連結貓咪','連結貓咪','关联猫咪','Linked cats']
+ free:['Free · 多貓免費使用','Free · 多貓免費使用','Free · 多猫免费使用','Free · multiple cats included'], future:['Cat+ 訂閱／年費／終身及進階家庭洞察：未來架構，尚未開售','Cat+ 訂閱／年繳／終身與進階家庭洞察：未來架構，尚未販售','Cat+ 订阅／年费／终身及高级家庭洞察：未来架构，尚未开售','Cat+ monthly / annual / lifetime and advanced family insights: future only'], legacy:['保留的互動記錄','保留的互動記錄','保留的互动记录','Preserved interaction records'], edit:['調整外觀與初步印象','調整外觀與初步印象','调整外观与初步印象','Edit appearance and first impression'], linked:['連結貓咪','連結貓咪','关联猫咪','Linked cats'],
+
+ labTitle:['貓咪小實驗','貓咪小實驗','猫咪小实验','Little cat experiments'], labProgress:['已試 {n}／4','已試 {n}／4','已试 {n}／4','{n}/4 tried'], labTry:['試吓','試試看','试试看','Try it'], labAgain:['再試一次','再試一次','再试一次','Try again'], labNotYet:['未試過','還沒試過','还没试过','Not tried yet'],
+ labNote:['結果唔係考試：冇反應都好正常，貓有自己嘅心情。','結果不是考試：沒有反應也很正常，貓有自己的心情。','结果不是考试：没有反应也很正常，猫有自己的心情。','Not a test — no reaction is perfectly normal. Cats have their own moods.'],
+ labSuggest:['今日想唔想試個小實驗？','今天想試個小實驗嗎？','今天想试个小实验吗？','Try a little experiment today?'], labResultPrompt:['佢點反應？','牠怎樣反應？','它怎样反应？','How did they respond?'],
+ exp_name:['認唔認得自己個名','認不認得自己的名字','认不认得自己的名字','Do they know their name?'],
+ exp_name_sci:['日本研究：78 隻貓聽到自己個名，反應明顯大過相似嘅字（Saito 2019）','日本研究：78 隻貓聽到自己的名字，反應明顯大於相似的詞（Saito 2019）','日本研究：78 只猫听到自己的名字，反应明显大于相似的词（Saito 2019）','Japanese study: 78 cats reacted more to their own name than to similar words (Saito 2019)'],
+ exp_name_steps:['等佢放鬆、冇望住你嗰陣，用平時語氣逐個講 4 個同佢個名差唔多長嘅字，每個隔 15 秒；最後叫佢個名一次。','趁牠放鬆、沒看著你時，用平常語氣逐一說 4 個和牠名字差不多長的詞，每個間隔 15 秒；最後叫牠的名字一次。','趁它放松、没看着你时，用平常语气逐一说 4 个和它名字差不多长的词，每个间隔 15 秒；最后叫它的名字一次。','When they are relaxed and not looking at you, say 4 words about as long as their name in your normal voice, 15 seconds apart. Then say their name once.'],
+ res_strong:['郁耳仔／轉頭，仲行過嚟或者叫返你','動耳朵／轉頭，還走過來或回應你','动耳朵／转头，还走过来或回应你','Turned ears or head, and came over or called back'], res_subtle:['淨係郁吓耳仔或者轉頭','只是動耳朵或轉頭','只是动耳朵或转头','Just an ear twitch or head turn'], res_none:['冇乜反應','沒什麼反應','没什么反应','No visible reaction'],
+ exp_blink:['慢眨眼對話','慢眨眼對話','慢眨眼对话','Slow-blink conversation'],
+ exp_blink_sci:['英國研究：主人慢眨眼之後，貓更常眨返，亦更願意行近（Humphrey 2020）','英國研究：主人慢眨眼之後，貓更常眨回來，也更願意靠近（Humphrey 2020）','英国研究：主人慢眨眼之后，猫更常眨回来，也更愿意靠近（Humphrey 2020）','UK study: after owners slow-blinked, cats blinked back more and approached more readily (Humphrey 2020)'],
+ exp_blink_steps:['坐喺佢 1 米外，望住佢，慢慢半閉眼、合埋 2 秒再打開，重複 3 次。','坐在牠 1 公尺外，看著牠，慢慢半閉眼、閉上 2 秒再張開，重複 3 次。','坐在它 1 米外，看着它，慢慢半闭眼、闭上 2 秒再张开，重复 3 次。','Sit about a metre away and look at them. Slowly narrow your eyes, close them for 2 seconds, then open. Repeat 3 times.'],
+ res_returned:['佢眨返／瞇埋眼','牠眨回來／瞇起眼','它眨回来／眯起眼','They blinked or narrowed their eyes back'], res_approached:['佢行埋嚟','牠走過來','它走过来','They came closer'],
+ exp_prefer:['佢最鍾意咩','牠最喜歡什麼','它最喜欢什么','What do they choose first?'],
+ exp_prefer_sci:['美國研究：一半嘅貓揀咗同人互動，多過揀食物同玩具（Vitale Shreve 2017）','美國研究：一半的貓選擇與人互動，多於選食物和玩具（Vitale Shreve 2017）','美国研究：一半的猫选择与人互动，多于选食物和玩具（Vitale Shreve 2017）','US study: half the cats chose time with a person over food or toys (Vitale Shreve 2017)'],
+ exp_prefer_steps:['佢唔肚餓、唔眼瞓嗰陣，喺地下放一粒小食同一件玩具，你坐喺側邊伸隻手出嚟，睇佢第一樣去邊度。','趁牠不餓也不睏時，在地上放一顆零食和一個玩具，你坐在旁邊伸出手，看牠第一個去哪裡。','趁它不饿也不困时，在地上放一颗零食和一个玩具，你坐在旁边伸出手，看它第一个去哪里。','When they are neither hungry nor sleepy, put a treat and a toy on the floor, sit nearby with your hand out, and see what they go to first.'],
+ res_social:['你 🤲','你 🤲','你 🤲','You 🤲'], res_food:['小食 🍗','零食 🍗','零食 🍗','The treat 🍗'], res_toy:['玩具 🧶','玩具 🧶','玩具 🧶','The toy 🧶'],
+ exp_reunion:['返屋企重逢','回家重逢','回家重逢','Coming-home reunion'],
+ exp_reunion_sci:['美國研究：約 65% 貓同主人係安全型依附——重逢時會行近，又好快放鬆（Vitale 2019）','美國研究：約 65% 貓與主人是安全型依附——重逢時會靠近，又很快放鬆（Vitale 2019）','美国研究：约 65% 猫与主人是安全型依恋——重逢时会靠近，又很快放松（Vitale 2019）','US study: about 65% of cats are securely attached — they greet you, then settle quickly (Vitale 2019)'],
+ exp_reunion_steps:['下次出完街返屋企，入門頭 2 分鐘唔好主動叫佢，淨係留意佢第一個反應。一次觀察，唔代表任何分類。','下次出門回家，進門前 2 分鐘不要主動叫牠，只留意牠的第一個反應。一次觀察，不代表任何分類。','下次出门回家，进门前 2 分钟不要主动叫它，只留意它的第一个反应。一次观察，不代表任何分类。','Next time you come home, don’t call them for the first 2 minutes — just notice their first response. One observation, not a label.'],
+ res_greet:['行過嚟迎接／磨蹭我','走過來迎接／磨蹭我','走过来迎接／蹭我','Came to greet me / rubbed against me'], res_nearby:['喺附近望住我','在附近看著我','在附近看着我','Watched me from nearby'], res_carryon:['繼續做自己嘢','繼續做自己的事','继续做自己的事','Carried on with their own thing'],
+
+ touchTitle:['摸摸地圖','摸摸地圖','摸摸地图','Petting map'],
+ touchHint:['撳你啱啱摸過嘅位置。小貼士：摸 3 秒就停，睇佢會唔會頂返你要多啲——俾佢揀，佢會更放心。','點你剛剛摸過的位置。小提示：摸 3 秒就停，看牠會不會頂回來要更多——讓牠選，牠會更安心。','点你刚刚摸过的位置。小提示：摸 3 秒就停，看它会不会顶回来要更多——让它选，它会更安心。','Tap where you just stroked them. Tip: stroke for 3 seconds, then pause and see if they ask for more — letting them choose helps them feel safe.'],
+ touchAsk:['你摸咗佢嘅{zone}，佢點反應？','你摸了牠的{zone}，牠怎樣反應？','你摸了它的{zone}，它怎样反应？','You stroked their {zone}. How did they respond?'],
+ touch_more:['頂返我／要多啲 😻','頂回來／想要更多 😻','顶回来／想要更多 😻','Leaned in / wanted more 😻'], touch_ok:['接受，冇特別反應 😐','接受，沒特別反應 😐','接受，没特别反应 😐','Accepted it 😐'], touch_stop:['走開／甩尾／耳仔向後 😾','走開／甩尾／耳朵向後 😾','走开／甩尾／耳朵向后 😾','Moved away / tail flick / ears back 😾'],
+ zone_cheek:['面頰','臉頰','脸颊','cheeks'], zone_chin:['下巴','下巴','下巴','chin'], zone_earbase:['耳仔底','耳朵根','耳朵根','base of ears'], zone_head:['頭頂','頭頂','头顶','top of head'], zone_back:['背脊','背部','背部','back'], zone_tailbase:['尾巴根','尾巴根','尾巴根','base of tail'], zone_belly:['肚','肚子','肚子','belly'], zone_paws:['手腳','腳掌','脚掌','paws'],
+ verdict_loves:['佢鍾意','牠喜歡','它喜欢','Loves it'], verdict_ok:['可以接受','可以接受','可以接受','Fine'], verdict_avoid:['唔好摸','先別摸','先别摸','Avoid'], verdict_unknown:['未知','未知','未知','Not sure yet'],
+ touchCaution:['虛線位置好多貓都唔鍾意被摸，試之前睇清楚佢身體語言。','虛線位置很多貓都不喜歡被摸，嘗試前先看清楚牠的身體語言。','虚线位置很多猫都不喜欢被摸，尝试前先看清楚它的身体语言。','Dashed areas are sensitive for many cats — read their body language first.'],
+ touchSource:['參考：Haywood 等 2021 嘅 CAT 指引（俾佢揀、留意反應、揀啱位置）','參考：Haywood 等 2021 的 CAT 指引（讓牠選擇、留意反應、選對位置）','参考：Haywood 等 2021 的 CAT 指引（让它选择、留意反应、选对位置）','Based on the CAT guidelines (Haywood et al. 2021): choice, attention, touch.'],
+
+ manualOpen:['📋 睇{name}說明書','📋 看{name}說明書','📋 看{name}说明书','📋 {name}’s guide'], manualTitle:['{name}說明書','{name}說明書','{name}说明书','{name}’s guide'],
+ manualTouchLoves:['最鍾意被摸','最喜歡被摸','最喜欢被摸','Favourite petting spots'], manualTouchAvoid:['唔好摸','先別摸','先别摸','Please avoid'], manualBest:['佢最受落','牠最受用','它最受用','What works best'], manualWarn:['要溫柔啲','要溫柔一點','要温柔一点','Go gently with'], manualReactions:['佢點表達愛意','牠怎樣表達愛意','它怎样表达爱意','How they show love'], manualExperiments:['小實驗結果','小實驗結果','小实验结果','Experiment results'],
+ manualEmpty:['仲未夠資料：試幾個小實驗、喺摸摸地圖記低幾次，說明書就會慢慢寫出嚟。','資料還不夠：試幾個小實驗、在摸摸地圖記錄幾次，說明書就會慢慢寫出來。','资料还不够：试几个小实验、在摸摸地图记录几次，说明书就会慢慢写出来。','Not enough yet — try a few experiments and log some petting, and the guide will fill itself in.'],
+ manualDownload:['⤴ 下載說明書圖（可以交俾 cat sitter）','⤴ 下載說明書圖（可以交給保姆）','⤴ 下载说明书图（可以交给上门喂猫）','⤴ Download as image (for your cat sitter)'],
+ manualDisclaimer:['根據你自己嘅記錄整理，唔係醫療或行為診斷。','根據你自己的記錄整理，並非醫療或行為診斷。','根据你自己的记录整理，并非医疗或行为诊断。','Based on your own records — not a medical or behavioural diagnosis.']
 };
 Catnu.LOCALES.forEach((locale,i)=>Catnu.COPY[locale]=Object.fromEntries(Object.entries(copyRows).map(([k,v])=>[k,v[i]])));
 Catnu.prepareRedesign = state => {
  state.settings ||= {}; state.settings.locale = Catnu.LOCALES.includes(state.settings.locale)?state.settings.locale:'zh-HK'; state.settings.region = ['HK','TW','CN','OTHER'].includes(state.settings.region)?state.settings.region:'HK';
- for(const key of ['moments','assets','observations','insightFeedback','relationships']) if(!Array.isArray(state[key])) state[key]=[];
+ for(const key of ['moments','assets','observations','insightFeedback','relationships','experiments','touches']) if(!Array.isArray(state[key])) state[key]=[];
  state.cats.forEach(c=>{c.avatarPhoto ||= null; if(!Catnu.AVATAR_PRESETS.includes(c.avatarPreset)) c.avatarPreset=null; if(!Array.isArray(c.ownerPerception)) c.ownerPerception=[]; c.observedTraits ||= []; c.observationConfidence ||= 'low';});
  return state;
 };
@@ -3244,10 +3405,105 @@ function rAvatar(cat,size=110){const name=cat?.name||'';const photo=cat?.avatarP
 function rLocaleControls(){return `<div class="r-fields"><label>${rt('region')}<select id="r-region">${['HK','TW','CN','OTHER'].map((v,i)=>`<option value="${v}" ${STATE.settings.region===v?'selected':''}>${rt(['hk','tw','cn','other'][i])}</option>`).join('')}</select></label><label>${rt('language')}<select id="r-locale">${Catnu.LOCALES.map((v,i)=>`<option value="${v}" ${STATE.settings.locale===v?'selected':''}>${['繁體中文（香港）','繁體中文（台灣）','简体中文','English'][i]}</option>`).join('')}</select></label></div>`;}
 function rCatForm(){const c=rDraft||STATE.cats.find(c=>c.id===rEditing);const photo=c?.avatarPhoto||null;const preset=(c?.avatarPreset&&Catnu.AVATAR_PRESETS.includes(c.avatarPreset))?c.avatarPreset:Catnu.AVATAR_PRESETS[0];return `<section class="r-card"><h2>${rt(rEditing?'edit':STATE.cats.length?'add':'promise')}</h2><p>${rt(rLoadBlocked?'damaged':'optional')}</p>${rLoadBlocked?`<button data-action="backup">${rt('backup')}</button>`:''}${rLocaleControls()}<form id="r-cat-form"><div class="r-avatar-upload">${rAvatar({name:c?.name||rt('cats'),avatarPhoto:photo,avatarPreset:preset},110)}<input type="file" id="r-avatar-file" accept="image/*" capture="environment" aria-label="${rt('changePhoto')}"><span class="r-avatar-edit" aria-hidden="true">📷</span></div><p>${rt('avatarPhoto')}</p>${!photo?`<small>${rt('startAvatar')}</small><div class="r-avatar-presets" role="group" aria-label="${rt('startAvatar')}">${Catnu.AVATAR_PRESETS.map(p=>`<button type="button" class="r-avatar-preset ${preset===p?'selected':''}" data-preset="${p}" aria-label="${p}"><img src="images/avatars/cat-avatar-${p}.png" alt=""></button>`).join('')}</div>`:''}<label>${rt('name')}<input name="name" required maxlength="40" value="${esc(c?.name||'')}" autocomplete="off"></label><fieldset><legend>${rt('impression')}</legend>${['social','playful','quiet','independent'].map(k=>`<label class="r-check"><input type="checkbox" name="traits" value="${k}" ${c?.ownerPerception.includes(k)?'checked':''}>${rt(k)}</label>`).join('')}</fieldset><details><summary>${rt('details')}</summary><label>${rt('birthday')}<input type="date" name="birthDate" value="${esc(c?.birthDate||'')}"></label><label>${rt('home')}<input type="date" name="homeDate" value="${esc(c?.homeDate||'')}"></label></details><button class="r-primary">${rt(rEditing?'save':'start')}</button>${STATE.cats.length?`<button type="button" data-action="cancel">${rt('cancel')}</button>`:''}</form>${!STATE.cats.length?`<label>${rt('restore')}<input id="r-restore" type="file" accept="application/json"></label>`:''}</section>`;}
 function rMomentForm(){return `<section class="r-card"><h2>${rt('moment')}</h2><form id="r-moment"><label>${rt('note')}<textarea name="note" maxlength="500"></textarea></label><label>${rt('photo')}<input type="file" name="photo" accept="image/*" capture="environment"></label><fieldset><legend>${rt('linked')}</legend>${STATE.cats.map(c=>`<label class="r-check"><input type="checkbox" name="cats" value="${esc(c.id)}" ${rActive==='all'||rActive===c.id?'checked':''}>${esc(c.name)}</label>`).join('')}</fieldset><button class="r-primary">${rt('save')}</button></form></section>`;}
-function rToday(){const cat=Catnu.dailyCat(STATE,todayStr());const answered=STATE.observations.some(o=>o.date===todayStr());const question=Catnu.dailyQuestion(STATE,todayStr());return `<section class="r-hero"><span class="r-kicker">${rt('promise')}</span>${rActive==='all'&&STATE.cats.length>1?`<div class="r-family-art">${STATE.cats.map(c=>rAvatar(c,100)).join('')}</div>`:rAvatar(STATE.cats.find(c=>c.id===rActive)||cat,140)}<h2>${rActive==='all'&&STATE.cats.length>1?rt('family'):esc((STATE.cats.find(c=>c.id===rActive)||cat).name)}</h2><p>${rt('question')} · ${esc(cat.name)}</p><button class="r-primary" data-action="blink">${rt('blink')}</button></section>${rRecapBanner?`<button type="button" class="backup-nudge" data-recap-open><span>📖</span><div>${esc(rt('recapReady').replace('{month}',rRecapMonthLabel(rRecapBanner.monthKey,STATE.settings.locale)))}<small>${rt('recapSub')}</small></div></button>`:''}${rLogWidget(rActive!=='all'?rActive:cat.id)}${rFactPending?`<section class="r-card" id="r-fact-card"><h2 style="font-size:16px">${rt('factTitle')}</h2><p>${esc(rFactPending.fact)}</p><button type="button" data-fact-dismiss>${rt('factDismiss')}</button></section>`:''}<section class="r-card"><p>${rt('rotate')}</p><h2>${rt(answered?'done':{'quiet-approach':'ask','toy-interest':'playAsk','settle-rest':'restAsk'}[question])}</h2>${answered?'':`<div class="r-answer">${['yes','no','skip'].map(k=>`<button data-answer="${k}">${rt(k==='no'&&question!=='quiet-approach'?'notToday':k)}</button>`).join('')}</div>`}</section>${rMomentForm()}`;}
+function rToday(){const cat=Catnu.dailyCat(STATE,todayStr());const answered=STATE.observations.some(o=>o.date===todayStr());const question=Catnu.dailyQuestion(STATE,todayStr());return `<section class="r-hero"><span class="r-kicker">${rt('promise')}</span>${rActive==='all'&&STATE.cats.length>1?`<div class="r-family-art">${STATE.cats.map(c=>rAvatar(c,100)).join('')}</div>`:rAvatar(STATE.cats.find(c=>c.id===rActive)||cat,140)}<h2>${rActive==='all'&&STATE.cats.length>1?rt('family'):esc((STATE.cats.find(c=>c.id===rActive)||cat).name)}</h2><p>${rt('question')} · ${esc(cat.name)}</p><button class="r-primary" data-action="blink">${rt('blink')}</button></section>${rRecapBanner?`<button type="button" class="backup-nudge" data-recap-open><span>📖</span><div>${esc(rt('recapReady').replace('{month}',rRecapMonthLabel(rRecapBanner.monthKey,STATE.settings.locale)))}<small>${rt('recapSub')}</small></div></button>`:''}${rLogWidget(rActive!=='all'?rActive:cat.id)}${rLabSuggest(rActive!=='all'?rActive:cat.id)}${rFactPending?`<section class="r-card" id="r-fact-card"><h2 style="font-size:16px">${rt('factTitle')}</h2><p>${esc(rFactPending.fact)}</p><button type="button" data-fact-dismiss>${rt('factDismiss')}</button></section>`:''}<section class="r-card"><p>${rt('rotate')}</p><h2>${rt(answered?'done':{'quiet-approach':'ask','toy-interest':'playAsk','settle-rest':'restAsk'}[question])}</h2>${answered?'':`<div class="r-answer">${['yes','no','skip'].map(k=>`<button data-answer="${k}">${rt(k==='no'&&question!=='quiet-approach'?'notToday':k)}</button>`).join('')}</div>`}</section>${rMomentForm()}`;}
 function rMemories(){const moments=STATE.moments.filter(m=>rActive==='all'||m.catIds.includes(rActive));return `${rMomentForm()}${moments.slice().reverse().map(m=>{const asset=STATE.assets.find(a=>a.id===m.assetId);return `<article class="r-card">${asset&&/^data:image\/(jpeg|png|webp);base64,/.test(asset.data)?`<img class="r-photo" src="${esc(asset.data)}" alt="${esc(m.note)}">`:''}<p>${esc(m.note)}</p><small>${esc(m.date)} · ${m.catIds.map(id=>esc(STATE.cats.find(c=>c.id===id)?.name||'')).join(' · ')}</small></article>`;}).join('')||`<section class="r-hero">${rAvatar(STATE.cats[0])}<p>${rt('empty')}</p></section>`}<section class="r-card"><h2>${rt('legacy')}</h2>${STATE.logs.filter(l=>rActive==='all'||l.catId===rActive).slice().reverse().slice(0,rHistoryLimit).map(l=>`<p>${esc(l.note||l.notes||'')} <span>${esc([...(l.actions||[]),...(l.reactions||[])].map(id=>copyRows[id]?rt(id):STATE.customActions?.find(a=>a.id===id)?.label||id).join(' · '))}</span><small>${esc(new Date(l.ts||l.timestamp||Date.now()).toLocaleDateString(STATE.settings.locale))}</small></p>`).join('')}<small>${STATE.logs.length}</small>${STATE.logs.length>rHistoryLimit?`<button data-action="more">${rt('more')}</button>`:''}</section>`;}
 function rCatAnalysis(cat){const now=Date.now();const affection=Catnu.affectionScore(STATE.logs,cat.id,now);const level=affection.insufficient?null:Catnu.relationshipLevel(affection.score);const story=Catnu.weeklyStory(STATE.logs,cat.id,now);const insights=Catnu.generateInsights(STATE.logs,cat,now);return `<div class="minicard"><div><div class="mlbl">${rt('voiceTitle').replace('{name}',esc(cat.name))}</div><div class="voice-line">${esc(Catnu.catVoice(affection.insufficient?null:affection.score,todayStr(),STATE.settings.locale))}</div></div><div class="mheart">💗</div></div><div class="voice-sub">${affection.insufficient?`${rt('affectionLabel')} --`:`${rt('affectionLabel')} ${affection.score}${level?` · Lv.${level.lv} ${esc(level.title)}`:''}`}</div><div class="meter"><div style="width:${affection.insufficient?0:affection.score}%"></div></div>${affection.insufficient?`<div class="mlbl" style="margin-top:8px">${rt('affectionInsufficient')}</div>`:(level?`<div class="lvl-line"><span class="lvl-next" style="margin-left:0">${level.next?`仲差 ${level.next.pointsNeeded} 分升 Lv.${level.next.lv}「${esc(level.next.title)}」`:'頂級！繼續寵佢 👑'}</span></div>`:'')}<small class="voice-note">ⓘ ${rt('affectionNote')}</small>${renderWeeklyStoryCard(STATE,cat,story)}<div class="r-card" style="margin:12px 0 0;padding:14px"><h2 style="font-size:15px;margin:0 0 8px">${rt('insightsHeading')}</h2>${insights.length?insights.map(i=>`<div class="insight"><span>${insightIcon(i)}</span><span>${mdBold(i.text)}</span></div>`).join(''):`<div class="note">${rt('insightsEmpty')}</div>`}</div>${(()=>{const signal=Catnu.recentSignal(STATE.logs,cat.id,now);return signal?`<div class="r-card" style="margin:12px 0 0;padding:14px"><h2 style="font-size:15px;margin:0 0 6px">${rt('signalTitle')}</h2><p style="margin:0">${esc(signal.message)}</p><small>${rt('signalDisclaimer')}</small></div>`:'';})()}${rTimelineBlock(cat)}`;}
-function rCats(){return `${renderMilestoneWall(STATE)}${rFactsWall()}<p>${rt('compare')}</p>${STATE.cats.filter(c=>rActive==='all'||c.id===rActive).map(c=>{const i=Catnu.insight(STATE,c.id);return `<article class="r-card r-profile" data-cat-id="${esc(c.id)}">${rAvatar(c)}<h2>${esc(c.name)}</h2><p>${rt('original')} · ${c.ownerPerception.map(rt).join(' / ')||rt('pending')}</p><p>${rt('observed')} · ${i.revised?rt('revised'):Catnu.observedTraits(STATE,c.id).map(t=>rt(t.trait)).join(' / ')||rt('pending')}</p>${rCatAnalysis(c)}<small>${rt('confidence')}: ${rt(i.confidence)} (${i.count})</small>${i.count?`<p>${rt('feedback')}</p><div class="r-answer">${['accurate','unsure','inaccurate'].map(k=>`<button data-feedback="${k}" data-id="${esc(c.id)}">${rt(k)}</button>`).join('')}</div>`:''}<details><summary>${rt('history')}</summary>${STATE.observations.filter(o=>o.catId===c.id).slice(-5).reverse().map(o=>`<p><small>${esc(o.date)} · ${rt({'quiet-approach':'ask','toy-interest':'playAsk','settle-rest':'restAsk'}[o.question]||'ask')} · ${rt(o.answer==='no'?'notToday':o.answer)}</small></p>`).join('')}</details><button data-edit="${esc(c.id)}">${rt('edit')}</button></article>`;}).join('')}<button class="r-primary" data-action="add">${rt('add')}</button>`;}
+let rOpenDetails=new Set();
+function rPunct(){const en=STATE.settings.locale==='en';return {list:en?', ':'、',colon:en?': ':'：',semi:en?'; ':'；',open:en?' (':'（',close:en?')':'）'};}
+function rDetailsAttr(key){return `data-details-key="${esc(key)}" ${rOpenDetails.has(key)?'open':''}`;}
+function rLabBlock(cat){
+  const sum=Catnu.experimentSummary(STATE.experiments,cat.id);
+  const tried=Catnu.EXPERIMENTS.filter(e=>sum[e.id].count>0).length;
+  const rows=Catnu.EXPERIMENTS.map(e=>{const latest=sum[e.id].latest;return `<div class="lab-row"><span class="lab-emoji" aria-hidden="true">${e.emoji}</span><div class="lab-txt"><b>${rt('exp_'+e.id)}</b><small>${latest?`${esc(rt('res_'+latest.result))} · ${esc(latest.date)}`:rt('labNotYet')}</small></div><button type="button" data-exp-start="${e.id}" data-id="${esc(cat.id)}">${rt(latest?'labAgain':'labTry')}</button></div>`;}).join('');
+  return `<details class="r-lab" ${rDetailsAttr('lab:'+cat.id)}><summary>🔬 ${rt('labTitle')} · ${rt('labProgress').replace('{n}',tried)}</summary>${rows}<p class="lab-note">${rt('labNote')}</p></details>`;
+}
+function rLabSuggest(catId){
+  const next=Catnu.nextExperiment(STATE.experiments,catId);
+  return next?`<button type="button" class="backup-nudge" data-exp-start="${next}" data-id="${esc(catId)}"><span aria-hidden="true">🔬</span><div>${rt('labSuggest')}<small>${rt('exp_'+next)}</small></div></button>`:'';
+}
+function rExperimentOpen(type,catId){
+  const def=Catnu.EXPERIMENTS.find(e=>e.id===type);const cat=STATE.cats.find(c=>c.id===catId);if(!def||!cat)return;
+  const dialog=document.createElement('dialog');dialog.className='r-dialog';dialog.setAttribute('aria-labelledby','r-exp-title');
+  dialog.innerHTML=`<h2 id="r-exp-title">${def.emoji} ${rt('exp_'+type)} · ${esc(cat.name)}</h2><p class="lab-sci">${rt('exp_'+type+'_sci')}</p><p>${rt('exp_'+type+'_steps')}</p><p style="font-weight:800;margin-top:12px">${rt('labResultPrompt')}</p><div class="lab-results">${def.results.map(r=>`<button type="button" data-exp-result="${r}">${rt('res_'+r)}</button>`).join('')}</div><p class="lab-note">${rt('labNote')}</p><button type="button" data-exp-close>${rt('cancel')}</button>`;
+  document.getElementById('app').appendChild(dialog);
+  dialog.querySelector('[data-exp-close]').onclick=()=>dialog.close();
+  dialog.onclose=()=>dialog.remove();
+  dialog.querySelectorAll('[data-exp-result]').forEach(b=>b.onclick=()=>{
+    STATE.experiments.push({id:'x'+Date.now()+Math.random().toString(36).slice(2,6),catId,type,result:b.dataset.expResult,date:todayStr(),ts:Date.now()});
+    if(rSave()){rOpenDetails.add('lab:'+catId);dialog.close();rRender();Catnu.showToast(rt('saved'));}
+  });
+  dialog.showModal();
+}
+// 側面貓剪影；同一 zone 可以有多個形狀（例如四隻腳）。順序＝繪畫次序（後畫嘅喺上面）
+const TOUCH_SHAPES=[
+ ['paws','rect','x="104" y="146" width="18" height="42" rx="9"'],
+ ['paws','rect','x="134" y="148" width="18" height="40" rx="9"'],
+ ['paws','rect','x="200" y="148" width="18" height="40" rx="9"'],
+ ['paws','rect','x="230" y="146" width="18" height="42" rx="9"'],
+ ['back','path','d="M85 118 A85 44 0 0 1 255 118 Z"'],
+ ['belly','path','d="M85 118 A85 44 0 0 0 255 118 Z"'],
+ ['tailbase','circle','cx="255" cy="108" r="13"'],
+ ['head','circle','cx="72" cy="72" r="40"'],
+ ['earbase','ellipse','cx="52" cy="40" rx="11" ry="7"'],
+ ['earbase','ellipse','cx="92" cy="40" rx="11" ry="7"'],
+ ['cheek','circle','cx="48" cy="90" r="11"'],
+ ['chin','ellipse','cx="68" cy="108" rx="15" ry="8"'],
+];
+function rTouchSvg(cat){
+  const map=Catnu.touchMap(STATE.touches,cat.id);
+  const shapes=TOUCH_SHAPES.map(([zone,tag,attrs])=>{const z=map[zone];const label=`${rt('zone_'+zone)}${rPunct().colon}${rt('verdict_'+z.verdict)}`;return `<${tag} ${attrs} class="tz tz-${z.verdict}${z.caution?' tz-caution':''}" data-touch-zone="${zone}" data-id="${esc(cat.id)}" tabindex="0" role="button" aria-label="${esc(label)}"><title>${esc(label)}</title></${tag}>`;}).join('');
+  return `<svg class="touch-svg" viewBox="0 0 320 200" aria-label="${rt('touchTitle')}">`
+    +`<path class="deco-line" d="M262 104 C300 96 304 52 286 28"/>`
+    +`<path class="deco" d="M38 46 L46 8 L66 36 Z"/><path class="deco" d="M78 36 L98 8 L106 46 Z"/>`
+    +shapes
+    +`<g pointer-events="none"><circle cx="60" cy="68" r="4" fill="#5C4638"/><circle cx="86" cy="68" r="4" fill="#5C4638"/><path d="M69 80 L77 80 L73 85 Z" fill="#E8809A"/><path d="M73 85 Q69 90 65 88 M73 85 Q77 90 81 88" fill="none" stroke="#5C4638" stroke-width="1.6" stroke-linecap="round"/></g>`
+    +`</svg>`;
+}
+function rTouchBlock(cat){
+  const map=Catnu.touchMap(STATE.touches,cat.id);
+  const legend=Catnu.TOUCH_ZONES.filter(z=>map[z.id].n>0).map(z=>`<span class="chip tz-chip">${rt('zone_'+z.id)}${rPunct().colon}${rt('verdict_'+map[z.id].verdict)}${rPunct().open}${map[z.id].n}${rPunct().close}</span>`).join('');
+  return `<details class="r-touch" ${rDetailsAttr('touch:'+cat.id)}><summary>🖐️ ${rt('touchTitle')}</summary><p class="lab-note">${rt('touchHint')}</p>${rTouchSvg(cat)}${legend?`<div class="touch-legend">${legend}</div>`:''}<p class="lab-note">${rt('touchCaution')}</p><p class="lab-note">${rt('touchSource')}</p></details>`;
+}
+function rTouchOpen(zone,catId){
+  if(!Catnu.TOUCH_ZONES.some(z=>z.id===zone)||!STATE.cats.some(c=>c.id===catId))return;
+  const dialog=document.createElement('dialog');dialog.className='r-dialog';dialog.setAttribute('aria-labelledby','r-touch-title');
+  dialog.innerHTML=`<h2 id="r-touch-title">${rt('touchAsk').replace('{zone}',rt('zone_'+zone))}</h2><div class="lab-results">${Catnu.TOUCH_REACTIONS.map(r=>`<button type="button" data-touch-reaction="${r}">${rt('touch_'+r)}</button>`).join('')}</div><p class="lab-note">${rt('touchHint')}</p><button type="button" data-touch-close>${rt('cancel')}</button>`;
+  document.getElementById('app').appendChild(dialog);
+  dialog.querySelector('[data-touch-close]').onclick=()=>dialog.close();
+  dialog.onclose=()=>dialog.remove();
+  dialog.querySelectorAll('[data-touch-reaction]').forEach(b=>b.onclick=()=>{
+    STATE.touches.push({id:'t'+Date.now()+Math.random().toString(36).slice(2,6),catId,zone,reaction:b.dataset.touchReaction,ts:Date.now()});
+    if(rSave()){rOpenDetails.add('touch:'+catId);dialog.close();rRender();Catnu.showToast(rt('saved'));}
+  });
+  dialog.showModal();
+}
+function rManualSections(m){
+  const P=rPunct();
+  const join=ids=>ids.join(P.list);
+  const out=[];
+  if(m.touchLoves.length)out.push([rt('manualTouchLoves'),join(m.touchLoves.map(z=>rt('zone_'+z)))]);
+  if(m.touchAvoid.length)out.push([rt('manualTouchAvoid'),join(m.touchAvoid.map(z=>rt('zone_'+z)))]);
+  if(m.bestActions.length)out.push([rt('manualBest'),join(m.bestActions.map(a=>rt(a)))]);
+  if(m.warnActions.length)out.push([rt('manualWarn'),join(m.warnActions.map(a=>rt(a)))]);
+  if(m.topReactions.length)out.push([rt('manualReactions'),join(m.topReactions.map(r=>rt(r)))]);
+  const exps=Catnu.EXPERIMENTS.filter(e=>m.experiments[e.id]).map(e=>`${rt('exp_'+e.id)}${P.colon}${rt('res_'+m.experiments[e.id])}`);
+  if(exps.length)out.push([rt('manualExperiments'),exps.join(P.semi)]);
+  return out;
+}
+function rManualOpen(catId){
+  const cat=STATE.cats.find(c=>c.id===catId);if(!cat)return;
+  const m=Catnu.catManual(STATE,catId,Date.now());
+  const title=rt('manualTitle').replace('{name}',cat.name);
+  const sections=rManualSections(m);
+  const dialog=document.createElement('dialog');dialog.className='r-dialog';dialog.setAttribute('aria-labelledby','r-manual-title');
+  dialog.innerHTML=`<h2 id="r-manual-title">📋 ${esc(title)}</h2>${m.ready?sections.map(([h,b])=>`<div class="manual-sec"><b>${esc(h)}</b><span>${esc(b)}</span></div>`).join(''):`<p>${rt('manualEmpty')}</p>`}<p class="lab-note">${rt('manualDisclaimer')}</p>${m.ready?`<button type="button" class="r-primary" data-manual-download>${rt('manualDownload')}</button>`:''}<button type="button" data-manual-close>${rt('close')}</button>`;
+  document.getElementById('app').appendChild(dialog);
+  dialog.querySelector('[data-manual-close]').onclick=()=>dialog.close();
+  dialog.onclose=()=>dialog.remove();
+  const dl=dialog.querySelector('[data-manual-download]');if(dl)dl.onclick=()=>Catnu.shareCatManualCard(cat,title,sections,rt('manualDisclaimer'));
+  dialog.showModal();
+}
+function rCats(){return `${renderMilestoneWall(STATE)}${rFactsWall()}<p>${rt('compare')}</p>${STATE.cats.filter(c=>rActive==='all'||c.id===rActive).map(c=>{const i=Catnu.insight(STATE,c.id);return `<article class="r-card r-profile" data-cat-id="${esc(c.id)}">${rAvatar(c)}<h2>${esc(c.name)}</h2><p>${rt('original')} · ${c.ownerPerception.map(rt).join(' / ')||rt('pending')}</p><p>${rt('observed')} · ${i.revised?rt('revised'):Catnu.observedTraits(STATE,c.id).map(t=>rt(t.trait)).join(' / ')||rt('pending')}</p>${rCatAnalysis(c)}${rLabBlock(c)}${rTouchBlock(c)}<button type="button" class="r-primary" style="display:block;width:100%;margin:12px 0 8px" data-manual="${esc(c.id)}">${esc(rt('manualOpen').replace('{name}',c.name))}</button><small>${rt('confidence')}: ${rt(i.confidence)} (${i.count})</small>${i.count?`<p>${rt('feedback')}</p><div class="r-answer">${['accurate','unsure','inaccurate'].map(k=>`<button data-feedback="${k}" data-id="${esc(c.id)}">${rt(k)}</button>`).join('')}</div>`:''}<details><summary>${rt('history')}</summary>${STATE.observations.filter(o=>o.catId===c.id).slice(-5).reverse().map(o=>`<p><small>${esc(o.date)} · ${rt({'quiet-approach':'ask','toy-interest':'playAsk','settle-rest':'restAsk'}[o.question]||'ask')} · ${rt(o.answer==='no'?'notToday':o.answer)}</small></p>`).join('')}</details><button data-edit="${esc(c.id)}">${rt('edit')}</button></article>`;}).join('')}<button class="r-primary" data-action="add">${rt('add')}</button>`;}
 Catnu.getDemoPicks=(state,catId)=>{
  const household=catId==='all';const insight=household?null:Catnu.insight(state,catId);
  const relevant=insight?.trait==='social'&&!insight.revised;
@@ -3277,6 +3533,10 @@ app.querySelectorAll('[data-log-action]').forEach(c=>c.onclick=()=>{const id=c.d
 const logSubmit=app.querySelector('[data-log-submit]');if(logSubmit)logSubmit.onclick=()=>{const entry={catId:logSubmit.dataset.logCat,reactions:[...rLogReactions],actions:[...rLogActions]};rLogReactions=new Set();rLogActions=new Set();rLogDetailOpen=false;rCommitLog(entry,logSubmit);};
 app.querySelectorAll('.r-profile').forEach(art=>{const catId=art.dataset.catId;const shareBtn=art.querySelector('#weekly-share');if(shareBtn)shareBtn.onclick=()=>{const cat=STATE.cats.find(c=>c.id===catId);Catnu.shareWeeklyCard(STATE,cat,Catnu.weeklyReport(STATE.logs,catId,Date.now()));};});
 const factDismiss=app.querySelector('[data-fact-dismiss]');if(factDismiss)factDismiss.onclick=()=>{rFactPending=null;rRender();};
+app.querySelectorAll('[data-exp-start]').forEach(b=>b.onclick=()=>rExperimentOpen(b.dataset.expStart,b.dataset.id));
+app.querySelectorAll('[data-details-key]').forEach(d=>d.ontoggle=()=>{d.open?rOpenDetails.add(d.dataset.detailsKey):rOpenDetails.delete(d.dataset.detailsKey);});
+app.querySelectorAll('[data-touch-zone]').forEach(z=>{const open=()=>rTouchOpen(z.dataset.touchZone,z.dataset.id);z.onclick=open;z.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}};});
+app.querySelectorAll('[data-manual]').forEach(b=>b.onclick=()=>rManualOpen(b.dataset.manual));
 const recapOpenBtn=app.querySelector('[data-recap-open]');if(recapOpenBtn)recapOpenBtn.onclick=()=>rRecapOpen();
 const mf=app.querySelector('#r-moment');if(mf)mf.onsubmit=async e=>{e.preventDefault();const f=new FormData(mf);const ids=f.getAll('cats');const note=String(f.get('note')).trim();const file=f.get('photo');if(!ids.length||(!note&&!file?.size))return;const button=mf.querySelector('button');button.disabled=true;try{let asset=null;if(file?.size){if(!file.type.startsWith('image/')||file.size>15000000)throw Error('photo');asset={id:'a'+Date.now(),data:await rPhoto(file)};STATE.assets.push(asset);}const moment={id:'m'+Date.now(),catIds:ids,assetId:asset?.id||null,note,date:todayStr()};STATE.moments.push(moment);if(!rSave())return;rTab='memories';rRender();}catch(err){Catnu.showToast(rt('error'));}finally{button.disabled=false;}};
 const restore=app.querySelector('#r-restore');if(restore)restore.onchange=async()=>{try{const parsed=JSON.parse(await restore.files[0].text());if(!Catnu.validateBackup(parsed))throw Error('schema');const s=Catnu.migrateState(parsed);if(!s)throw Error('schema');rRestorePreview(s);}catch(e){Catnu.showToast(rt('error'));}};
@@ -3300,12 +3560,14 @@ Catnu.validateBackup = parsed => {
  if(!parsed||![1,2].includes(parsed.schemaVersion)||!Array.isArray(parsed.cats)||!Array.isArray(parsed.logs))return false;
  if(parsed.cats.some(c=>!c||typeof c.id!=='string'||typeof c.name!=='string'))return false;
  const ids=new Set(parsed.cats.map(c=>c.id));if(ids.size!==parsed.cats.length)return false;
- for(const key of ['moments','assets','observations','insightFeedback','relationships'])if(parsed[key]!==undefined&&!Array.isArray(parsed[key]))return false;
+ for(const key of ['moments','assets','observations','insightFeedback','relationships','experiments','touches'])if(parsed[key]!==undefined&&!Array.isArray(parsed[key]))return false;
  const assets=parsed.assets||[];const assetIds=new Set(assets.map(a=>a?.id));if(assetIds.size!==assets.length||assets.some(a=>!a||typeof a.id!=='string'||typeof a.data!=='string'||!/^data:image\/(jpeg|png|webp);base64,/.test(a.data)))return false;
  if((parsed.moments||[]).some(m=>!m||!Array.isArray(m.catIds)||!m.catIds.length||m.catIds.some(id=>!ids.has(id))||(m.assetId&&!assetIds.has(m.assetId))))return false;
  if((parsed.observations||[]).some(o=>!o||!ids.has(o.catId)||!['yes','no','skip'].includes(o.answer)))return false;
  if((parsed.insightFeedback||[]).some(f=>!f||!ids.has(f.catId)||!['accurate','unsure','inaccurate'].includes(f.answer)))return false;
  if((parsed.relationships||[]).some(r=>!r||!Array.isArray(r.catIds)||r.catIds.length!==2||r.catIds[0]===r.catIds[1]||r.catIds.some(id=>!ids.has(id))||!['together','space'].includes(r.kind)))return false;
+ if((parsed.experiments||[]).some(x=>!x||!ids.has(x.catId)||!Catnu.EXPERIMENTS.some(e=>e.id===x.type&&e.results.includes(x.result))))return false;
+ if((parsed.touches||[]).some(t=>!t||!ids.has(t.catId)||!Catnu.TOUCH_ZONES.some(z=>z.id===t.zone)||!Catnu.TOUCH_REACTIONS.includes(t.reaction)))return false;
  return true;
 };
 function rCaptureDraft(){const form=document.getElementById('r-cat-form');if(!form)return;const f=new FormData(form);const existing=rEditing?STATE.cats.find(c=>c.id===rEditing):null;const avatarPhoto=(rDraft&&rDraft.avatarPhoto!==undefined)?rDraft.avatarPhoto:(existing?.avatarPhoto||null);const avatarPreset=(rDraft&&rDraft.avatarPreset!==undefined)?rDraft.avatarPreset:(existing?.avatarPreset||null);rDraft={name:f.get('name'),avatarPhoto,avatarPreset,ownerPerception:f.getAll('traits'),birthDate:f.get('birthDate')||'',homeDate:f.get('homeDate')||''};}
