@@ -9,8 +9,8 @@
 <style>
 :root{
   --cream:#FFF4EA; --paper:#FFFDFA; --teal:#E89B6B; --teal-dk:#7A4A38; --night:#4A3630;
-  --terra:#E0754F; --terra-dk:#C75E3A; --mustard:#F2B45C; --mustard-lt:#FFD9A0;
-  --rose:#E3A8B5; --ink:#5C4638; --sub:#A98D7C; --line:#F3E3D3;
+  --terra:#A6573A; --terra-dk:#7F3A1F; --mustard:#F2B45C; --mustard-lt:#FFD9A0;
+  --rose:#E3A8B5; --ink:#5C4638; --sub:#6E5A4E; --line:#F3E3D3;
   --serif:'Noto Serif TC',serif; --sans:'Noto Sans TC',sans-serif; --disp:'Fraunces',serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -77,7 +77,7 @@ body.zone-dark .rail::before{border-color:rgba(221,190,170,.4)}
   background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent);animation:shine 3.2s infinite}
 @keyframes shine{0%{left:-80%}55%{left:130%}100%{left:130%}}
 .hero .stats{display:flex;gap:44px;margin-top:46px;flex-wrap:wrap;justify-content:center}
-.hero .stat b{font-family:var(--disp);font-style:italic;font-size:34px;color:var(--teal);display:block}
+.hero .stat b{font-family:var(--disp);font-style:italic;font-size:34px;color:var(--terra);display:block}
 .hero .stat span{font-size:12px;color:var(--sub);letter-spacing:2px}
 .hero-cat{margin-top:20px;width:min(300px,60vw);position:relative;z-index:2}
 .tail{transform-origin:18px 150px;animation:tailwag 3.4s ease-in-out infinite}
@@ -164,20 +164,20 @@ body.zone-dark .rail::before{border-color:rgba(221,190,170,.4)}
 .breed-chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
 .bchip{border:2px solid var(--ink);border-radius:20px;padding:7px 14px;font-size:13px;background:var(--paper);transition:all .2s}
 .bchip:hover{background:var(--mustard);transform:translateY(-3px)}
-.bchip.star{background:var(--teal);color:var(--cream);font-weight:700}
+.bchip.star{background:var(--teal-dk);color:var(--cream);font-weight:700}
 .bchip.mix{background:var(--terra);color:var(--cream);font-weight:700}
 
 /* ---------- STOP 03 warm quests ---------- */
 .s3{background:var(--mustard);color:var(--ink);overflow:hidden}
 .s3 .stop-tag{color:var(--terra-dk)}
 .s3 h2 .accent{color:var(--terra-dk)}
-.s3 .lead{color:#8A6A3A}
+.s3 .lead{color:var(--ink)}
 .quest-wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;margin-top:50px;align-items:start}
 .qlist .q{display:flex;gap:14px;align-items:center;background:var(--paper);border:2.5px solid var(--ink);border-radius:16px;
   padding:16px;margin-bottom:14px;box-shadow:0 8px 18px rgba(122,74,56,.24)}
 .qlist .q .box{width:30px;height:30px;flex:none;border:2.5px solid var(--ink);border-radius:9px;background:var(--paper);
   display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--teal)}
-.qlist .q.done .box{background:var(--teal);color:var(--cream)}
+.qlist .q.done .box{background:var(--terra);color:var(--cream)}
 .qlist .q .t{font-size:14.5px;font-weight:500;line-height:1.55}
 .qlist .q .t small{display:block;color:var(--sub);font-size:12px;font-weight:400}
 .streak-card{background:var(--paper);border:2.5px solid var(--ink);border-radius:20px;padding:30px;text-align:center;

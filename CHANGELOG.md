@@ -5,7 +5,8 @@
 - **查核**：`--ink` 全過（≥8:1）；`--sub`（`#A98D7C`，2.8–3.1:1）、`--terra`（`#E0754F`，2.8–3.0:1）、`.btn` 白字（淺端漸變 1.92:1）、硬編碼 `#C9A78F`（2.05:1）／`#B99C8C`（2.35:1）、`.chip.sel`／`.repeat-btn` 字色 `#A14E2E`（3.56:1）全部跌穿 AA 一般文字 4.5:1。
 - **修**：`--sub` → `#6E5A4E`；`--terra` → `#A6573A`；`.btn`／`.r-primary`／`.r-download`／file-selector 橙色漸變加深（`#B85A35`→`#9E4F30`／`var(--terra)`，白字 ≥4.6:1）；`.tab`／`.tile .s`／`.detail-toggle`／`.lvl-next` 淺色硬編碼改用 `var(--sub)`；`#A14E2E` → `#8A3F22`；`.r-hero` 嘅 kicker 用 `--teal-dk`、`p` 用 `--ink`（底色去到 mustard 較深）。
 - **驗證**：`node --test tests/*.test.mjs` 91/91 全綠；瀏覽器用腳本掃描 5 個 tab 所有可見文字（漸變取兩端最差、半透明底疊埋計），0 個不達標；今日頁 CTA 實色赤陶＋白字睇落清晰。
-- **冇郁**：share-card canvas 內嘅 hardcoded 色（靜態圖，另一個媒介）；`landing.html`。
+- **冇郁**：share-card canvas 內嘅 hardcoded 色（靜態圖，另一個媒介）。
+- **landing.html 同步修（2026-10-11）**：掃描 161 個文字元素，34 個不達標（`--terra` 2.84、`--sub` 2.86–3.05、`.hero .stat` 大字 `--teal` 2.08、`.bchip.star`／done-box 米色字配 `--teal` 底 2.08、STOP 03 喺 mustard 底嘅 `--terra-dk` 2.25／`.lead` `#8A6A3A` 2.73）。修：`--terra` → `#A6573A`、`--terra-dk` → `#7F3A1F`、`--sub` → `#6E5A4E`；`.hero .stat b` 改 `--terra`；`.bchip.star` 底改 `--teal-dk`；done-box 底改 `--terra`；`.s3 .lead` 改 `--ink`。重掃 0 個不達標。
 
 ## 2026-10-05 — 「以隻貓為中心」UX 升級 4 項
 
