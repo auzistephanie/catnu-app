@@ -1,5 +1,12 @@
 # CHANGELOG — catnu-app
 
+## 2026-10-11 — 今日 tab：hero 小字對齊＋每日問題講明輪到邊隻貓
+
+- **① hero 小字偏左**：`.r-kicker` 係 inline `<span>`，同 `inline-block` 嘅 `.r-avatar` 擠喺同一行（單貓 view），整行置中令小字貼住頭像左邊。改 `display:block;margin-bottom:4px`；「全家」view 本身冇問題。
+- **② 每日問題記錯貓**：每日問題按日期輪流問其中一隻貓（`dailyCat`），但 hero 同問題卡都冇講清楚，用家喺 Mochi 嘅頁撳「有呀」，記錄其實寫入咗輪值嘅 Eheh。採用方案 B（保持輪流制、唔改資料模型）：hero 副標變「今日，只留意一件小事 · 輪到 Eheh」；問題卡頂加 40px 頭像＋「輪到 Eheh」＋原有「全家每日共一條問題」說明。新增 `turnOf` 文字（四個 locale，帶 `{name}`）。
+- **已知限制**：舊記錄冇存「用戶當時睇邊隻貓」，之前記錯嘅觀察無法自動分辨。
+- 驗證：`tests/lab.test.mjs` 加 1 個 test（`turnOf` 四語言＋`{name}`），`node --test tests/*.test.mjs` **106/106 全綠**；瀏覽器（375px）三個 view 小字同頭像中心對齊（188＝188）；回答寫入嘅貓＝畫面寫明輪到嘅貓；答完顯示「今日已經記低」；四語言文字正確；對比度 0 不達標；零 console error、冇橫向 scroll。
+
 ## 2026-10-11 — 修正 Humphrey 2020 出處寫法
 
 - 核對原文（*Scientific Reports* 10:16503；Humphrey, Proops, Forman, Spooner, McComb）：實驗 1（21 隻貓／14 個家庭）係主人慢眨眼後貓更常半眨眼／瞇眼；實驗 2 係貓對**陌生實驗員**慢眨眼後更願意行近。原寫法將「行近」錯配畀主人。

@@ -182,6 +182,14 @@ test('catManual：得「愛意」一類（即使有 3 項）都唔算夠 → rea
 
 /* ── Task 5：文字 ── */
 
+test('每日問題要講明輪到邊隻貓：turnOf 文字帶 {name}，4 個 locale 都有', () => {
+  const C = loadCatnu();
+  for (const l of C.LOCALES) {
+    assert.ok(C.COPY[l].turnOf, `${l} 缺 turnOf`);
+    assert.ok(C.COPY[l].turnOf.includes('{name}'), `${l} turnOf 冇 {name}`);
+  }
+});
+
 test('新功能用到嘅每個文字 key，4 個 locale 都有', () => {
   const C = loadCatnu();
   const keys = ['labTitle', 'labProgress', 'labTry', 'labAgain', 'labNotYet', 'labNote', 'labSuggest', 'labResultPrompt',
