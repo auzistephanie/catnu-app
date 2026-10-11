@@ -1,5 +1,11 @@
 # CHANGELOG — catnu-app
 
+## 2026-10-11 — landing.html 加「貓咪說明書」section
+
+- 新增 STOP 03「唔係翻譯機，係你隻貓嘅說明書」：3 張明信片（貓咪小實驗／摸摸地圖／貓咪說明書）＋摸摸地圖示範 SVG（珊瑚＝鍾意、淡紫＝唔好摸、虛線＝敏感／未有記錄）＋「研究根據」5 條（Saito 2019、Humphrey 2020、Vitale Shreve 2017、Vitale 2019、Haywood 2021）＋免責（冇用 AI、唔係診斷）。
+- 原 STOP 03 順延做 STOP 04；nav、右側 rail、marquee 同步加入口（rail 6 點對應 6 個 zone）。
+- 驗證：183 個文字元素對比度 0 個不達標；375px／桌面冇橫向 scroll；STOP 序號、nav、rail 正確。
+
 ## 2026-10-11 — 貓咪小實驗＋摸摸地圖＋貓咪說明書
 
 Plan：`docs/superpowers/plans/2026-10-11-cat-lab-touch-map-manual.md`。定位：「唔係翻譯機，係你隻貓嘅說明書」——有研究根據、教你讀懂自己隻貓；唔用 AI、唔遊戲化、唔係診斷。

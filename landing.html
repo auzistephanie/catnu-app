@@ -167,7 +167,25 @@ body.zone-dark .rail::before{border-color:rgba(221,190,170,.4)}
 .bchip.star{background:var(--teal-dk);color:var(--cream);font-weight:700}
 .bchip.mix{background:var(--terra);color:var(--cream);font-weight:700}
 
-/* ---------- STOP 03 warm quests ---------- */
+/* ---------- STOP 03 cat lab ---------- */
+.s4{background:var(--cream)}
+.s4 .stop-tag{color:var(--terra)}
+.s4 h2 .accent{color:var(--terra)}
+.s4 .lead{color:var(--sub)}
+.lab-demo{margin-top:46px;display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:center}
+.lab-map{background:var(--paper);border:2px solid var(--ink);border-radius:18px;padding:22px;box-shadow:0 10px 20px rgba(122,74,56,.16);text-align:center}
+.lab-map svg{width:100%;max-width:340px;display:inline-block}
+.lab-map .tz{stroke:var(--ink);stroke-width:2}
+.lab-map .tz-loves{fill:#F7BFA6}.lab-map .tz-ok{fill:#FFE2C6}.lab-map .tz-avoid{fill:#D9BCE4}.lab-map .tz-unknown{fill:#FFFDFA;stroke-dasharray:5 4}
+.lab-map .deco{fill:#FFFDFA;stroke:var(--ink);stroke-width:2}
+.lab-map .deco-line{fill:none;stroke:var(--ink);stroke-width:10;stroke-linecap:round}
+.lab-map .cap{font-size:12.5px;color:var(--sub);margin-top:10px;line-height:1.8}
+.lab-refs h3{font-size:18px;color:var(--teal-dk);margin-bottom:10px}
+.lab-refs ul{list-style:none;font-size:13.5px;line-height:2;color:var(--ink)}
+.lab-refs li::before{content:"◆";color:var(--terra);margin-right:8px;font-size:10px}
+.lab-refs p{font-size:12.5px;color:var(--sub);margin-top:12px;line-height:1.8}
+
+/* ---------- STOP 04 warm quests ---------- */
 .s3{background:var(--mustard);color:var(--ink);overflow:hidden}
 .s3 .stop-tag{color:var(--terra-dk)}
 .s3 h2 .accent{color:var(--terra-dk)}
@@ -229,7 +247,7 @@ footer .paws{font-size:16px;letter-spacing:8px;color:var(--mustard)}
 .amb-paw{position:absolute;font-size:26px;opacity:.14;animation:drift 9s ease-in-out infinite}
 @keyframes drift{0%,100%{transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-22px) rotate(8deg)}}
 
-@media(max-width:900px){.cards3,.postcards{grid-template-columns:1fr 1fr}.quest-wrap,.gate .inner{grid-template-columns:1fr}}
+@media(max-width:900px){.cards3,.postcards{grid-template-columns:1fr 1fr}.quest-wrap,.gate .inner,.lab-demo{grid-template-columns:1fr}}
 @media(max-width:640px){.cards3,.postcards{grid-template-columns:1fr}.stamp{right:-8px}}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
@@ -244,6 +262,7 @@ footer .paws{font-size:16px;letter-spacing:8px;color:var(--mustard)}
   <ul>
     <li><a href="#features">點樣運作</a></li>
     <li><a href="#decode">貓語圖鑑</a></li>
+    <li><a href="#lab">貓咪說明書</a></li>
     <li><a href="#quest">每日任務</a></li>
     <li><a href="#gate">開始用</a></li>
   </ul>
@@ -255,6 +274,7 @@ footer .paws{font-size:16px;letter-spacing:8px;color:var(--mustard)}
   <a href="#hero" data-dot><span class="tip">啟程</span></a>
   <a href="#features" data-dot><span class="tip">記錄與分析</span></a>
   <a href="#decode" data-dot><span class="tip">貓語圖鑑</span></a>
+  <a href="#lab" data-dot><span class="tip">貓咪說明書</span></a>
   <a href="#quest" data-dot><span class="tip">任務與里程碑</span></a>
   <a href="#gate" data-dot><span class="tip">開始用</span></a>
 </div>
@@ -313,7 +333,7 @@ footer .paws{font-size:16px;letter-spacing:8px;color:var(--mustard)}
   <div class="track" id="mqtrack">
     <span><i>◆</i>慢眨眼</span><span><i>◆</i>呼嚕嚕</span><span><i>◆</i>踩奶</span><span><i>◆</i>尾巴直豎</span>
     <span><i>◆</i>露肚皮</span><span><i>◆</i>飛機耳注意</span><span><i>◆</i>坐大脾</span><span><i>◆</i>貓界錫錫</span>
-    <span><i>◆</i>英國長毛</span><span><i>◆</i>唐貓至叻</span>
+    <span><i>◆</i>摸摸地圖</span><span><i>◆</i>貓咪說明書</span><span><i>◆</i>英國長毛</span><span><i>◆</i>唐貓至叻</span>
   </div>
 </div>
 
@@ -395,11 +415,54 @@ footer .paws{font-size:16px;letter-spacing:8px;color:var(--mustard)}
 </section>
 
 <!-- ================= STOP 03 ================= -->
+<section class="stop s4" id="lab" data-zone="light">
+  <div class="inner">
+    <span class="stop-tag reveal">STOP 03 · 貓咪說明書</span>
+    <h2 class="reveal">唔係翻譯機，<span class="accent">係你隻貓嘅說明書</span></h2>
+    <p class="lead reveal d1">貓叫翻譯機始終係估。我哋反過嚟：用真實研究設計幾個小實驗，再配合你每日嘅記錄，慢慢寫出只屬於你隻貓嘅說明書。</p>
+    <div class="postcards">
+      <div class="pcard reveal slide-l d1">
+        <div class="ico">🔬</div><h3>貓咪小實驗</h3>
+        <p>4 個 1 分鐘家居觀察：佢認唔認得自己個名？識唔識慢眨眼？食物同你，佢先揀邊個？冇反應都好正常，唔係考試。</p>
+        <div class="sig">— 小實驗 · 免費</div>
+      </div>
+      <div class="pcard reveal d2">
+        <div class="ico">🖐️</div><h3>摸摸地圖</h3>
+        <p>撳你摸過嘅位置、記低佢反應，砌出「佢鍾意被摸邊度」嘅專屬地圖。背脊、尾巴根、肚會特別提醒你小心。</p>
+        <div class="sig">— 摸摸地圖 · 免費</div>
+      </div>
+      <div class="pcard reveal slide-r d3">
+        <div class="ico">📋</div><h3>貓咪說明書</h3>
+        <p>將實驗、摸摸地圖同日常記錄整理成一頁，下載成圖，去旅行嗰陣直接交俾 cat sitter。</p>
+        <div class="sig">— 說明書 · 免費</div>
+      </div>
+    </div>
+    <div class="lab-demo">
+      <div class="lab-map reveal zoom">
+        <svg viewBox="0 0 320 200" aria-label="摸摸地圖示範：下巴同耳仔底係佢鍾意，肚係唔好摸" role="img"><path class="deco-line" d="M262 104 C300 96 304 52 286 28"/><path class="deco" d="M38 46 L46 8 L66 36 Z"/><path class="deco" d="M78 36 L98 8 L106 46 Z"/><rect x="104" y="146" width="18" height="42" rx="9" class="tz tz-unknown"/><rect x="134" y="148" width="18" height="40" rx="9" class="tz tz-unknown"/><rect x="200" y="148" width="18" height="40" rx="9" class="tz tz-unknown"/><rect x="230" y="146" width="18" height="42" rx="9" class="tz tz-unknown"/><path d="M85 118 A85 44 0 0 1 255 118 Z" class="tz tz-ok"/><path d="M85 118 A85 44 0 0 0 255 118 Z" class="tz tz-avoid"/><circle cx="255" cy="108" r="13" class="tz tz-unknown"/><circle cx="72" cy="72" r="40" class="tz tz-ok"/><ellipse cx="52" cy="40" rx="11" ry="7" class="tz tz-loves"/><ellipse cx="92" cy="40" rx="11" ry="7" class="tz tz-loves"/><circle cx="48" cy="90" r="11" class="tz tz-unknown"/><ellipse cx="68" cy="108" rx="15" ry="8" class="tz tz-loves"/><g><circle cx="60" cy="68" r="4" fill="#5C4638"/><circle cx="86" cy="68" r="4" fill="#5C4638"/><path d="M69 80 L77 80 L73 85 Z" fill="#E8809A"/><path d="M73 85 Q69 90 65 88 M73 85 Q77 90 81 88" fill="none" stroke="#5C4638" stroke-width="1.6" stroke-linecap="round"/></g></svg>
+        <div class="cap">示範：珊瑚色＝佢鍾意（下巴、耳仔底）　淡紫＝唔好摸（肚）<br>虛線＝好多貓都敏感，或者仲未有足夠記錄</div>
+      </div>
+      <div class="lab-refs reveal d1">
+        <h3>研究根據</h3>
+        <ul>
+          <li>貓聽得出自己個名（Saito 等 2019）</li>
+          <li>主人慢眨眼，貓更常眨返、更願意行近（Humphrey 等 2020）</li>
+          <li>約一半嘅貓揀同人互動多過揀食物（Vitale Shreve 等 2017）</li>
+          <li>約 65% 貓同主人係安全型依附（Vitale 等 2019）</li>
+          <li>俾貓揀、留意反應、揀啱位置——CAT 指引（Haywood 等 2021）</li>
+        </ul>
+        <p>全部用你自己嘅記錄整理，冇用 AI 估貓心思；只係觀察輔助，唔係醫療或行為診斷。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= STOP 04 ================= -->
 <section class="stop s3" id="quest" data-zone="warm">
   <span class="amb-paw" style="top:10%;right:6%;font-size:40px">🐾</span>
   <span class="amb-paw" style="bottom:12%;left:5%;font-size:34px;animation-delay:3s">🐾</span>
   <div class="inner">
-    <span class="stop-tag reveal">STOP 03 · 每日修行</span>
+    <span class="stop-tag reveal">STOP 04 · 每日修行</span>
     <h2 class="reveal">每日三個任務，<span class="accent">節奏由你揀</span></h2>
     <p class="lead reveal d1">任務由你嘅數據＋品種特性生成，日日唔同。你可以揀完成 1／2／3 個就達標；預設兩個，維持習慣但唔使日日追滿。</p>
     <div class="quest-wrap">
