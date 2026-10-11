@@ -454,7 +454,7 @@ Expected: FAIL（`zh-HK 缺 labTitle`）
  exp_name_steps:['等佢放鬆、冇望住你嗰陣，用平時語氣逐個講 4 個同佢個名差唔多長嘅字，每個隔 15 秒；最後叫佢個名一次。','趁牠放鬆、沒看著你時，用平常語氣逐一說 4 個和牠名字差不多長的詞，每個間隔 15 秒；最後叫牠的名字一次。','趁它放松、没看着你时，用平常语气逐一说 4 个和它名字差不多长的词，每个间隔 15 秒；最后叫它的名字一次。','When they are relaxed and not looking at you, say 4 words about as long as their name in your normal voice, 15 seconds apart. Then say their name once.'],
  res_strong:['郁耳仔／轉頭，仲行過嚟或者叫返你','動耳朵／轉頭，還走過來或回應你','动耳朵／转头，还走过来或回应你','Turned ears or head, and came over or called back'], res_subtle:['淨係郁吓耳仔或者轉頭','只是動耳朵或轉頭','只是动耳朵或转头','Just an ear twitch or head turn'], res_none:['冇乜反應','沒什麼反應','没什么反应','No visible reaction'],
  exp_blink:['慢眨眼對話','慢眨眼對話','慢眨眼对话','Slow-blink conversation'],
- exp_blink_sci:['英國研究：主人慢眨眼之後，貓更常眨返，亦更願意行近（Humphrey 2020）','英國研究：主人慢眨眼之後，貓更常眨回來，也更願意靠近（Humphrey 2020）','英国研究：主人慢眨眼之后，猫更常眨回来，也更愿意靠近（Humphrey 2020）','UK study: after owners slow-blinked, cats blinked back more and approached more readily (Humphrey 2020)'],
+ exp_blink_sci:['英國研究：主人慢眨眼之後，貓更常眨返；對陌生人慢眨眼，貓亦更願意行近（Humphrey 2020）','英國研究：主人慢眨眼之後，貓更常眨回來；對陌生人慢眨眼，貓也更願意靠近（Humphrey 2020）','英国研究：主人慢眨眼之后，猫更常眨回来；对陌生人慢眨眼，猫也更愿意靠近（Humphrey 2020）','UK study: cats blinked back more after their owners slow-blinked, and approached a stranger more readily after the stranger slow-blinked (Humphrey 2020)'],
  exp_blink_steps:['坐喺佢 1 米外，望住佢，慢慢半閉眼、合埋 2 秒再打開，重複 3 次。','坐在牠 1 公尺外，看著牠，慢慢半閉眼、閉上 2 秒再張開，重複 3 次。','坐在它 1 米外，看着它，慢慢半闭眼、闭上 2 秒再张开，重复 3 次。','Sit about a metre away and look at them. Slowly narrow your eyes, close them for 2 seconds, then open. Repeat 3 times.'],
  res_returned:['佢眨返／瞇埋眼','牠眨回來／瞇起眼','它眨回来／眯起眼','They blinked or narrowed their eyes back'], res_approached:['佢行埋嚟','牠走過來','它走过来','They came closer'],
  exp_prefer:['佢最鍾意咩','牠最喜歡什麼','它最喜欢什么','What do they choose first?'],

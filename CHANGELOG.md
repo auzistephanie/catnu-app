@@ -1,5 +1,10 @@
 # CHANGELOG — catnu-app
 
+## 2026-10-11 — 修正 Humphrey 2020 出處寫法
+
+- 核對原文（*Scientific Reports* 10:16503；Humphrey, Proops, Forman, Spooner, McComb）：實驗 1（21 隻貓／14 個家庭）係主人慢眨眼後貓更常半眨眼／瞇眼；實驗 2 係貓對**陌生實驗員**慢眨眼後更願意行近。原寫法將「行近」錯配畀主人。
+- 改為「主人慢眨眼，貓更常眨返；對陌生人慢眨眼，貓亦更願意行近」：`index.html`（`exp_blink_sci` 四語）、`landing.html`「研究根據」、plan 檔同步。105/105 測試全綠。
+
 ## 2026-10-11 — landing.html 加「貓咪說明書」section
 
 - 新增 STOP 03「唔係翻譯機，係你隻貓嘅說明書」：3 張明信片（貓咪小實驗／摸摸地圖／貓咪說明書）＋摸摸地圖示範 SVG（珊瑚＝鍾意、淡紫＝唔好摸、虛線＝敏感／未有記錄）＋「研究根據」5 條（Saito 2019、Humphrey 2020、Vitale Shreve 2017、Vitale 2019、Haywood 2021）＋免責（冇用 AI、唔係診斷）。
