@@ -1,5 +1,12 @@
 # CHANGELOG — catnu-app
 
+## 2026-10-11 — 小實驗／摸摸地圖：刪除單條記錄（可復原）
+
+- **UI**：貓咪 tab 嘅「貓咪小實驗」同「摸摸地圖」各加可收合嘅「記錄（n）」清單（最新 10 條，標題顯示總數）；每行有日期＋✕ 掣（40px，有 `aria-label`「刪除：…」）。刪除後即時重畫（摸摸地圖顏色／圖例、實驗進度同「下一個實驗」提示都會跟住變），並彈「已刪除 · 撳一下復原」toast（4.2 秒內撳一下放返落原位置）。展開狀態重畫後保持。
+- **邏輯**：`Catnu.removeRecord(items,id)`／`Catnu.restoreRecord(items,record,index)` 兩個純函數（唔改原 array）；`rDeleteRecord()` 儲存失敗會自動還原。`prepareRedesign` 補返冇 id 或 id 重複嘅 `experiments`／`touches`（舊備份／手動編輯過嘅檔案都刪得到）。
+- 文字：`recordsTitle`／`deleteRecord`／`recordDeleted` 四個 locale；英文版 aria-label 用英文標點。
+- 驗證：`tests/lab.test.mjs` 加 5 個 test，`node --test tests/*.test.mjs` **111/111 全綠**。瀏覽器（375px）：刪除→數量減少→復原放返原位置（順序正確）；刪 2 條「下巴」令地圖由「鍾意」變「未知」，復原後返回；超過 10 條時 summary 顯示總數、清單 10 行；冇 id 舊記錄自動補 id；只影響該貓；四語言正確；164 個元素對比度 0 不達標；備份還原驗證通過；零 console error、冇橫向 scroll。
+
 ## 2026-10-11 — 今日 tab：hero 小字對齊＋每日問題講明輪到邊隻貓
 
 - **① hero 小字偏左**：`.r-kicker` 係 inline `<span>`，同 `inline-block` 嘅 `.r-avatar` 擠喺同一行（單貓 view），整行置中令小字貼住頭像左邊。改 `display:block;margin-bottom:4px`；「全家」view 本身冇問題。

@@ -339,6 +339,10 @@ input,select{font-family:inherit}
 .touch-svg .deco-line{fill:none;stroke:var(--ink);stroke-width:10;stroke-linecap:round;pointer-events:none}
 .touch-legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .touch-legend .chip{font-size:12px;padding:6px 10px}
+.r-records{margin-top:10px}.r-records summary{font-size:12.5px;color:var(--sub);cursor:pointer}
+.rec-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line)}.rec-row:last-child{border-bottom:none}
+.rec-txt{flex:1;min-width:0}.rec-txt b{display:block;font-size:12.5px}.rec-txt small{color:var(--sub);font-size:11px}
+.rec-del{flex:none;width:40px;height:40px;padding:0;border-radius:50%;font-size:14px;color:var(--terra)}
 .manual-sec{margin:10px 0}.manual-sec b{display:block;color:var(--terra);font-size:13px}.manual-sec span{font-size:14px}
 @media(max-width:420px){.r-app{padding-left:14px;padding-right:14px}.r-card{padding:16px}.r-hero{padding:18px}.r-hero h2{font-size:22px}}
 /* 追返 reaction/action 記錄／milestones／核心分析：重用 classic .tile/.btn/.detail-toggle，
@@ -1538,6 +1542,18 @@ Catnu.touchMap = function touchMap(touches, catId) {
     if (n >= 2) verdict = stop / n >= 0.5 ? 'avoid' : more / n >= 0.5 ? 'loves' : 'ok';
     out[z.id] = { n, more, ok, stop, verdict, caution: z.caution };
   }
+  return out;
+};
+
+/* @LOGIC:RECORDS — 刪除單條記錄（可復原）：純函數，唔郁原 array */
+Catnu.removeRecord = function removeRecord(items, id) {
+  const index = items.findIndex(x => x.id === id);
+  if (index < 0) return null;
+  return { items: items.filter((_, i) => i !== index), removed: items[index], index };
+};
+Catnu.restoreRecord = function restoreRecord(items, record, index) {
+  const out = items.slice();
+  out.splice(Math.min(Math.max(index, 0), out.length), 0, record);
   return out;
 };
 
@@ -3248,6 +3264,7 @@ const copyRows = {
  region:['地區','地區','地区','Region'], language:['語言','語言','语言','Language'], hk:['香港','香港','香港','Hong Kong'], tw:['台灣','台灣','台湾','Taiwan'], cn:['中國內地','中國大陸','中国内地','Mainland China'], other:['其他','其他','其他','Other'],
  question:['今日，只留意一件小事','今天，只觀察一件小事','今天，只观察一件小事','One little observation today'], ask:['你安靜坐低時，佢有冇主動行近？','你安靜坐下時，牠有主動靠近嗎？','你安静坐下时，它有主动靠近吗？','When you sit quietly, does your cat come closer?'], yes:['有呀','有','有','Yes'], no:['想自己休息','想自己休息','想自己休息','Prefers some space'], skip:['今日未留意到','今天還沒觀察到','今天还没观察到','Haven’t noticed today'], done:['今日已經記低，聽日再慢慢了解','今天已記錄，明天再慢慢理解','今天已记录，明天再慢慢了解','Saved for today. More tomorrow.'], rotate:['全家每日共一條問題，輪流了解每隻貓','全家每天共一個問題，輪流理解每隻貓','全家每天共一个问题，轮流了解每只猫','One question per household, rotating between cats.'],
  turnOf:['輪到 {name}','輪到 {name}','轮到 {name}','{name}’s turn'],
+ recordsTitle:['記錄（{n}）','記錄（{n}）','记录（{n}）','Records ({n})'], deleteRecord:['刪除','刪除','删除','Delete'], recordDeleted:['已刪除 · 撳一下復原','已刪除 · 點一下復原','已删除 · 点一下恢复','Deleted · tap to undo'],
  moment:['留住呢一刻','留下這一刻','留下这一刻','Keep this moment'], note:['呢一刻發生咗咩？','這一刻發生了什麼？','这一刻发生了什么？','What happened in this moment?'], photo:['加照片（只留喺裝置）','新增照片（只留在裝置）','添加照片（仅保存在设备）','Add photo (device only)'], save:['儲存','儲存','保存','Save'], cancel:['取消','取消','取消','Cancel'], empty:['第一個生活片段，由你開始','第一個生活片段，由你開始','第一个生活片段，由你开始','Your first little memory starts here'], local:['資料只留喺呢個瀏覽器。記得下載備份。','資料只保存在這個瀏覽器。記得下載備份。','数据仅保存在此浏览器。记得下载备份。','Data stays in this browser. Download a backup regularly.'],
  original:['你原本覺得','你原本覺得','你原本觉得','Your first impression'], observed:['我哋逐漸發現','我們逐漸發現','我们逐渐发现','What we’re noticing'], pending:['仲有好多可以慢慢了解','還有很多可以慢慢理解','还有很多可以慢慢了解','Still getting to know you'], confidence:['觀察信心','觀察信心','观察信心','Observation confidence'], low:['初步','初步','初步','Early'], growing:['累積中','累積中','积累中','Growing'], feedback:['呢個印象準唔準？','這個印象準確嗎？','这个印象准确吗？','Does this impression feel right?'], accurate:['幾準','準確','准确','Feels right'], unsure:['未肯定','不確定','不确定','Not sure'], inaccurate:['唔太似','不太像','不太像','Not quite'], revised:['你嘅回饋提醒我哋，暫時唔下定論','你的回饋提醒我們，暫時不下定論','你的反馈提醒我们，暂时不下定论','Your feedback reminds us to keep this open.'],
  compare:['每隻貓，都有自己嘅節奏','每隻貓，都有自己的步調','每只猫，都有自己的节奏','Every cat has their own rhythm'], demo:['示範好物 · 冇接商店或付款','示範好物 · 尚未連接商店或付款','示范好物 · 尚未连接商店或付款','Demo picks · no store connection or checkout'], sponsored:['贊助示範','贊助示範','赞助示范','Sponsored demo'], wand:['逗貓棒','逗貓棒','逗猫棒','Teaser wand'], bed:['貓窩','貓窩','猫窝','Cat bed'], scratch:['大型抓板','大型抓板','大型抓板','Large scratcher'], match:['配合已觀察到嘅親近偏好','符合已觀察到的親近偏好','符合已观察到的亲近偏好','Matches observed interest in shared interaction'], neutral:['了解多啲之後，再調整推薦','了解更多之後，再調整推薦','了解更多之后，再调整推荐','Suggestions improve as we learn more'], shared:['家庭共享用品；每隻貓仍需要自己嘅空間','家庭共享用品；每隻貓仍需要自己的空間','家庭共享用品；每只猫仍需要自己的空间','Shared household item; each cat still needs their own space'],
@@ -3293,6 +3310,7 @@ Catnu.LOCALES.forEach((locale,i)=>Catnu.COPY[locale]=Object.fromEntries(Object.e
 Catnu.prepareRedesign = state => {
  state.settings ||= {}; state.settings.locale = Catnu.LOCALES.includes(state.settings.locale)?state.settings.locale:'zh-HK'; state.settings.region = ['HK','TW','CN','OTHER'].includes(state.settings.region)?state.settings.region:'HK';
  for(const key of ['moments','assets','observations','insightFeedback','relationships','experiments','touches']) if(!Array.isArray(state[key])) state[key]=[];
+ for(const [key,prefix] of [['experiments','x'],['touches','t']]){const seen=new Set();state[key].forEach((r,i)=>{if(!r||typeof r!=='object')return;if(typeof r.id!=='string'||!r.id||seen.has(r.id))r.id=prefix+'b'+Date.now().toString(36)+i;seen.add(r.id);});}
  state.cats.forEach(c=>{c.avatarPhoto ||= null; if(!Catnu.AVATAR_PRESETS.includes(c.avatarPreset)) c.avatarPreset=null; if(!Array.isArray(c.ownerPerception)) c.ownerPerception=[]; c.observedTraits ||= []; c.observationConfidence ||= 'low';});
  return state;
 };
@@ -3413,11 +3431,32 @@ function rCatAnalysis(cat){const now=Date.now();const affection=Catnu.affectionS
 let rOpenDetails=new Set();
 function rPunct(){const en=STATE.settings.locale==='en';return {list:en?', ':'、',colon:en?': ':'：',semi:en?'; ':'；',open:en?' (':'（',close:en?')':'）'};}
 function rDetailsAttr(key){return `data-details-key="${esc(key)}" ${rOpenDetails.has(key)?'open':''}`;}
+const REC_LIMIT=10;
+function rRecordRows(kind,cat){
+  const all=STATE[kind].filter(r=>r.catId===cat.id).sort((a,b)=>b.ts-a.ts);
+  if(!all.length)return '';
+  const rows=all.slice(0,REC_LIMIT).map(r=>{
+    const P=rPunct();
+    const date=kind==='experiments'?r.date:todayStr(new Date(r.ts));
+    const title=kind==='experiments'
+      ?`${(Catnu.EXPERIMENTS.find(e=>e.id===r.type)||{}).emoji||''} ${rt('exp_'+r.type)}${P.colon}${rt('res_'+r.result)}`
+      :`${rt('zone_'+r.zone)}${P.colon}${rt('touch_'+r.reaction)}`;
+    return `<div class="rec-row"><div class="rec-txt"><b>${esc(title)}</b><small>${esc(date)}</small></div><button type="button" class="rec-del" data-del-kind="${kind}" data-del-id="${esc(r.id)}" aria-label="${esc(rt('deleteRecord'))}${P.colon}${esc(title)}">✕</button></div>`;
+  }).join('');
+  return `<details class="r-records" ${rDetailsAttr('rec:'+kind+':'+cat.id)}><summary>${rt('recordsTitle').replace('{n}',all.length)}</summary>${rows}</details>`;
+}
+function rDeleteRecord(kind,id){
+  const r=Catnu.removeRecord(STATE[kind],id);if(!r)return;
+  STATE[kind]=r.items;
+  if(!rSave()){STATE[kind]=Catnu.restoreRecord(r.items,r.removed,r.index);return;}
+  rRender();
+  Catnu.showToast(rt('recordDeleted'),()=>{STATE[kind]=Catnu.restoreRecord(STATE[kind],r.removed,r.index);if(rSave())rRender();});
+}
 function rLabBlock(cat){
   const sum=Catnu.experimentSummary(STATE.experiments,cat.id);
   const tried=Catnu.EXPERIMENTS.filter(e=>sum[e.id].count>0).length;
   const rows=Catnu.EXPERIMENTS.map(e=>{const latest=sum[e.id].latest;return `<div class="lab-row"><span class="lab-emoji" aria-hidden="true">${e.emoji}</span><div class="lab-txt"><b>${rt('exp_'+e.id)}</b><small>${latest?`${esc(rt('res_'+latest.result))} · ${esc(latest.date)}`:rt('labNotYet')}</small></div><button type="button" data-exp-start="${e.id}" data-id="${esc(cat.id)}">${rt(latest?'labAgain':'labTry')}</button></div>`;}).join('');
-  return `<details class="r-lab" ${rDetailsAttr('lab:'+cat.id)}><summary>🔬 ${rt('labTitle')} · ${rt('labProgress').replace('{n}',tried)}</summary>${rows}<p class="lab-note">${rt('labNote')}</p></details>`;
+  return `<details class="r-lab" ${rDetailsAttr('lab:'+cat.id)}><summary>🔬 ${rt('labTitle')} · ${rt('labProgress').replace('{n}',tried)}</summary>${rows}${rRecordRows('experiments',cat)}<p class="lab-note">${rt('labNote')}</p></details>`;
 }
 function rLabSuggest(catId){
   const next=Catnu.nextExperiment(STATE.experiments,catId);
@@ -3464,7 +3503,7 @@ function rTouchSvg(cat){
 function rTouchBlock(cat){
   const map=Catnu.touchMap(STATE.touches,cat.id);
   const legend=Catnu.TOUCH_ZONES.filter(z=>map[z.id].n>0).map(z=>`<span class="chip tz-chip">${rt('zone_'+z.id)}${rPunct().colon}${rt('verdict_'+map[z.id].verdict)}${rPunct().open}${map[z.id].n}${rPunct().close}</span>`).join('');
-  return `<details class="r-touch" ${rDetailsAttr('touch:'+cat.id)}><summary>🖐️ ${rt('touchTitle')}</summary><p class="lab-note">${rt('touchHint')}</p>${rTouchSvg(cat)}${legend?`<div class="touch-legend">${legend}</div>`:''}<p class="lab-note">${rt('touchCaution')}</p><p class="lab-note">${rt('touchSource')}</p></details>`;
+  return `<details class="r-touch" ${rDetailsAttr('touch:'+cat.id)}><summary>🖐️ ${rt('touchTitle')}</summary><p class="lab-note">${rt('touchHint')}</p>${rTouchSvg(cat)}${legend?`<div class="touch-legend">${legend}</div>`:''}${rRecordRows('touches',cat)}<p class="lab-note">${rt('touchCaution')}</p><p class="lab-note">${rt('touchSource')}</p></details>`;
 }
 function rTouchOpen(zone,catId){
   if(!Catnu.TOUCH_ZONES.some(z=>z.id===zone)||!STATE.cats.some(c=>c.id===catId))return;
@@ -3538,6 +3577,7 @@ const factDismiss=app.querySelector('[data-fact-dismiss]');if(factDismiss)factDi
 app.querySelectorAll('[data-exp-start]').forEach(b=>b.onclick=()=>rExperimentOpen(b.dataset.expStart,b.dataset.id));
 app.querySelectorAll('[data-details-key]').forEach(d=>d.ontoggle=()=>{d.open?rOpenDetails.add(d.dataset.detailsKey):rOpenDetails.delete(d.dataset.detailsKey);});
 app.querySelectorAll('[data-touch-zone]').forEach(z=>{const open=()=>rTouchOpen(z.dataset.touchZone,z.dataset.id);z.onclick=open;z.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}};});
+app.querySelectorAll('[data-del-id]').forEach(b=>b.onclick=()=>rDeleteRecord(b.dataset.delKind,b.dataset.delId));
 app.querySelectorAll('[data-manual]').forEach(b=>b.onclick=()=>rManualOpen(b.dataset.manual));
 const recapOpenBtn=app.querySelector('[data-recap-open]');if(recapOpenBtn)recapOpenBtn.onclick=()=>rRecapOpen();
 const mf=app.querySelector('#r-moment');if(mf)mf.onsubmit=async e=>{e.preventDefault();const f=new FormData(mf);const ids=f.getAll('cats');const note=String(f.get('note')).trim();const file=f.get('photo');if(!ids.length||(!note&&!file?.size))return;const button=mf.querySelector('button');button.disabled=true;try{let asset=null;if(file?.size){if(!file.type.startsWith('image/')||file.size>15000000)throw Error('photo');asset={id:'a'+Date.now(),data:await rPhoto(file)};STATE.assets.push(asset);}const moment={id:'m'+Date.now(),catIds:ids,assetId:asset?.id||null,note,date:todayStr()};STATE.moments.push(moment);if(!rSave())return;rTab='memories';rRender();}catch(err){Catnu.showToast(rt('error'));}finally{button.disabled=false;}};

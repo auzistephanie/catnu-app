@@ -207,3 +207,51 @@ test('新功能用到嘅每個文字 key，4 個 locale 都有', () => {
   for (const r of C.REACTIONS.filter(x => x.polarity > 0)) keys.push(r.id);
   for (const l of C.LOCALES) for (const k of keys) assert.ok(C.COPY[l][k], `${l} 缺 ${k}`);
 });
+
+/* ── 刪除單條記錄（可復原）── */
+
+test('removeRecord：按 id 移走一條，回傳新 array＋被移走嘅記錄＋原位置；唔改原 array', () => {
+  const C = loadCatnu();
+  const orig = [{ id: 'a' }, { id: 'b' }, { id: 'c' }];
+  const r = C.removeRecord(orig, 'b');
+  assert.equal([...r.items].map(x => x.id).join(','), 'a,c');
+  assert.equal(r.removed.id, 'b');
+  assert.equal(r.index, 1);
+  assert.equal(orig.length, 3);
+});
+
+test('removeRecord：搵唔到 id → null', () => {
+  const C = loadCatnu();
+  assert.equal(C.removeRecord([{ id: 'a' }], 'zzz'), null);
+});
+
+test('restoreRecord：放返落原位置；位置超出範圍就放尾；唔改原 array', () => {
+  const C = loadCatnu();
+  const items = [{ id: 'a' }, { id: 'c' }];
+  const back = C.restoreRecord(items, { id: 'b' }, 1);
+  assert.equal([...back].map(x => x.id).join(','), 'a,b,c');
+  const tail = C.restoreRecord(items, { id: 'z' }, 99);
+  assert.equal([...tail].map(x => x.id).join(','), 'a,c,z');
+  assert.equal(items.length, 2);
+});
+
+test('prepareRedesign：補返冇 id 嘅 experiments／touches，已有 id 唔郁，id 唔重複', () => {
+  const C = loadCatnu();
+  const s = C.prepareRedesign({
+    schemaVersion: 2, cats: [{ id: 'a', name: 'A' }], logs: [], quests: {}, settings: {}, streak: { current: 0 }, milestones: [],
+    experiments: [{ catId: 'a', type: 'name', result: 'none', date: '2026-10-11', ts: 1 }, { id: 'keep', catId: 'a', type: 'blink', result: 'none', date: '2026-10-11', ts: 2 }],
+    touches: [{ catId: 'a', zone: 'chin', reaction: 'more', ts: 3 }, { catId: 'a', zone: 'chin', reaction: 'more', ts: 3 }],
+  });
+  assert.equal(s.experiments[1].id, 'keep');
+  const ids = [...s.experiments, ...s.touches].map(x => x.id);
+  assert.ok(ids.every(id => typeof id === 'string' && id.length > 0));
+  assert.equal(new Set(ids).size, ids.length);
+});
+
+test('刪除記錄用到嘅文字 key，4 個 locale 都有', () => {
+  const C = loadCatnu();
+  for (const l of C.LOCALES) {
+    for (const k of ['recordsTitle', 'deleteRecord', 'recordDeleted']) assert.ok(C.COPY[l][k], `${l} 缺 ${k}`);
+    assert.ok(C.COPY[l].recordsTitle.includes('{n}'), `${l} recordsTitle 冇 {n}`);
+  }
+});
