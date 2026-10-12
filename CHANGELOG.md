@@ -1,5 +1,11 @@
 # CHANGELOG — catnu-app
 
+## 2026-10-13 — 摸摸地圖改 clay 風
+
+- 貓咪 tab「摸摸地圖」原本係線條畫（尖三角耳、粗深色描邊、白底、浮吓浮吓嘅橢圓 zone），同新 clay 貓唔夾 → 重畫做 Q 版側身貓：圓耳＋粉紅內耳、大閃眼、粗短腳、軟色填色、整體 drop shadow＋頭／身高光、地面影子；`TOUCH_SHAPES` zone id／點擊／鍵盤／aria 全部唔變（`viewBox` 改 330×214）。
+- 未記錄嘅 zone 用毛色（臉頰＝腮紅色、下巴／肚＝淺奶色、耳根＝淺粉），面部 zone 冇描邊；「好多貓唔鍾意被摸」位置保留虛線（說明文字有提），改淡色圓點虛線；hover／focus 先出 terra 色描邊。結果色：鍾意 #F9B79C、OK #FFDDB8、唔鍾意 #D9BCE4。
+- 驗證：117/117 全綠；瀏覽器（375px）未記錄／有記錄（loves／ok／avoid）兩種狀態都睇過；㩒下巴彈出「你摸咗佢嘅下巴，佢點反應？」；逐頁碌過今日／生活片段／貓咪／編輯頁，冇其他舊風格殘留；零 console error、冇橫向 scroll。
+
 ## 2026-10-13 — 新貓（Q 版 clay 公仔 × 4 表情）＋動態／3D
 
 - **新貓圖**：9 款 preset 全部重畫做 Q 版 clay 公仔（大頭大眼、腮紅、煲呔），每款 4 個表情 happy／sleepy／shy／purr，共 36 張 `images/cats/<preset>-<mood>.webp`（512px 透明背景，合共約 1.1MB）。生成：先用 Canva 定稿忌廉貓造型，其餘經 OpenRouter `google/gemini-2.5-flash-image`（以定稿圖做參考圖保持同一隻貓）；去背景用綠幕＋本機 chroma key，3 張綠色滲色嘅改用白底 flood-fill。舊 `images/avatars/` 已冇引用 → mv `_to_delete/avatars-2026-10-13/`。
