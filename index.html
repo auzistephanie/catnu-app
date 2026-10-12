@@ -346,8 +346,8 @@ input,select{font-family:inherit}
 .manual-sec{margin:10px 0}.manual-sec b{display:block;color:var(--terra);font-size:13px}.manual-sec span{font-size:14px}
 @media(max-width:420px){.r-app{padding-left:14px;padding-right:14px}.r-card{padding:16px}.r-hero{padding:18px}.r-hero h2{font-size:22px}}
 /* ── 2026-10-13 motion pass: clay-toy cat art + 3D hero + entrance + nav bounce ── */
-/* circle avatars crop to the head of the full-body art */
-.r-avatar img.art,.r-avatar-preset img.art{object-fit:cover;transform:scale(1.42);transform-origin:50% 20%}
+/* circle avatars: zoom a little and drop the art 10% so the ear tips stay inside the circle */
+.r-avatar img.art,.r-avatar-preset img.art{object-fit:cover;transform:translateY(10%) scale(1.1);transform-origin:50% 0}
 /* drifting milk-tea blobs behind everything */
 .r-app::before,.r-app::after{content:"";position:fixed;z-index:-1;border-radius:50%;filter:blur(40px);opacity:.5;pointer-events:none;animation:blobDrift 20s ease-in-out infinite alternate}
 .r-app::before{width:300px;height:300px;background:#FFD3BE;top:-80px;left:-90px}

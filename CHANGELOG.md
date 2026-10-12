@@ -1,5 +1,10 @@
 # CHANGELOG — catnu-app
 
+## 2026-10-13 — 圓形頭像唔再剪走耳仔
+
+- 圓形頭像（揀貓 pill、記錄卡、說明書、編輯頁 9 款 preset）原本 `scale(1.42)` 裁頭部，耳尖俾圓形四角剪走 → 改 `translateY(10%) scale(1.1)`、`transform-origin:50% 0`：輕微放大再向下移，9 款毛色耳仔都完整入圓（試過 1.0–1.25 倍 × 8–16% 位移共 5 組，三花貓係最易剪耳嗰隻）。
+- 驗證：117/117；375px 瀏覽器睇過揀貓 pill。
+
 ## 2026-10-13 — 摸摸地圖改用生成 clay 貓圖
 
 - 上一版手畫 SVG 側身貓 Stephanie 覺得仍然好醜 → 改用 OpenRouter `google/gemini-2.5-flash-image` 以忌廉貓做參考生成「企喺度、側身、望住你」嘅 clay 貓（2 張揀 1），白底 flood-fill 去背 → `images/touch-cat.webp`（640×731，約 30KB）。
