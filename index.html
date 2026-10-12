@@ -328,18 +328,14 @@ input,select{font-family:inherit}
 .lab-row button{flex:none}
 .lab-note,.lab-sci{font-size:12px;color:var(--sub);margin-top:8px;line-height:1.6}
 .lab-results{display:flex;flex-direction:column;gap:8px;margin:8px 0}
-.touch-svg{display:block;width:100%;max-width:340px;margin:8px auto 4px}
-.touch-svg .tz{stroke:rgba(122,74,56,.22);stroke-width:1.5;cursor:pointer;transition:fill .25s,stroke .2s}
-.touch-svg [data-touch-zone=cheek],.touch-svg [data-touch-zone=chin],.touch-svg [data-touch-zone=earbase],.touch-svg [data-touch-zone=belly]{stroke:none}
-.touch-svg .tz:hover{stroke:var(--terra);stroke-width:2.5;stroke-dasharray:none}
-.touch-svg [data-touch-zone=cheek].tz-unknown{fill:#FFD9CC}.touch-svg [data-touch-zone=chin].tz-unknown,.touch-svg [data-touch-zone=belly].tz-unknown{fill:#FFF9F1}.touch-svg [data-touch-zone=earbase].tz-unknown{fill:#FFE6D6}
-.touch-svg .tz:focus-visible{outline:none;stroke:var(--terra);stroke-width:4}
-.tz-loves{fill:#F9B79C}.tz-ok{fill:#FFDDB8}.tz-avoid{fill:#D9BCE4}.tz-unknown{fill:#FFF1E2}
-.tz-caution.tz-unknown{stroke-dasharray:3 5;stroke:rgba(122,74,56,.38);stroke-linecap:round}.touch-svg [data-touch-zone=belly].tz-caution.tz-unknown{stroke:rgba(122,74,56,.3)}
-.touch-svg .deco{fill:#FFF1E2;stroke:rgba(122,74,56,.28);stroke-width:1.5;stroke-linejoin:round;pointer-events:none}
-.touch-svg .deco-ear{fill:#F7C3B4;pointer-events:none}
-.touch-svg .deco-tail{fill:none;stroke:rgba(122,74,56,.3);stroke-width:17;stroke-linecap:round;pointer-events:none}
-.touch-svg .deco-tail-in{fill:none;stroke:#FFF1E2;stroke-width:14;stroke-linecap:round;pointer-events:none}
+.touch-svg{display:block;width:100%;max-width:300px;margin:8px auto 4px;overflow:visible}
+.touch-svg .tz{fill:#fff;fill-opacity:0;stroke:transparent;stroke-width:4;cursor:pointer;pointer-events:all;transition:fill-opacity .25s,stroke .2s}
+.touch-svg .tz:hover,.touch-svg .tz:focus-visible{outline:none;filter:none;stroke:var(--terra);stroke-width:5;stroke-dasharray:none}
+.touch-svg .tz:active{fill-opacity:.35}
+.tz-loves{fill:#FF8C7A!important;fill-opacity:.5!important;mix-blend-mode:multiply;filter:url(#tz-soft)}
+.tz-ok{fill:#FFC86E!important;fill-opacity:.5!important;mix-blend-mode:multiply;filter:url(#tz-soft)}
+.tz-avoid{fill:#A77BD0!important;fill-opacity:.5!important;mix-blend-mode:multiply;filter:url(#tz-soft)}
+.touch-svg .tz-caution.tz-unknown{stroke:rgba(122,74,56,.5);stroke-dasharray:2 10;stroke-linecap:round}
 .touch-legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .touch-legend .chip{font-size:12px;padding:6px 10px}
 .r-records{margin-top:10px}.r-records summary{font-size:12.5px;color:var(--sub);cursor:pointer}
@@ -3544,38 +3540,26 @@ function rExperimentOpen(type,catId){
   dialog.showModal();
 }
 // 側面貓剪影；同一 zone 可以有多個形狀（例如四隻腳）。順序＝繪畫次序（後畫嘅喺上面）
-// Touch map: chibi clay cat in side view (facing left). Zone ids/order unchanged; drawn back-to-front.
+// Touch map: clay cat photo (images/touch-cat.webp, 640×731) with tappable zones laid over it.
+// Zone ids/order unchanged; coordinates are in the image's pixel space.
 const TOUCH_SHAPES=[
- ['paws','rect','x="122" y="150" width="30" height="46" rx="15"'],
- ['paws','rect','x="156" y="154" width="30" height="42" rx="15"'],
- ['paws','rect','x="218" y="154" width="30" height="42" rx="15"'],
- ['paws','rect','x="252" y="150" width="30" height="46" rx="15"'],
- ['back','ellipse','cx="200" cy="128" rx="92" ry="50"'],
- ['belly','ellipse','cx="196" cy="152" rx="58" ry="20"'],
- ['tailbase','circle','cx="284" cy="114" r="15"'],
- ['head','circle','cx="90" cy="96" r="58"'],
- ['earbase','ellipse','cx="58" cy="54" rx="16" ry="10" transform="rotate(-30 58 54)"'],
- ['earbase','ellipse','cx="122" cy="54" rx="16" ry="10" transform="rotate(30 122 54)"'],
- ['cheek','ellipse','cx="58" cy="118" rx="15" ry="11"'],
- ['chin','ellipse','cx="90" cy="140" rx="20" ry="11"'],
+ ['back','ellipse','cx="440" cy="470" rx="78" ry="34"'],
+ ['belly','ellipse','cx="352" cy="612" rx="58" ry="26"'],
+ ['paws','ellipse','cx="190" cy="664" rx="22" ry="30"'],
+ ['paws','ellipse','cx="388" cy="666" rx="22" ry="28"'],
+ ['paws','ellipse','cx="258" cy="664" rx="54" ry="40"'],
+ ['paws','ellipse','cx="462" cy="664" rx="54" ry="40"'],
+ ['tailbase','circle','cx="532" cy="482" r="30"'],
+ ['head','ellipse','cx="250" cy="175" rx="140" ry="90"'],
+ ['earbase','ellipse','cx="162" cy="100" rx="34" ry="20" transform="rotate(-20 162 100)"'],
+ ['earbase','ellipse','cx="304" cy="196" rx="34" ry="22" transform="rotate(35 304 196)"'],
+ ['chin','ellipse','cx="84" cy="418" rx="34" ry="18"'],
+ ['cheek','ellipse','cx="140" cy="384" rx="44" ry="32"'],
 ];
 function rTouchSvg(cat){
   const map=Catnu.touchMap(STATE.touches,cat.id);
   const shapes=TOUCH_SHAPES.map(([zone,tag,attrs])=>{const z=map[zone];const label=`${rt('zone_'+zone)}${rPunct().colon}${rt('verdict_'+z.verdict)}`;return `<${tag} ${attrs} class="tz tz-${z.verdict}${z.caution?' tz-caution':''}" data-touch-zone="${zone}" data-id="${esc(cat.id)}" tabindex="0" role="button" aria-label="${esc(label)}"><title>${esc(label)}</title></${tag}>`;}).join('');
-  return `<svg class="touch-svg" viewBox="0 0 330 214" aria-label="${rt('touchTitle')}">`
-    +`<defs><filter id="tz-clay" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#7A4A38" flood-opacity=".18"/></filter>`
-    +`<radialGradient id="tz-shine" cx="35%" cy="30%" r="60%"><stop offset="0" stop-color="#fff" stop-opacity=".75"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>`
-    +`<ellipse cx="190" cy="204" rx="120" ry="8" fill="#7A4A38" opacity=".1"/>`
-    +`<g filter="url(#tz-clay)">`
-    +`<path class="deco-tail" d="M290 108 C318 96 322 52 300 30"/><path class="deco-tail-in" d="M290 108 C318 96 322 52 300 30"/>`
-    +`<path class="deco" d="M38 80 C34 52 38 26 50 16 C62 20 78 32 90 46 Z"/><path class="deco" d="M90 46 C102 32 118 20 130 16 C142 26 146 52 142 80 Z"/>`
-    +`<path class="deco-ear" d="M48 60 C46 44 48 32 54 26 C62 30 70 36 76 44 Z"/><path class="deco-ear" d="M104 44 C110 36 118 30 126 26 C132 32 134 44 132 60 Z"/>`
-    +shapes
-    +`</g>`
-    +`<g pointer-events="none"><ellipse cx="72" cy="70" rx="30" ry="20" fill="url(#tz-shine)"/><ellipse cx="170" cy="100" rx="50" ry="18" fill="url(#tz-shine)"/>`
-    +`<circle cx="70" cy="98" r="9.5" fill="#4A3A30"/><circle cx="110" cy="98" r="9.5" fill="#4A3A30"/><circle cx="73.5" cy="94.5" r="3.4" fill="#fff"/><circle cx="113.5" cy="94.5" r="3.4" fill="#fff"/><circle cx="67" cy="102" r="1.5" fill="#fff" opacity=".8"/><circle cx="107" cy="102" r="1.5" fill="#fff" opacity=".8"/>`
-    +`<path d="M86 112 Q90 109 94 112 L90 116 Z" fill="#E8809A"/><path d="M90 116 Q86 122 81 119 M90 116 Q94 122 99 119" fill="none" stroke="#5C4638" stroke-width="1.8" stroke-linecap="round"/></g>`
-    +`</svg>`;
+  return `<svg class="touch-svg" viewBox="0 0 640 731" aria-label="${rt('touchTitle')}"><defs><filter id="tz-soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="9"/></filter><mask id="tz-cat" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="640" height="731"><image href="images/touch-cat.webp" width="640" height="731"/></mask></defs><image href="images/touch-cat.webp" width="640" height="731"/><g mask="url(#tz-cat)">${shapes}</g></svg>`;
 }
 function rTouchBlock(cat){
   const map=Catnu.touchMap(STATE.touches,cat.id);

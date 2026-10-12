@@ -1,5 +1,11 @@
 # CHANGELOG — catnu-app
 
+## 2026-10-13 — 摸摸地圖改用生成 clay 貓圖
+
+- 上一版手畫 SVG 側身貓 Stephanie 覺得仍然好醜 → 改用 OpenRouter `google/gemini-2.5-flash-image` 以忌廉貓做參考生成「企喺度、側身、望住你」嘅 clay 貓（2 張揀 1），白底 flood-fill 去背 → `images/touch-cat.webp`（640×731，約 30KB）。
+- `rTouchSvg`：SVG `<image>` 做底，12 個透明 zone 疊上去（坐標＝圖片像素，`viewBox 0 0 640 731`）；zone id／點擊／鍵盤／aria 不變。未記錄＝透明（只有「好多貓唔鍾意被摸」位置有淡點虛線，對返說明文字）；有記錄＝鍾意珊瑚／OK 杏／唔鍾意淡紫，`multiply`＋高斯模糊似腮紅咁暈開，並用隻貓 alpha 做 mask 唔會溢出身體；hover／focus 出 terra 描邊。臉頰畫喺下巴之上，交界位歸臉頰。
+- 驗證：117/117 全綠；375px 瀏覽器實㩒臉頰／下巴／腳都彈啱對話框；`elementFromPoint` 檢查 12 個部位點全部命中正確 zone；未記錄＋有記錄兩種狀態都睇過；零 console error、冇橫向 scroll。
+
 ## 2026-10-13 — 摸摸地圖改 clay 風
 
 - 貓咪 tab「摸摸地圖」原本係線條畫（尖三角耳、粗深色描邊、白底、浮吓浮吓嘅橢圓 zone），同新 clay 貓唔夾 → 重畫做 Q 版側身貓：圓耳＋粉紅內耳、大閃眼、粗短腳、軟色填色、整體 drop shadow＋頭／身高光、地面影子；`TOUCH_SHAPES` zone id／點擊／鍵盤／aria 全部唔變（`viewBox` 改 330×214）。
