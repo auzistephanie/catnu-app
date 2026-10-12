@@ -3314,7 +3314,7 @@ Catnu.LOCALES.forEach((locale,i)=>Catnu.COPY[locale]=Object.fromEntries(Object.e
 Catnu.prepareRedesign = state => {
  state.settings ||= {}; state.settings.locale = Catnu.LOCALES.includes(state.settings.locale)?state.settings.locale:'zh-HK'; state.settings.region = ['HK','TW','CN','OTHER'].includes(state.settings.region)?state.settings.region:'HK';
  for(const key of ['moments','assets','observations','insightFeedback','relationships','experiments','touches']) if(!Array.isArray(state[key])) state[key]=[];
- for(const [key,prefix] of [['experiments','x'],['touches','t']]){const seen=new Set();state[key].forEach((r,i)=>{if(!r||typeof r!=='object')return;if(typeof r.id!=='string'||!r.id||seen.has(r.id))r.id=prefix+'b'+Date.now().toString(36)+i;seen.add(r.id);});}
+ for(const [key,prefix] of [['experiments','x'],['touches','t'],['observations','o']]){const seen=new Set();state[key].forEach((r,i)=>{if(!r||typeof r!=='object')return;if(typeof r.id!=='string'||!r.id||seen.has(r.id))r.id=prefix+'b'+Date.now().toString(36)+i;seen.add(r.id);});}
  state.cats.forEach(c=>{c.avatarPhoto ||= null; if(!Catnu.AVATAR_PRESETS.includes(c.avatarPreset)) c.avatarPreset=null; if(!Array.isArray(c.ownerPerception)) c.ownerPerception=[]; c.observedTraits ||= []; c.observationConfidence ||= 'low';});
  return state;
 };
@@ -3438,20 +3438,25 @@ function rDetailsAttr(key){return `data-details-key="${esc(key)}" ${rOpenDetails
 const REC_LIMIT=10;
 let rRecLimits={};
 function rRecordRows(kind,cat){
-  const all=STATE[kind].filter(r=>r.catId===cat.id).sort((a,b)=>b.ts-a.ts);
+  const sortKey=r=>r.ts!==undefined?r.ts:Date.parse(r.date+'T12:00:00Z');
+  const all=STATE[kind].filter(r=>r.catId===cat.id).sort((a,b)=>sortKey(b)-sortKey(a));
   if(!all.length)return '';
+  const P0=rPunct();
   const limitKey=kind+':'+cat.id;
   const page=Catnu.pageRecords(all,rRecLimits[limitKey]||REC_LIMIT);
   const rows=page.shown.map(r=>{
     const P=rPunct();
-    const date=kind==='experiments'?r.date:todayStr(new Date(r.ts));
+    const date=kind==='touches'?todayStr(new Date(r.ts)):r.date;
+    const askKey={'quiet-approach':'ask','toy-interest':'playAsk','settle-rest':'restAsk'}[r.question]||'ask';
     const title=kind==='experiments'
       ?`${(Catnu.EXPERIMENTS.find(e=>e.id===r.type)||{}).emoji||''} ${rt('exp_'+r.type)}${P.colon}${rt('res_'+r.result)}`
-      :`${rt('zone_'+r.zone)}${P.colon}${rt('touch_'+r.reaction)}`;
+      :kind==='observations'
+        ?`${rt(askKey)}${P.colon}${rt(r.answer==='no'&&r.question&&r.question!=='quiet-approach'?'notToday':r.answer)}`
+        :`${rt('zone_'+r.zone)}${P.colon}${rt('touch_'+r.reaction)}`;
     return `<div class="rec-row"><div class="rec-txt"><b>${esc(title)}</b><small>${esc(date)}</small></div><button type="button" class="rec-del" data-del-kind="${kind}" data-del-id="${esc(r.id)}" aria-label="${esc(rt('deleteRecord'))}${P.colon}${esc(title)}">✕</button></div>`;
   }).join('');
   const more=page.remaining?`<button type="button" class="rec-more" data-rec-more="${esc(limitKey)}">${rt('more')}${rPunct().open}${page.remaining}${rPunct().close}</button>`:'';
-  return `<details class="r-records" ${rDetailsAttr('rec:'+kind+':'+cat.id)}><summary>${rt('recordsTitle').replace('{n}',all.length)}</summary>${rows}${more}</details>`;
+  return `<details class="r-records" ${rDetailsAttr('rec:'+kind+':'+cat.id)}><summary>${kind==='observations'?`${rt('history')}${P0.open}${all.length}${P0.close}`:rt('recordsTitle').replace('{n}',all.length)}</summary>${rows}${more}</details>`;
 }
 function rDeleteRecord(kind,id){
   const r=Catnu.removeRecord(STATE[kind],id);if(!r)return;
@@ -3552,7 +3557,7 @@ function rManualOpen(catId){
   const dl=dialog.querySelector('[data-manual-download]');if(dl)dl.onclick=()=>Catnu.shareCatManualCard(cat,title,sections,rt('manualDisclaimer'));
   dialog.showModal();
 }
-function rCats(){return `${renderMilestoneWall(STATE)}${rFactsWall()}<p>${rt('compare')}</p>${STATE.cats.filter(c=>rActive==='all'||c.id===rActive).map(c=>{const i=Catnu.insight(STATE,c.id);return `<article class="r-card r-profile" data-cat-id="${esc(c.id)}">${rAvatar(c)}<h2>${esc(c.name)}</h2><p>${rt('original')} · ${c.ownerPerception.map(rt).join(' / ')||rt('pending')}</p><p>${rt('observed')} · ${i.revised?rt('revised'):Catnu.observedTraits(STATE,c.id).map(t=>rt(t.trait)).join(' / ')||rt('pending')}</p>${rCatAnalysis(c)}${rLabBlock(c)}${rTouchBlock(c)}<button type="button" class="r-primary" style="display:block;width:100%;margin:12px 0 8px" data-manual="${esc(c.id)}">${esc(rt('manualOpen').replace('{name}',c.name))}</button><small>${rt('confidence')}: ${rt(i.confidence)} (${i.count})</small>${i.count?`<p>${rt('feedback')}</p><div class="r-answer">${['accurate','unsure','inaccurate'].map(k=>`<button data-feedback="${k}" data-id="${esc(c.id)}">${rt(k)}</button>`).join('')}</div>`:''}<details><summary>${rt('history')}</summary>${STATE.observations.filter(o=>o.catId===c.id).slice(-5).reverse().map(o=>`<p><small>${esc(o.date)} · ${rt({'quiet-approach':'ask','toy-interest':'playAsk','settle-rest':'restAsk'}[o.question]||'ask')} · ${rt(o.answer==='no'?'notToday':o.answer)}</small></p>`).join('')}</details><button data-edit="${esc(c.id)}">${rt('edit')}</button></article>`;}).join('')}<button class="r-primary" data-action="add">${rt('add')}</button>`;}
+function rCats(){return `${renderMilestoneWall(STATE)}${rFactsWall()}<p>${rt('compare')}</p>${STATE.cats.filter(c=>rActive==='all'||c.id===rActive).map(c=>{const i=Catnu.insight(STATE,c.id);return `<article class="r-card r-profile" data-cat-id="${esc(c.id)}">${rAvatar(c)}<h2>${esc(c.name)}</h2><p>${rt('original')} · ${c.ownerPerception.map(rt).join(' / ')||rt('pending')}</p><p>${rt('observed')} · ${i.revised?rt('revised'):Catnu.observedTraits(STATE,c.id).map(t=>rt(t.trait)).join(' / ')||rt('pending')}</p>${rCatAnalysis(c)}${rLabBlock(c)}${rTouchBlock(c)}<button type="button" class="r-primary" style="display:block;width:100%;margin:12px 0 8px" data-manual="${esc(c.id)}">${esc(rt('manualOpen').replace('{name}',c.name))}</button><small>${rt('confidence')}: ${rt(i.confidence)} (${i.count})</small>${i.count?`<p>${rt('feedback')}</p><div class="r-answer">${['accurate','unsure','inaccurate'].map(k=>`<button data-feedback="${k}" data-id="${esc(c.id)}">${rt(k)}</button>`).join('')}</div>`:''}${rRecordRows('observations',c)}<button data-edit="${esc(c.id)}">${rt('edit')}</button></article>`;}).join('')}<button class="r-primary" data-action="add">${rt('add')}</button>`;}
 Catnu.getDemoPicks=(state,catId)=>{
  const household=catId==='all';const insight=household?null:Catnu.insight(state,catId);
  const relevant=insight?.trait==='social'&&!insight.revised;
@@ -3573,7 +3578,7 @@ app.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>{rEditing=b.dataset
 const form=app.querySelector('#r-cat-form');if(form)form.onsubmit=e=>{e.preventDefault();const f=new FormData(form);const name=String(f.get('name')).trim();if(!name)return;let c=STATE.cats.find(c=>c.id===rEditing);const avatarPhoto=(rDraft&&rDraft.avatarPhoto!==undefined)?rDraft.avatarPhoto:(c?.avatarPhoto||null);const avatarPreset=(rDraft&&rDraft.avatarPreset!==undefined)?rDraft.avatarPreset:(c?.avatarPreset||null);if(!c){c={id:'c'+Date.now(),breedId:'mixed',emoji:'🐱',anniversaries:[]};STATE.cats.push(c);}Object.assign(c,{name,avatarPhoto,avatarPreset,birthDate:f.get('birthDate')||'',homeDate:f.get('homeDate')||'',ownerPerception:f.getAll('traits')});if(rSave()){rAdding=false;rEditing=null;rDraft=null;rActive=c.id;rRender();}};
 const avatarFile=app.querySelector('#r-avatar-file');if(avatarFile)avatarFile.onchange=async()=>{const file=avatarFile.files[0];if(!file)return;try{if(!file.type.startsWith('image/')||file.size>15000000)throw Error('photo');rCaptureDraft();rDraft.avatarPhoto=await rCropSquare(file);rRender();}catch(e){Catnu.showToast(rt('error'));}};
 app.querySelectorAll('.r-avatar-preset').forEach(b=>b.onclick=()=>{rCaptureDraft();rDraft.avatarPreset=b.dataset.preset;rRender();});
-app.querySelectorAll('[data-answer]').forEach(b=>b.onclick=()=>{if(STATE.observations.some(o=>o.date===todayStr()))return;STATE.observations.push({catId:Catnu.dailyCat(STATE,todayStr()).id,date:todayStr(),answer:b.dataset.answer,question:Catnu.dailyQuestion(STATE,todayStr())});if(rSave()){rRender();Catnu.showToast(rt('saved'));}});
+app.querySelectorAll('[data-answer]').forEach(b=>b.onclick=()=>{if(STATE.observations.some(o=>o.date===todayStr()))return;STATE.observations.push({id:'o'+Date.now()+Math.random().toString(36).slice(2,6),catId:Catnu.dailyCat(STATE,todayStr()).id,date:todayStr(),answer:b.dataset.answer,question:Catnu.dailyQuestion(STATE,todayStr())});if(rSave()){rRender();Catnu.showToast(rt('saved'));}});
 app.querySelectorAll('[data-feedback]').forEach(b=>b.onclick=()=>{STATE.insightFeedback.push({catId:b.dataset.id,answer:b.dataset.feedback,ts:Date.now()});if(rSave()){rRender();Catnu.showToast(rt('saved'));}});
 app.querySelectorAll('[data-log-preset]').forEach(b=>b.onclick=()=>{const p=QUICK_PRESETS[+b.dataset.logPreset];rCommitLog({catId:b.dataset.logCat,reactions:p.reactions,actions:p.actions,neg:p.neg,tileId:p.id},b);});
 const logToggle=app.querySelector('[data-log-detail-toggle]');if(logToggle)logToggle.onclick=()=>{rLogDetailOpen=!rLogDetailOpen;rRender();};

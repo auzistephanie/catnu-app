@@ -268,3 +268,29 @@ test('pageRecords：按 limit 切，回傳顯示嘅同剩低嘅數量；limit �
   assert.equal(C.pageRecords([], 10).remaining, 0);
   assert.equal(items.length, 14);
 });
+
+test('prepareRedesign：每日觀察（observations）冇 id 都會補返，已有 id 唔郁', () => {
+  const C = loadCatnu();
+  const s = C.prepareRedesign({
+    schemaVersion: 2, cats: [{ id: 'a', name: 'A' }], logs: [], quests: {}, settings: {}, streak: { current: 0 }, milestones: [],
+    observations: [{ catId: 'a', date: '2026-10-10', answer: 'yes', question: 'quiet-approach' }, { id: 'keep', catId: 'a', date: '2026-10-11', answer: 'no', question: 'toy-interest' }, { catId: 'a', date: '2026-10-12', answer: 'skip' }],
+  });
+  assert.equal(s.observations[1].id, 'keep');
+  const ids = s.observations.map(o => o.id);
+  assert.ok(ids.every(id => typeof id === 'string' && id.length > 0));
+  assert.equal(new Set(ids).size, ids.length);
+});
+
+test('刪除每日觀察後，Catnu.observedTraits／insight 即時跟住變（唔再算被刪嗰條）', () => {
+  const C = loadCatnu();
+  const s = C.prepareRedesign({
+    schemaVersion: 2, cats: [{ id: 'a', name: 'A' }], logs: [], quests: {}, settings: {}, streak: { current: 0 }, milestones: [],
+    observations: [1, 2, 3].map(i => ({ id: 'o' + i, catId: 'a', date: '2026-10-0' + i, answer: 'yes', question: 'quiet-approach' })),
+  });
+  assert.equal(C.observedTraits(s, 'a')[0].samples, 3);
+  const r = C.removeRecord(s.observations, 'o2');
+  s.observations = r.items;
+  assert.equal(C.observedTraits(s, 'a')[0].samples, 2);
+  s.observations = [];
+  assert.equal(C.observedTraits(s, 'a').length, 0);
+});
