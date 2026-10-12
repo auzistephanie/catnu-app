@@ -9,7 +9,8 @@
 - **C 小動態**：轉 tab／轉貓時卡片逐張彈上（`main.enter`，animation 用 backwards fill，關咗動畫都照常顯示）；背景兩嚿奶茶色 blob 慢慢飄；底部 tab 新揀嗰個 icon 彈一下，現時 tab 有細 🐾。
 - `prefers-reduced-motion`：沿用全域 `animation/transition:none`，所有 JS 動效（飛心、彩紙、傾斜）亦會跳過。
 - 驗證：`node --test tests/*.test.mjs` **117/117 全綠**。瀏覽器（375px）：hero 新貓、慢眨眼轉眼瞓、tile 飛心＋轉 purr＋泡泡、貓咪 tab 正常；冇爛圖、冇橫向 scroll、零 console error。
-- 已知：灰貓 sleepy 嘅「zZ」去背景時一齊去咗；iOS 傾斜只跟手指（未開陀螺儀，要另加權限掣）。
+- 灰貓 sleepy 嘅淺灰「zZ」去背景時一齊去咗 → 補返忌廉貓同款深色「zZ」（淺灰 z 喺奶茶底本身亦睇唔到），重新裁切令貓身比例同其他 35 張一致。
+- 已知：iOS 傾斜只跟手指（未開陀螺儀，要另加權限掣）。
 
 ## 2026-10-12 — 移除「好物」tab
 
