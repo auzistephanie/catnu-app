@@ -1,5 +1,16 @@
 # CHANGELOG — catnu-app
 
+## 2026-10-13 — 新貓（Q 版 clay 公仔 × 4 表情）＋動態／3D
+
+- **新貓圖**：9 款 preset 全部重畫做 Q 版 clay 公仔（大頭大眼、腮紅、煲呔），每款 4 個表情 happy／sleepy／shy／purr，共 36 張 `images/cats/<preset>-<mood>.webp`（512px 透明背景，合共約 1.1MB）。生成：先用 Canva 定稿忌廉貓造型，其餘經 OpenRouter `google/gemini-2.5-flash-image`（以定稿圖做參考圖保持同一隻貓）；去背景用綠幕＋本機 chroma key，3 張綠色滲色嘅改用白底 flood-fill。舊 `images/avatars/` 已冇引用 → mv `_to_delete/avatars-2026-10-13/`。
+- **Pure logic**：`Catnu.CAT_MOODS`、`Catnu.catArt(preset,mood)`（未知 preset／mood 退返第一款＋happy）；`tests/cat-art.test.mjs` 3 個 test。
+- **A 主角貓**：今日 tab 單貓時，hero 改成企喺卡上嘅公仔（`rHeroCat`，唔再係圓形頭像）：慢慢呼吸＋地面影子；卡片跟手指 3D 傾斜＋反光；㩒＝啫喱彈＋💕；長按＝呼嚕臉＋震＋手機震動（Android）；1.2 秒內連㩒 4 下＝怕醜臉；「送佢一個慢眨眼」＝眼瞓臉＋💤。用戶上傳相嘅貓照用圓形相，只有彈／震，冇轉表情。全家 view 各頭像錯開呼吸。
+- **B 記錄回饋**：㩒 quick-log tile → 💗 由 tile 飛入「一撳即記」個貓頭像，再爆 burst；頭像跟回應轉 purr（負面＝shy），泡泡收起時變返 happy。解鎖里程碑 → 貓爪／魚骨彩紙落下。
+- **C 小動態**：轉 tab／轉貓時卡片逐張彈上（`main.enter`，animation 用 backwards fill，關咗動畫都照常顯示）；背景兩嚿奶茶色 blob 慢慢飄；底部 tab 新揀嗰個 icon 彈一下，現時 tab 有細 🐾。
+- `prefers-reduced-motion`：沿用全域 `animation/transition:none`，所有 JS 動效（飛心、彩紙、傾斜）亦會跳過。
+- 驗證：`node --test tests/*.test.mjs` **117/117 全綠**。瀏覽器（375px）：hero 新貓、慢眨眼轉眼瞓、tile 飛心＋轉 purr＋泡泡、貓咪 tab 正常；冇爛圖、冇橫向 scroll、零 console error。
+- 已知：灰貓 sleepy 嘅「zZ」去背景時一齊去咗；iOS 傾斜只跟手指（未開陀螺儀，要另加權限掣）。
+
 ## 2026-10-12 — 移除「好物」tab
 
 - 移走底部導航嘅「好物」（Picks）tab：`rPicks`、`Catnu.getDemoPicks`、`Catnu.commerce`、`entitlements.flags` 入面嘅 `affiliate`／`sponsoredDemo`、相關 CSS（`.r-product`、`.r-badge`）同 8 個文字 key（`picks`／`demo`／`sponsored`／`bed`／`scratch`／`match`／`neutral`／`shared`，四個 locale）。`wand` 係動作標籤，保留。導航剩「今日／生活片段／貓咪」三個 tab（flex 均分）。
