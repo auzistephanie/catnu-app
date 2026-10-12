@@ -1,5 +1,13 @@
 # CHANGELOG — catnu-app
 
+## 2026-10-13 — 摸摸地圖遊戲化（解鎖進度＋貓口吻）
+
+- 「未知」原因：同一部位要記 ≥2 次先出判斷（`TOUCH_MIN`），但畫面冇講 → 而家每個部位顯示「再摸 N 次就知 ●○」／「未試過 ○○」，地圖頂有「已解鎖 x/8」進度條。
+- 地圖：未解鎖位置淡點虛線；鍾意＝💗、唔好摸＝✋ 標記；今日建議位置（`nextTouchZone`：差少少解鎖優先，再揀唔敏感）脈動描邊＋「🎯 今日試試」按鈕，撳咗直接開記錄。
+- 記錄後貓口吻回應（`touchReply`，4 語系各 3 句）；部位解鎖加「🔓 解鎖：肚」；8 個全解鎖→新里程碑 `touch-map-all` 🗺️。
+- 純邏輯：`touchMap` 加 `need`、新增 `touchProgress`／`nextTouchZone`／`touchReply`／`TOUCH_REPLIES`。`prefers-reduced-motion` 停動畫。
+- 驗證：121/121 全綠（新增 4 個 test）；瀏覽器用 seed 數據睇過地圖、chips、撳建議按鈕→記錄→toast＋進度 4/8→5/8。**未 push**（working tree 仲有其他未提交改動，等 Stephanie 確認）。
+
 ## 2026-10-13 — 圓形頭像唔再剪走耳仔
 
 - 圓形頭像（揀貓 pill、記錄卡、說明書、編輯頁 9 款 preset）原本 `scale(1.42)` 裁頭部，耳尖俾圓形四角剪走 → 改 `translateY(10%) scale(1.1)`、`transform-origin:50% 0`：輕微放大再向下移，9 款毛色耳仔都完整入圓（試過 1.0–1.25 倍 × 8–16% 位移共 5 組，三花貓係最易剪耳嗰隻）。

@@ -134,6 +134,44 @@ test('touchMap：只計呢隻貓', () => {
   assert.equal(m.chin.verdict, 'unknown');
 });
 
+
+test('touchMap：need＝距離出判斷仲差幾次；touchProgress 數已解鎖部位', () => {
+  const C = loadCatnu();
+  const m = C.touchMap([touch('chin', 'more', NOW), touch('head', 'ok', NOW), touch('head', 'ok', NOW + 1)], 'a');
+  assert.equal(m.chin.need, 1);
+  assert.equal(m.head.need, 0);
+  assert.equal(m.belly.need, 2);
+  assert.equal(JSON.stringify(C.touchProgress(m)), JSON.stringify({ unlocked: 1, total: 8 }));
+});
+
+test('nextTouchZone：已記過嘅優先，再揀唔敏感嘅；全解鎖 → null', () => {
+  const C = loadCatnu();
+  assert.equal(C.nextTouchZone(C.touchMap([], 'a')), 'cheek');
+  assert.equal(C.nextTouchZone(C.touchMap([touch('belly', 'ok', NOW)], 'a')), 'belly');
+  const all = C.TOUCH_ZONES.flatMap(z => [touch(z.id, 'ok', NOW), touch(z.id, 'ok', NOW + 1)]);
+  assert.equal(C.nextTouchZone(C.touchMap(all, 'a')), null);
+});
+
+test('touchReply：每個反應四個語系都有貓口吻；未知反應 → 空字串', () => {
+  const C = loadCatnu();
+  for (const loc of ['zh-HK', 'zh-TW', 'zh-CN', 'en']) for (const r of ['more', 'ok', 'stop']) {
+    assert.ok(C.touchReply(r, loc, () => 0).length > 0);
+  }
+  assert.equal(C.touchReply('nope', 'en'), '');
+});
+
+test('里程碑 touch-map-all：8 個部位全部出判斷先解鎖，只解鎖一次', () => {
+  const C = loadCatnu();
+  const s = fixture(C);
+  s.touches = C.TOUCH_ZONES.slice(0, 7).flatMap(z => [touch(z.id, 'ok', NOW), touch(z.id, 'ok', NOW + 1)]);
+  assert.equal(C.checkNewMilestones(s, NOW).some(m => m.id === 'touch-map-all'), false);
+  s.touches.push(touch('paws', 'more', NOW), touch('paws', 'more', NOW + 1));
+  const found = C.checkNewMilestones(s, NOW).filter(m => m.id === 'touch-map-all');
+  assert.equal(found.map(m => m.catId).join(), 'a');
+  s.milestones.push(...found);
+  assert.equal(C.checkNewMilestones(s, NOW).some(m => m.id === 'touch-map-all'), false);
+});
+
 /* ── Task 4：貓咪說明書 ── */
 
 test('catManual：搵唔到貓 → null', () => {

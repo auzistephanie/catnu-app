@@ -335,7 +335,16 @@ input,select{font-family:inherit}
 .tz-loves{fill:#FF8C7A!important;fill-opacity:.5!important;mix-blend-mode:multiply;filter:url(#tz-soft)}
 .tz-ok{fill:#FFC86E!important;fill-opacity:.5!important;mix-blend-mode:multiply;filter:url(#tz-soft)}
 .tz-avoid{fill:#A77BD0!important;fill-opacity:.5!important;mix-blend-mode:multiply;filter:url(#tz-soft)}
+.touch-svg .tz-unknown{stroke:rgba(122,74,56,.28);stroke-dasharray:2 10;stroke-linecap:round}
 .touch-svg .tz-caution.tz-unknown{stroke:rgba(122,74,56,.5);stroke-dasharray:2 10;stroke-linecap:round}
+.touch-svg .tz-next{stroke:var(--terra);stroke-width:5;stroke-dasharray:7 7;animation:tzPulse 1.6s ease-in-out infinite}
+@keyframes tzPulse{0%,100%{stroke-opacity:.3}50%{stroke-opacity:1}}
+.tz-mark{font-size:46px;text-anchor:middle;dominant-baseline:central;pointer-events:none;animation:floaty 3.4s ease-in-out infinite}
+.touch-progress{display:flex;align-items:center;gap:8px;margin:8px 0 2px;font-size:12.5px;font-weight:800;color:var(--teal-dk)}
+.touch-progress .meter{flex:1;margin:0}
+.touch-next{display:block;width:100%;margin:8px 0 0;padding:10px 12px;border-radius:99px;font-size:13px;font-weight:800;color:var(--ink);text-align:center}
+.tz-dots{letter-spacing:1px;color:var(--terra)}
+@media (prefers-reduced-motion:reduce){.touch-svg .tz-next,.tz-mark{animation:none}}
 .touch-legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .touch-legend .chip{font-size:12px;padding:6px 10px}
 .r-records{margin-top:10px}.r-records summary{font-size:12.5px;color:var(--sub);cursor:pointer}
@@ -626,6 +635,7 @@ Catnu.MILESTONE_META = {
   'first-slowblink': { emoji: '😌', label: '第一次慢眨眼' },
   'logs-50': { emoji: '📚', label: '累積 50 條記錄' },
   'logs-100': { emoji: '📚', label: '累積 100 條記錄' },
+  'touch-map-all': { emoji: '🗺️', label: '解鎖全部摸摸地圖' },
   'score-70': { emoji: '💛', label: '好感度達 70' },
   'score-85': { emoji: '💛', label: '好感度達 85' },
   'streak-7': { emoji: '🔥', label: '連續 7 日' },
@@ -1289,6 +1299,10 @@ Catnu.checkNewMilestones = function checkNewMilestones(state, nowTs) {
       if (unlocked.has(key)) continue;
       if (def.check(state.logs, cat.id)) found.push({ id: def.id, catId: cat.id, unlockedAt: nowTs });
     }
+    if (!unlocked.has(`touch-map-all:${cat.id}`)) {
+      const tp = Catnu.touchProgress(Catnu.touchMap(state.touches || [], cat.id));
+      if (tp.unlocked >= tp.total) found.push({ id: 'touch-map-all', catId: cat.id, unlockedAt: nowTs });
+    }
     const score = Catnu.affectionScore(state.logs, cat.id, nowTs);
     if (!score.insufficient) {
       if (score.score >= 70 && !unlocked.has(`score-70:${cat.id}`)) found.push({ id: 'score-70', catId: cat.id, unlockedAt: nowTs });
@@ -1570,6 +1584,7 @@ Catnu.TOUCH_ZONES = [
 ];
 Catnu.TOUCH_REACTIONS = ['more', 'ok', 'stop'];
 Catnu.TOUCH_WINDOW = 10;
+Catnu.TOUCH_MIN = 2; // 同一部位至少記幾次先出判斷
 
 Catnu.touchMap = function touchMap(touches, catId) {
   const out = {};
@@ -1581,10 +1596,55 @@ Catnu.touchMap = function touchMap(touches, catId) {
     const ok = rows.filter(t => t.reaction === 'ok').length;
     const stop = rows.filter(t => t.reaction === 'stop').length;
     let verdict = 'unknown';
-    if (n >= 2) verdict = stop / n >= 0.5 ? 'avoid' : more / n >= 0.5 ? 'loves' : 'ok';
-    out[z.id] = { n, more, ok, stop, verdict, caution: z.caution };
+    if (n >= Catnu.TOUCH_MIN) verdict = stop / n >= 0.5 ? 'avoid' : more / n >= 0.5 ? 'loves' : 'ok';
+    out[z.id] = { n, more, ok, stop, verdict, caution: z.caution, need: Math.max(0, Catnu.TOUCH_MIN - n) };
   }
   return out;
+};
+
+// 已解鎖部位數（出到判斷＝解鎖）
+Catnu.touchProgress = function touchProgress(map) {
+  const total = Catnu.TOUCH_ZONES.length;
+  return { unlocked: Catnu.TOUCH_ZONES.filter(z => map[z.id].verdict !== 'unknown').length, total };
+};
+
+// 今日建議試邊度：未解鎖嘅部位，已經記過嘅（差少少就解鎖）優先，再揀唔敏感嘅，最後按原次序
+Catnu.nextTouchZone = function nextTouchZone(map) {
+  const pending = Catnu.TOUCH_ZONES.map((z, i) => ({ z, i })).filter(x => map[x.z.id].verdict === 'unknown');
+  if (!pending.length) return null;
+  pending.sort((a, b) => (map[b.z.id].n - map[a.z.id].n) || (a.z.caution - b.z.caution) || (a.i - b.i));
+  return pending[0].z.id;
+};
+
+Catnu.TOUCH_REPLIES = {
+  'zh-HK': {
+    more: ['呢度好舒服，再多啲～', '呼嚕呼嚕…就係呢度', '你好識摸喎'],
+    ok: ['嗯，可以㗎', '…（眨眼）你繼續啦', 'OK 啦，唔錯'],
+    stop: ['呢度唔太想畀你摸喎', '等陣先啦…', '俾我自己揀好嗎'],
+  },
+  'zh-TW': {
+    more: ['這裡好舒服，再多一點～', '呼嚕呼嚕…就是這裡', '你很會摸耶'],
+    ok: ['嗯，可以啊', '…（眨眼）你繼續吧', 'OK 啦，不錯'],
+    stop: ['這裡不太想被摸耶', '等一下嘛…', '讓我自己選好嗎'],
+  },
+  'zh-CN': {
+    more: ['这里好舒服，再多一点～', '呼噜呼噜…就是这里', '你很会摸嘛'],
+    ok: ['嗯，可以啊', '…（眨眼）你继续吧', 'OK 啦，不错'],
+    stop: ['这里不太想被摸耶', '等一下嘛…', '让我自己选好吗'],
+  },
+  en: {
+    more: ['So nice there, a little more~', 'Purr purr… right there', 'You know just where'],
+    ok: ['Mm, that’s fine', '…(blink) go on then', 'Okay, not bad'],
+    stop: ['Not really my spot…', 'Later, okay?', 'Let me choose, please'],
+  },
+};
+
+Catnu.touchReply = function touchReply(reaction, locale, rand) {
+  const table = Catnu.TOUCH_REPLIES[locale] || Catnu.TOUCH_REPLIES['zh-HK'];
+  const pool = table[reaction];
+  if (!pool) return '';
+  const r = typeof rand === 'function' ? rand() : Math.random();
+  return pool[Math.min(pool.length - 1, Math.floor(r * pool.length))];
 };
 
 /* @LOGIC:RECORDS — 刪除單條記錄（可復原）：純函數，唔郁原 array */
@@ -3349,6 +3409,10 @@ const copyRows = {
  touch_more:['頂返我／要多啲 😻','頂回來／想要更多 😻','顶回来／想要更多 😻','Leaned in / wanted more 😻'], touch_ok:['接受，冇特別反應 😐','接受，沒特別反應 😐','接受，没特别反应 😐','Accepted it 😐'], touch_stop:['走開／甩尾／耳仔向後 😾','走開／甩尾／耳朵向後 😾','走开／甩尾／耳朵向后 😾','Moved away / tail flick / ears back 😾'],
  zone_cheek:['面頰','臉頰','脸颊','cheeks'], zone_chin:['下巴','下巴','下巴','chin'], zone_earbase:['耳仔底','耳朵根','耳朵根','base of ears'], zone_head:['頭頂','頭頂','头顶','top of head'], zone_back:['背脊','背部','背部','back'], zone_tailbase:['尾巴根','尾巴根','尾巴根','base of tail'], zone_belly:['肚','肚子','肚子','belly'], zone_paws:['手腳','腳掌','脚掌','paws'],
  verdict_loves:['佢鍾意','牠喜歡','它喜欢','Loves it'], verdict_ok:['可以接受','可以接受','可以接受','Fine'], verdict_avoid:['唔好摸','先別摸','先别摸','Avoid'], verdict_unknown:['未知','未知','未知','Not sure yet'],
+ touchProgress:['已解鎖 {n}/{total} 個部位','已解鎖 {n}/{total} 個部位','已解锁 {n}/{total} 个部位','{n}/{total} spots unlocked'],
+ touchNeed:['再摸 {n} 次就知','再摸 {n} 次就知','再摸 {n} 次就知','{n} more to go'], touchUntried:['未試過','未試過','未试过','Not tried'],
+ touchNext:['🎯 今日試試：{zone}（摸 3 秒就停，睇佢反應）','🎯 今天試試：{zone}（摸 3 秒就停，看牠反應）','🎯 今天试试：{zone}（摸 3 秒就停，看它反应）','🎯 Try today: {zone} (3 seconds, then watch)'],
+ touchUnlockedZone:['🔓 解鎖：{zone}','🔓 解鎖：{zone}','🔓 解锁：{zone}','🔓 Unlocked: {zone}'], touchAllDone:['地圖全部解鎖！你識晒佢嘅摸摸喜好 🗺️','地圖全部解鎖！你摸清了牠的喜好 🗺️','地图全部解锁！你摸清了它的喜好 🗺️','Map fully unlocked — you know their favourite spots 🗺️'],
  touchCaution:['虛線位置好多貓都唔鍾意被摸，試之前睇清楚佢身體語言。','虛線位置很多貓都不喜歡被摸，嘗試前先看清楚牠的身體語言。','虚线位置很多猫都不喜欢被摸，尝试前先看清楚它的身体语言。','Dashed areas are sensitive for many cats — read their body language first.'],
  touchSource:['參考：Haywood 等 2021 嘅 CAT 指引（俾佢揀、留意反應、揀啱位置）','參考：Haywood 等 2021 的 CAT 指引（讓牠選擇、留意反應、選對位置）','参考：Haywood 等 2021 的 CAT 指引（让它选择、留意反应、选对位置）','Based on the CAT guidelines (Haywood et al. 2021): choice, attention, touch.'],
 
@@ -3558,13 +3622,24 @@ const TOUCH_SHAPES=[
 ];
 function rTouchSvg(cat){
   const map=Catnu.touchMap(STATE.touches,cat.id);
-  const shapes=TOUCH_SHAPES.map(([zone,tag,attrs])=>{const z=map[zone];const label=`${rt('zone_'+zone)}${rPunct().colon}${rt('verdict_'+z.verdict)}`;return `<${tag} ${attrs} class="tz tz-${z.verdict}${z.caution?' tz-caution':''}" data-touch-zone="${zone}" data-id="${esc(cat.id)}" tabindex="0" role="button" aria-label="${esc(label)}"><title>${esc(label)}</title></${tag}>`;}).join('');
-  return `<svg class="touch-svg" viewBox="0 0 640 731" aria-label="${rt('touchTitle')}"><defs><filter id="tz-soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="9"/></filter><mask id="tz-cat" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="640" height="731"><image href="images/touch-cat.webp" width="640" height="731"/></mask></defs><image href="images/touch-cat.webp" width="640" height="731"/><g mask="url(#tz-cat)">${shapes}</g></svg>`;
+  const next=Catnu.nextTouchZone(map);
+  const shapes=TOUCH_SHAPES.map(([zone,tag,attrs])=>{const z=map[zone];const label=`${rt('zone_'+zone)}${rPunct().colon}${rt('verdict_'+z.verdict)}`;return `<${tag} ${attrs} class="tz tz-${z.verdict}${z.caution?' tz-caution':''}${zone===next?' tz-next':''}" data-touch-zone="${zone}" data-id="${esc(cat.id)}" tabindex="0" role="button" aria-label="${esc(label)}"><title>${esc(label)}</title></${tag}>`;}).join('');
+  const marks=Catnu.TOUCH_ZONES.map(({id})=>{const v=map[id].verdict;if(v!=='loves'&&v!=='avoid')return '';const first=TOUCH_SHAPES.find(sh=>sh[0]===id);const cx=/cx="(\d+)"/.exec(first[2]),cy=/cy="(\d+)"/.exec(first[2]);return `<text class="tz-mark" x="${cx[1]}" y="${cy[1]}" aria-hidden="true">${v==='loves'?'💗':'✋'}</text>`;}).join('');
+  return `<svg class="touch-svg" viewBox="0 0 640 731" aria-label="${rt('touchTitle')}"><defs><filter id="tz-soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="9"/></filter><mask id="tz-cat" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="640" height="731"><image href="images/touch-cat.webp" width="640" height="731"/></mask></defs><image href="images/touch-cat.webp" width="640" height="731"/><g mask="url(#tz-cat)">${shapes}</g>${marks}</svg>`;
+}
+function rTouchChip(id,z){
+  const P=rPunct();const dots='●'.repeat(Math.min(z.n,Catnu.TOUCH_MIN))+'○'.repeat(Math.max(0,Catnu.TOUCH_MIN-z.n));
+  const status=z.verdict==='unknown'?(z.n>0?rt('touchNeed').replace('{n}',z.need):rt('touchUntried')):`${rt('verdict_'+z.verdict)}${P.open}${z.n}${P.close}`;
+  return `<span class="chip tz-chip">${rt('zone_'+id)}${P.colon}${status}${z.verdict==='unknown'?` <span class="tz-dots" aria-hidden="true">${dots}</span>`:''}</span>`;
 }
 function rTouchBlock(cat){
   const map=Catnu.touchMap(STATE.touches,cat.id);
-  const legend=Catnu.TOUCH_ZONES.filter(z=>map[z.id].n>0).map(z=>`<span class="chip tz-chip">${rt('zone_'+z.id)}${rPunct().colon}${rt('verdict_'+map[z.id].verdict)}${rPunct().open}${map[z.id].n}${rPunct().close}</span>`).join('');
-  return `<details class="r-touch" ${rDetailsAttr('touch:'+cat.id)}><summary>🖐️ ${rt('touchTitle')}</summary><p class="lab-note">${rt('touchHint')}</p>${rTouchSvg(cat)}${legend?`<div class="touch-legend">${legend}</div>`:''}${rRecordRows('touches',cat)}<p class="lab-note">${rt('touchCaution')}</p><p class="lab-note">${rt('touchSource')}</p></details>`;
+  const prog=Catnu.touchProgress(map);
+  const next=Catnu.nextTouchZone(map);
+  const legend=Catnu.TOUCH_ZONES.map(z=>rTouchChip(z.id,map[z.id])).join('');
+  const progress=`<div class="touch-progress"><span>${rt('touchProgress').replace('{n}',prog.unlocked).replace('{total}',prog.total)}</span><div class="meter"><div style="width:${Math.round(prog.unlocked/prog.total*100)}%"></div></div></div>`;
+  const nudge=next?`<button type="button" class="touch-next" data-touch-next="${next}" data-id="${esc(cat.id)}">${rt('touchNext').replace('{zone}',rt('zone_'+next))}</button>`:`<p class="lab-note">${rt('touchAllDone')}</p>`;
+  return `<details class="r-touch" ${rDetailsAttr('touch:'+cat.id)}><summary>🖐️ ${rt('touchTitle')}</summary><p class="lab-note">${rt('touchHint')}</p>${progress}${rTouchSvg(cat)}${nudge}<div class="touch-legend">${legend}</div>${rRecordRows('touches',cat)}<p class="lab-note">${rt('touchCaution')}</p><p class="lab-note">${rt('touchSource')}</p></details>`;
 }
 function rTouchOpen(zone,catId){
   if(!Catnu.TOUCH_ZONES.some(z=>z.id===zone)||!STATE.cats.some(c=>c.id===catId))return;
@@ -3574,8 +3649,15 @@ function rTouchOpen(zone,catId){
   dialog.querySelector('[data-touch-close]').onclick=()=>dialog.close();
   dialog.onclose=()=>dialog.remove();
   dialog.querySelectorAll('[data-touch-reaction]').forEach(b=>b.onclick=()=>{
+    const before=Catnu.touchMap(STATE.touches,catId)[zone].verdict;
     STATE.touches.push({id:'t'+Date.now()+Math.random().toString(36).slice(2,6),catId,zone,reaction:b.dataset.touchReaction,ts:Date.now()});
-    if(rSave()){rOpenDetails.add('touch:'+catId);dialog.close();rRender();Catnu.showToast(rt('saved'));}
+    const msTs=Date.now();const newMs=Catnu.checkNewMilestones(STATE,msTs);if(newMs.length)STATE.milestones.push(...newMs);
+    if(rSave()){
+      const parts=[Catnu.touchReply(b.dataset.touchReaction,STATE.settings.locale)];
+      if(before==='unknown'&&Catnu.touchMap(STATE.touches,catId)[zone].verdict!=='unknown')parts.push(rt('touchUnlockedZone').replace('{zone}',rt('zone_'+zone)));
+      if(newMs.length)parts.push(newMs.map(m=>{const meta=Catnu.MILESTONE_META[m.id]||{};return `${meta.emoji||''} ${meta.label||m.id}`;}).join(' ／ '));
+      rOpenDetails.add('touch:'+catId);dialog.close();rRender();Catnu.showToast(parts.join(' · '));
+    }
   });
   dialog.showModal();
 }
@@ -3657,6 +3739,7 @@ const factDismiss=app.querySelector('[data-fact-dismiss]');if(factDismiss)factDi
 app.querySelectorAll('[data-exp-start]').forEach(b=>b.onclick=()=>rExperimentOpen(b.dataset.expStart,b.dataset.id));
 app.querySelectorAll('[data-details-key]').forEach(d=>d.ontoggle=()=>{d.open?rOpenDetails.add(d.dataset.detailsKey):rOpenDetails.delete(d.dataset.detailsKey);});
 app.querySelectorAll('[data-touch-zone]').forEach(z=>{const open=()=>rTouchOpen(z.dataset.touchZone,z.dataset.id);z.onclick=open;z.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}};});
+app.querySelectorAll('[data-touch-next]').forEach(b=>b.onclick=()=>rTouchOpen(b.dataset.touchNext,b.dataset.id));
 app.querySelectorAll('[data-rec-more]').forEach(b=>b.onclick=()=>{const k=b.dataset.recMore;rRecLimits[k]=(rRecLimits[k]||REC_LIMIT)+REC_LIMIT;rRender();});
 app.querySelectorAll('[data-del-id]').forEach(b=>b.onclick=()=>rDeleteRecord(b.dataset.delKind,b.dataset.delId));
 app.querySelectorAll('[data-manual]').forEach(b=>b.onclick=()=>rManualOpen(b.dataset.manual));
