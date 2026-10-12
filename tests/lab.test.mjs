@@ -255,3 +255,16 @@ test('刪除記錄用到嘅文字 key，4 個 locale 都有', () => {
     assert.ok(C.COPY[l].recordsTitle.includes('{n}'), `${l} recordsTitle 冇 {n}`);
   }
 });
+
+test('pageRecords：按 limit 切，回傳顯示嘅同剩低嘅數量；limit 大過總數就全部顯示', () => {
+  const C = loadCatnu();
+  const items = Array.from({ length: 14 }, (_, i) => ({ id: 'r' + i }));
+  const p = C.pageRecords(items, 10);
+  assert.equal(p.shown.length, 10);
+  assert.equal(p.remaining, 4);
+  const all = C.pageRecords(items, 20);
+  assert.equal(all.shown.length, 14);
+  assert.equal(all.remaining, 0);
+  assert.equal(C.pageRecords([], 10).remaining, 0);
+  assert.equal(items.length, 14);
+});

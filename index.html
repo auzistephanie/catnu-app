@@ -342,6 +342,7 @@ input,select{font-family:inherit}
 .r-records{margin-top:10px}.r-records summary{font-size:12.5px;color:var(--sub);cursor:pointer}
 .rec-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line)}.rec-row:last-child{border-bottom:none}
 .rec-txt{flex:1;min-width:0}.rec-txt b{display:block;font-size:12.5px}.rec-txt small{color:var(--sub);font-size:11px}
+.rec-more{display:block;width:100%;margin-top:8px;padding:10px;border-radius:99px;font-size:13px;font-weight:800;color:var(--ink)}
 .rec-del{flex:none;width:40px;height:40px;padding:0;border-radius:50%;font-size:14px;color:var(--terra)}
 .manual-sec{margin:10px 0}.manual-sec b{display:block;color:var(--terra);font-size:13px}.manual-sec span{font-size:14px}
 @media(max-width:420px){.r-app{padding-left:14px;padding-right:14px}.r-card{padding:16px}.r-hero{padding:18px}.r-hero h2{font-size:22px}}
@@ -1550,6 +1551,9 @@ Catnu.removeRecord = function removeRecord(items, id) {
   const index = items.findIndex(x => x.id === id);
   if (index < 0) return null;
   return { items: items.filter((_, i) => i !== index), removed: items[index], index };
+};
+Catnu.pageRecords = function pageRecords(items, limit) {
+  return { shown: items.slice(0, limit), remaining: Math.max(0, items.length - limit) };
 };
 Catnu.restoreRecord = function restoreRecord(items, record, index) {
   const out = items.slice();
@@ -3432,10 +3436,13 @@ let rOpenDetails=new Set();
 function rPunct(){const en=STATE.settings.locale==='en';return {list:en?', ':'、',colon:en?': ':'：',semi:en?'; ':'；',open:en?' (':'（',close:en?')':'）'};}
 function rDetailsAttr(key){return `data-details-key="${esc(key)}" ${rOpenDetails.has(key)?'open':''}`;}
 const REC_LIMIT=10;
+let rRecLimits={};
 function rRecordRows(kind,cat){
   const all=STATE[kind].filter(r=>r.catId===cat.id).sort((a,b)=>b.ts-a.ts);
   if(!all.length)return '';
-  const rows=all.slice(0,REC_LIMIT).map(r=>{
+  const limitKey=kind+':'+cat.id;
+  const page=Catnu.pageRecords(all,rRecLimits[limitKey]||REC_LIMIT);
+  const rows=page.shown.map(r=>{
     const P=rPunct();
     const date=kind==='experiments'?r.date:todayStr(new Date(r.ts));
     const title=kind==='experiments'
@@ -3443,7 +3450,8 @@ function rRecordRows(kind,cat){
       :`${rt('zone_'+r.zone)}${P.colon}${rt('touch_'+r.reaction)}`;
     return `<div class="rec-row"><div class="rec-txt"><b>${esc(title)}</b><small>${esc(date)}</small></div><button type="button" class="rec-del" data-del-kind="${kind}" data-del-id="${esc(r.id)}" aria-label="${esc(rt('deleteRecord'))}${P.colon}${esc(title)}">✕</button></div>`;
   }).join('');
-  return `<details class="r-records" ${rDetailsAttr('rec:'+kind+':'+cat.id)}><summary>${rt('recordsTitle').replace('{n}',all.length)}</summary>${rows}</details>`;
+  const more=page.remaining?`<button type="button" class="rec-more" data-rec-more="${esc(limitKey)}">${rt('more')}${rPunct().open}${page.remaining}${rPunct().close}</button>`:'';
+  return `<details class="r-records" ${rDetailsAttr('rec:'+kind+':'+cat.id)}><summary>${rt('recordsTitle').replace('{n}',all.length)}</summary>${rows}${more}</details>`;
 }
 function rDeleteRecord(kind,id){
   const r=Catnu.removeRecord(STATE[kind],id);if(!r)return;
@@ -3577,6 +3585,7 @@ const factDismiss=app.querySelector('[data-fact-dismiss]');if(factDismiss)factDi
 app.querySelectorAll('[data-exp-start]').forEach(b=>b.onclick=()=>rExperimentOpen(b.dataset.expStart,b.dataset.id));
 app.querySelectorAll('[data-details-key]').forEach(d=>d.ontoggle=()=>{d.open?rOpenDetails.add(d.dataset.detailsKey):rOpenDetails.delete(d.dataset.detailsKey);});
 app.querySelectorAll('[data-touch-zone]').forEach(z=>{const open=()=>rTouchOpen(z.dataset.touchZone,z.dataset.id);z.onclick=open;z.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}};});
+app.querySelectorAll('[data-rec-more]').forEach(b=>b.onclick=()=>{const k=b.dataset.recMore;rRecLimits[k]=(rRecLimits[k]||REC_LIMIT)+REC_LIMIT;rRender();});
 app.querySelectorAll('[data-del-id]').forEach(b=>b.onclick=()=>rDeleteRecord(b.dataset.delKind,b.dataset.delId));
 app.querySelectorAll('[data-manual]').forEach(b=>b.onclick=()=>rManualOpen(b.dataset.manual));
 const recapOpenBtn=app.querySelector('[data-recap-open]');if(recapOpenBtn)recapOpenBtn.onclick=()=>rRecapOpen();
