@@ -1,5 +1,12 @@
 # CHANGELOG — catnu-app
 
+## 2026-10-12 — 移除「好物」tab
+
+- 移走底部導航嘅「好物」（Picks）tab：`rPicks`、`Catnu.getDemoPicks`、`Catnu.commerce`、`entitlements.flags` 入面嘅 `affiliate`／`sponsoredDemo`、相關 CSS（`.r-product`、`.r-badge`）同 8 個文字 key（`picks`／`demo`／`sponsored`／`bed`／`scratch`／`match`／`neutral`／`shared`，四個 locale）。`wand` 係動作標籤，保留。導航剩「今日／生活片段／貓咪」三個 tab（flex 均分）。
+- 保留：設定頁（⚙）、`region` 設定（仍然影響預設語言）、`entitlements`（`multiCat`／`billing:false`）同設定頁「Free · 多貓免費使用」說明卡。localStorage 冇存好物相關資料，舊用家資料照常載入，唔使 migration。
+- 測試：刪走只為好物而設嘅 `commerce adapter` test 同 `commerce.live` assert；`tests/lab.test.mjs` 加 1 個「好物已移除」test。`node --test tests/*.test.mjs` **114/114 全綠**。
+- 瀏覽器（375px）：導航 3 個 tab 各 120px；舊資料（region=TW）載入正常；今日／生活片段／貓咪／設定四頁對比度 0 不達標、冇橫向 scroll；設定頁仍可由 ⚙ 進入且語言／地區／備份／還原齊全；四語言導航文字正確；零 console error。
+
 ## 2026-10-12 — 每日觀察可刪除（更正記錯貓）
 
 - 貓咪 tab 每隻貓嘅「最近觀察」由唯讀（只列 5 條）改成同小實驗／摸摸地圖一致嘅可刪除清單：標題「最近觀察（n）」、每行「問題：答案＋日期＋✕」、「睇更多記錄」、刪除後 toast 4 秒內可復原。沿用 `rRecordRows`／`rDeleteRecord`，答案文字按問題類型顯示（`no` 喺「想自己休息」同「今日冇」之間分得清）。

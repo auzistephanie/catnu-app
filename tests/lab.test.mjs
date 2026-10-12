@@ -294,3 +294,13 @@ test('刪除每日觀察後，Catnu.observedTraits／insight 即時跟住變（�
   s.observations = [];
   assert.equal(C.observedTraits(s, 'a').length, 0);
 });
+
+test('好物（Picks）功能已移除：冇 getDemoPicks／commerce／相關文字 key', () => {
+  const C = loadCatnu();
+  assert.equal(C.getDemoPicks, undefined);
+  assert.equal(C.commerce, undefined);
+  for (const l of C.LOCALES) {
+    for (const k of ['picks', 'demo', 'sponsored', 'bed', 'scratch', 'match', 'neutral', 'shared']) assert.equal(C.COPY[l][k], undefined, `${l} 仲有 ${k}`);
+    assert.ok(C.COPY[l].wand, `${l} wand 係動作標籤，要保留`);
+  }
+});
