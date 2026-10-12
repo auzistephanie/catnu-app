@@ -10,6 +10,7 @@
 - `prefers-reduced-motion`：沿用全域 `animation/transition:none`，所有 JS 動效（飛心、彩紙、傾斜）亦會跳過。
 - 驗證：`node --test tests/*.test.mjs` **117/117 全綠**。瀏覽器（375px）：hero 新貓、慢眨眼轉眼瞓、tile 飛心＋轉 purr＋泡泡、貓咪 tab 正常；冇爛圖、冇橫向 scroll、零 console error。
 - 灰貓 sleepy 嘅淺灰「zZ」去背景時一齊去咗 → 補返忌廉貓同款深色「zZ」（淺灰 z 喺奶茶底本身亦睇唔到），重新裁切令貓身比例同其他 35 張一致。
+- 灰貓 happy（綠幕版下巴白斑＋心口偏綠）同忌廉貓 sleepy（腳底白邊）改用白底原圖 flood-fill 重新去背（忌廉貓放寬 shadow 色差門檻至 30）。
 - 已知：iOS 傾斜只跟手指（未開陀螺儀，要另加權限掣）。
 
 ## 2026-10-12 — 移除「好物」tab
