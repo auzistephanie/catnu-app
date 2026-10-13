@@ -97,7 +97,7 @@ test('新 selectable controls 暴露 aria-pressed 狀態', () => {
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   assert.match(html, /data-daily-goal="2" aria-pressed=/);
   assert.match(html, /data-history-cat="all" aria-pressed=/);
-  assert.match(html, /data-qid="\$\{q\.id\}" aria-pressed=/);
+  assert.match(html, /data-qid="\$\{esc\(q\.id\)\}" aria-pressed=/);
 });
 
 test('catVoice: 5 個分段＋冇數據各自揀返對應句子（四個 locale）', () => {

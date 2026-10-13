@@ -1,5 +1,12 @@
 # CHANGELOG — catnu-app
 
+## 2026-10-13 — innerHTML XSS 審計＋無障礙
+
+- 逐個 innerHTML 檢查。用戶／localStorage 資料（貓名、emoji、備註、自訂動作、紀念日、頭像、時間軸 icon／日期、表單 value）改經 `esc()`。`mdBold` 先跳脫再加 `<b>`。頭像 `src` 只接受 `data:image/(jpeg|png|webp);base64`（`safeDataImage`），其他當冇相。
+- 無障礙：設定掣、關閉掣、刪除紀念日有 `aria-label`；貓切換、導航、摸摸地圖 SVG 有 role／aria；記錄 chip 同舊版可點 div 可鍵盤啟動並有 `aria-pressed`；dialog 加 `aria-modal`；button／input／textarea／連結／summary／`[role=button]` 同頭像上傳有可見 focus。
+- **冇拆** inline CSS／JS：`tests/helpers/load-app.mjs` 同 `phase5` 源碼斷言靠 `index.html` 入面嗰段 `<script>`，`CLAUDE.md` 亦鎖定單檔。拆走會改測試載入同啟動路徑，唔算低風險。
+- 驗證：`node --test tests/*.test.mjs`；瀏覽器用惡意貓名／紀念日／頭像確認唔執行，並走過摸摸地圖記錄。
+
 ## 2026-10-13 — 摸摸地圖遊戲化（解鎖進度＋貓口吻）
 
 - 「未知」原因：同一部位要記 ≥2 次先出判斷（`TOUCH_MIN`），但畫面冇講 → 而家每個部位顯示「再摸 N 次就知 ●○」／「未試過 ○○」，地圖頂有「已解鎖 x/8」進度條。
