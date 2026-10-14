@@ -105,7 +105,8 @@ input,select{font-family:inherit}
 .field{margin-bottom:14px}
 .field label{font-size:12px;color:var(--sub);display:block;margin-bottom:4px;font-weight:700}
 .field input,.field select{width:100%;padding:11px 12px;border:2px solid var(--line);border-radius:14px;background:var(--paper);font-size:14px;color:var(--ink)}
-.field input:focus,.field select:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(232,155,107,.18)}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(232,155,107,.18)}
+.quiz-close:focus-visible,.anni-del:focus-visible,.chip:focus-visible,.tab:focus-visible,.history-back:focus-visible,.history-filter:focus-visible,.goal-choice:focus-visible{outline:3px solid var(--terra);outline-offset:2px}
 .milestone-wall{display:flex;flex-wrap:wrap;gap:8px}
 .milestone-wall .chip.locked{opacity:.38}
 .danger-btn{color:var(--terra);font-size:12px;font-weight:800;cursor:pointer;margin-top:8px;display:inline-block}
@@ -262,7 +263,7 @@ input,select{font-family:inherit}
 .r-app button,.r-app input,.r-app select,.r-app textarea{font:inherit;min-height:44px}
 .r-app button{border:none;border-radius:18px;background:linear-gradient(180deg,var(--paper),#FFF3E9);color:var(--ink);padding:10px 16px;cursor:pointer;box-shadow:var(--clay-card-sm);font-weight:700;transition:transform .12s cubic-bezier(.34,1.56,.64,1),box-shadow .12s}
 .r-app button:active{transform:translateY(2px) scale(.97);box-shadow:var(--clay-pressed)}
-.r-app button:focus-visible,.r-app input:focus-visible,.r-app select:focus-visible{outline:3px solid var(--terra);outline-offset:3px}
+.r-app button:focus-visible,.r-app input:focus-visible,.r-app select:focus-visible,.r-app textarea:focus-visible,.r-app a:focus-visible,.r-app summary:focus-visible,.r-app [role="button"]:focus-visible{outline:3px solid var(--terra);outline-offset:3px}
 .r-app label{display:block;font-size:13px;margin:12px 0;color:var(--sub);font-weight:600}
 .r-app input:not([type=checkbox]),.r-app select,.r-app textarea{display:block;width:100%;border:none;border-radius:14px;background:var(--paper);padding:11px 12px;box-sizing:border-box;color:var(--ink);box-shadow:inset 0 2px 4px rgba(122,74,56,.1);margin-top:4px}
 .r-app input[type=file]{display:flex;align-items:center;gap:10px;padding:8px}
@@ -314,6 +315,7 @@ input,select{font-family:inherit}
 .r-avatar-upload{position:relative;width:110px;height:110px;margin:0 auto 8px}
 .r-avatar-upload .r-avatar{width:100%;height:100%}
 .r-avatar-upload input{position:absolute;inset:0;opacity:0;cursor:pointer;min-height:0}
+.r-avatar-upload:focus-within{outline:3px solid var(--terra);outline-offset:4px;border-radius:50%}
 .r-avatar-upload .r-avatar-edit{position:absolute;right:2px;bottom:2px;width:30px;height:30px;border-radius:50%;background:var(--terra);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;pointer-events:none;box-shadow:0 3px 8px rgba(122,74,56,.35)}
 .r-avatar-presets{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:0 0 14px}
 .r-app .r-avatar-preset{width:46px;height:46px;padding:0;border-radius:50%;overflow:hidden;background:linear-gradient(180deg,#FFE2B8,var(--mustard));box-shadow:var(--clay-card-sm);min-height:0}
@@ -1761,6 +1763,20 @@ function todayStr(d) {
 function esc(value) {
   return String(value == null ? '' : value).replace(/[&<>'"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[ch]);
 }
+function safeDataImage(value) {
+  const s = String(value == null ? '' : value).trim();
+  return /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/]+=*$/.test(s) ? s : '';
+}
+Catnu.esc = esc;
+Catnu.safeDataImage = safeDataImage;
+function onActivate(el, fn) {
+  el.addEventListener('click', fn);
+  if (el.getAttribute('role') === 'button') {
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(e); }
+    });
+  }
+}
 
 Catnu.showToast = function showToast(msg, onTap) {
   const el = document.getElementById('toast');
@@ -1889,7 +1905,7 @@ function renderOnboarding() {
               </div>
               <div class="field">
                 <label>Emoji（可自己揀，例如 🐱🐈🐈‍⬛🧡）</label>
-                <input type="text" data-idx="${i}" data-field="emoji" value="${c.emoji}" maxlength="4" style="width:70px">
+                <input type="text" data-idx="${i}" data-field="emoji" value="${esc(c.emoji)}" maxlength="4" style="width:70px">
               </div>
             </div>
           `).join('')}
@@ -2143,7 +2159,7 @@ function renderBeginnerJourney(state, cat, journey) {
       </div>
       <div class="beginner-progress"><span style="width:${Math.round(journey.progressDays / 3 * 100)}%"></span></div>
       <div style="font-size:12px;font-weight:700;line-height:1.55">${nextText}</div>
-      ${journey.earlySignal ? `<div class="beginner-signal">🔎 早期訊號：${cat.name} 已經有 ${journey.earlySignal.count} 次「${journey.earlySignal.label}」正面反應。呢個未係正式結論，再試幾次就可以確認。</div>` : `<div class="note">夠 2 次相同正面反應，就會先顯示早期訊號；夠正式統計門檻先會落結論。</div>`}
+      ${journey.earlySignal ? `<div class="beginner-signal">🔎 早期訊號：${esc(cat.name)} 已經有 ${journey.earlySignal.count} 次「${esc(journey.earlySignal.label)}」正面反應。呢個未係正式結論，再試幾次就可以確認。</div>` : `<div class="note">夠 2 次相同正面反應，就會先顯示早期訊號；夠正式統計門檻先會落結論。</div>`}
     </div>`;
 }
 
@@ -2174,17 +2190,17 @@ function renderRecord(state) {
     ${backup.due ? `<button class="backup-nudge" type="button" id="backup-nudge"><span>☁️</span><div>${backup.never ? '你嘅記錄仲未備份' : `上次備份已經 ${backup.daysAgo} 日`}<small>資料只存呢個瀏覽器，撳入去下載安心備份。</small></div></button>` : ''}
     ${renderBeginnerJourney(state, cat, journey)}
     ${todayAnni ? `
-      <div class="celebrate" id="celebrate-banner">🎉 今日係${cat.name}嘅${todayAnni.label}${todayAnni.key !== 'birthday' && todayAnni.years ? `（${todayAnni.years} 周年）` : ''}！
+      <div class="celebrate" id="celebrate-banner">🎉 今日係${esc(cat.name)}嘅${esc(todayAnni.label)}${todayAnni.key !== 'birthday' && todayAnni.years ? `（${todayAnni.years} 周年）` : ''}！
         <small>撳一下慶祝＋生成靚卡 share</small>
       </div>` : ''}
-    ${soonAnni ? `<div class="anni-badge">⏰ 仲有 ${soonAnni.daysUntil} 日就係${cat.name}嘅${soonAnni.label} ${soonAnni.emoji}</div>` : ''}
+    ${soonAnni ? `<div class="anni-badge">⏰ 仲有 ${soonAnni.daysUntil} 日就係${esc(cat.name)}嘅${esc(soonAnni.label)} ${esc(soonAnni.emoji)}</div>` : ''}
     ${!loggedToday ? `
       <div class="night" id="night-banner">
         <span class="moon">🌙</span>
-        <div>今日仲未記${cat.name}喎<small>快速回顧一下？10 秒搞掂</small></div>
+        <div>今日仲未記${esc(cat.name)}喎<small>快速回顧一下？10 秒搞掂</small></div>
       </div>
       <div class="card" id="night-review" style="${nightReviewOpen ? '' : 'display:none'}">
-        <h3><span class="deco">◆</span> 今日${cat.name}對你點呀？</h3>
+        <h3><span class="deco">◆</span> 今日${esc(cat.name)}對你點呀？</h3>
         <div class="tiles">
           <button class="tile" type="button" data-night="good"><span class="em">😻</span><span class="t">幾好，有黐我</span><span class="s">記低正面一刻</span></button>
           <button class="tile" type="button" data-night="ok"><span class="em">😐</span><span class="t">一般般啦</span><span class="s">打個卡，唔計分</span></button>
@@ -2193,7 +2209,7 @@ function renderRecord(state) {
       </div>
     ` : ''}
     <div class="switcher">
-      ${state.cats.map(c => `<div class="chip ${c.id === recordCatId ? 'sel' : ''}" data-cat="${c.id}">${c.emoji} ${c.name}</div>`).join('')}
+      ${state.cats.map(c => `<div class="chip ${c.id === recordCatId ? 'sel' : ''}" role="button" tabindex="0" aria-pressed="${c.id === recordCatId}" data-cat="${esc(c.id)}">${esc(c.emoji)} ${esc(c.name)}</div>`).join('')}
     </div>
     <h3 style="margin:2px 4px 10px;color:var(--teal-dk);font-size:14px">一撳即記 <small style="color:var(--sub);font-size:11px;font-weight:700">撳一下＝記錄完成</small></h3>
     <div class="tiles">
@@ -2202,37 +2218,37 @@ function renderRecord(state) {
           <span class="em">${p.emoji}</span><span class="t">${p.title}</span><span class="s">${p.sub}</span>
         </button>`).join('')}
     </div>
-    ${last ? `<button class="repeat-btn" type="button" id="record-repeat">⟳ 同上次一樣（${logSummary(state, last)}）</button>` : ''}
+    ${last ? `<button class="repeat-btn" type="button" id="record-repeat">⟳ 同上次一樣（${esc(logSummary(state, last))}）</button>` : ''}
     <button class="detail-toggle" type="button" id="record-detail-toggle">${recordDetailOpen ? '✏️ 收埋詳細 ▴' : '✏️ 記詳細啲 ▾'}</button>
     <div class="detail-wrap ${recordDetailOpen ? 'open' : ''}" id="record-detail">
     <div class="card">
       <h3><span class="deco">◆</span> 佢對我嘅反應</h3>
       <div class="chips" id="record-reactions">
-        ${Catnu.REACTIONS.map(r => `<span class="chip ${r.polarity < 0 ? 'neg' : ''} ${recordSelReactions.has(r.id) ? 'sel' : ''}" data-reaction="${r.id}">${r.label}</span>`).join('')}
+        ${Catnu.REACTIONS.map(r => `<span class="chip ${r.polarity < 0 ? 'neg' : ''} ${recordSelReactions.has(r.id) ? 'sel' : ''}" role="button" tabindex="0" aria-pressed="${recordSelReactions.has(r.id)}" data-reaction="${esc(r.id)}">${esc(r.label)}</span>`).join('')}
       </div>
       <h3 style="margin-top:14px"><span class="deco">◆</span> 我啱啱做咗咩</h3>
       <div class="chips" id="record-actions">
-        ${actions.map(a => `<span class="chip act ${recordSelActions.has(a.id) ? 'sel' : ''}" data-action="${a.id}">${a.label}</span>`).join('')}
+        ${actions.map(a => `<span class="chip act ${recordSelActions.has(a.id) ? 'sel' : ''}" role="button" tabindex="0" aria-pressed="${recordSelActions.has(a.id)}" data-action="${esc(a.id)}">${esc(a.label)}</span>`).join('')}
       </div>
       <div style="margin-top:8px">
         <button class="btn ghost" type="button" id="record-add-action-btn" style="margin-top:0">＋自訂動作</button>
         <div class="field" id="record-add-action-form" style="${recordAddActionOpen ? '' : 'display:none'};margin-top:8px">
-          <input type="text" id="record-new-action-emoji" placeholder="emoji，例如 🧶" maxlength="4" style="width:60px;display:inline-block;margin-right:6px" value="${recordNewActionEmoji}">
-          <input type="text" id="record-new-action-label" placeholder="動作名稱" style="width:calc(100% - 68px);display:inline-block" value="${recordNewActionLabel}">
+          <input type="text" id="record-new-action-emoji" placeholder="emoji，例如 🧶" maxlength="4" style="width:60px;display:inline-block;margin-right:6px" value="${esc(recordNewActionEmoji)}">
+          <input type="text" id="record-new-action-label" placeholder="動作名稱" style="width:calc(100% - 68px);display:inline-block" value="${esc(recordNewActionLabel)}">
           <button class="btn" type="button" id="record-new-action-save" style="margin-top:8px">加入</button>
         </div>
       </div>
       <div style="margin-top:10px">
         <button class="btn ghost" type="button" id="record-note-toggle" style="margin-top:0">${recordNoteOpen ? '－收埋備註' : '＋備註'}</button>
         <div class="field" style="${recordNoteOpen ? '' : 'display:none'};margin-top:8px">
-          <input type="text" id="record-note-input" placeholder="呢刻想記低啲咩..." value="${recordNoteValue}">
+          <input type="text" id="record-note-input" placeholder="呢刻想記低啲咩..." value="${esc(recordNoteValue)}">
         </div>
       </div>
       <div style="margin-top:10px">
         <button class="btn ghost" type="button" id="record-backfill-toggle" style="margin-top:0">${recordBackfill ? '－取消補記' : '🕐 補記'}</button>
         <div class="field" style="${recordBackfill ? '' : 'display:none'};margin-top:8px">
           <label>選返時間（今日內，半小時一格）</label>
-          <input type="time" id="record-backfill-time" step="1800" value="${recordBackfillTime}">
+          <input type="time" id="record-backfill-time" step="1800" value="${esc(recordBackfillTime)}">
         </div>
       </div>
       <button class="btn" type="button" id="record-submit">✓ 記錄呢一刻</button>
@@ -2242,7 +2258,7 @@ function renderRecord(state) {
     <div class="card" style="margin-top:14px">
       <div class="minicard">
         <div>
-          <div class="mlbl">${cat.name}嘅好感度</div>
+          <div class="mlbl">${esc(cat.name)}嘅好感度</div>
           <span class="mnum">${affection.insufficient ? '--' : affection.score}</span>
         </div>
         <div class="mheart">💗</div>
@@ -2277,7 +2293,7 @@ function renderRecord(state) {
     renderRecord(state);
   }));
 
-  el.querySelectorAll('[data-cat]').forEach(c => c.addEventListener('click', () => { recordCatId = c.dataset.cat; nightReviewOpen = false; renderRecord(state); }));
+  el.querySelectorAll('[data-cat]').forEach(c => onActivate(c, () => { recordCatId = c.dataset.cat; nightReviewOpen = false; renderRecord(state); }));
 
   el.querySelectorAll('[data-preset]').forEach(t => t.addEventListener('click', () => {
     const p = QUICK_PRESETS[+t.dataset.preset];
@@ -2293,12 +2309,12 @@ function renderRecord(state) {
 
   document.getElementById('record-detail-toggle').addEventListener('click', () => { recordDetailOpen = !recordDetailOpen; renderRecord(state); });
 
-  el.querySelectorAll('[data-reaction]').forEach(c => c.addEventListener('click', () => {
+  el.querySelectorAll('[data-reaction]').forEach(c => onActivate(c, () => {
     const id = c.dataset.reaction;
     recordSelReactions.has(id) ? recordSelReactions.delete(id) : recordSelReactions.add(id);
     renderRecord(state);
   }));
-  el.querySelectorAll('[data-action]').forEach(c => c.addEventListener('click', () => {
+  el.querySelectorAll('[data-action]').forEach(c => onActivate(c, () => {
     const id = c.dataset.action;
     recordSelActions.has(id) ? recordSelActions.delete(id) : recordSelActions.add(id);
     renderRecord(state);
@@ -2427,9 +2443,9 @@ function renderQuests(state) {
       </div>
       <div class="goal-message">${achievedToday ? '今日已達標，streak 保住咗 🔥' : `仲差 ${goalStatus.remaining} 個就達標；其餘任務可以當 bonus。`}</div>
       ${quests.map(q => `
-        <button class="quest ${q.done ? 'done' : ''}" type="button" data-qid="${q.id}" aria-pressed="${q.done}">
+        <button class="quest ${q.done ? 'done' : ''}" type="button" data-qid="${esc(q.id)}" aria-pressed="${q.done}">
           <span class="box">${q.done ? '✓' : ''}</span>
-          <span class="q">${catName(q.catId)}：${q.text}<small>${sourceLabel(q.source)}</small></span>
+          <span class="q">${esc(catName(q.catId))}：${esc(q.text)}<small>${sourceLabel(q.source)}</small></span>
         </button>
       `).join('')}
       <div class="note">每日仍然有 3 個任務，你可以揀完成 1／2／3 個就達標。每週有一次休息日：漏一日會自動保住 streak；同週再漏先會歸零。</div>
@@ -2440,7 +2456,7 @@ function renderQuests(state) {
         <h3><span class="deco">◆</span> 最新里程碑</h3>
         <div class="milestone">
           <div class="big">${(Catnu.MILESTONE_META[latestMilestone.id] || {}).emoji || '🏅'}</div>
-          <b>${catName(latestMilestone.catId) ? catName(latestMilestone.catId) + ' ' : ''}${(Catnu.MILESTONE_META[latestMilestone.id] || {}).label || latestMilestone.id}</b>
+          <b>${esc((catName(latestMilestone.catId) ? catName(latestMilestone.catId) + ' ' : '') + ((Catnu.MILESTONE_META[latestMilestone.id] || {}).label || latestMilestone.id))}</b>
           <small>${new Date(latestMilestone.unlockedAt).toLocaleDateString('zh-HK')}</small>
           <div class="share" id="milestone-share-link">⤴ 生成靚卡 share 俾朋友</div>
         </div>
@@ -2491,7 +2507,7 @@ function insightIcon(insight) {
   return insight.type === 'positive' ? '💡' : insight.type === 'negative' ? '⚠️' : '🪄';
 }
 
-function mdBold(text) { return text.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>'); }
+function mdBold(text) { return esc(text).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>'); }
 
 function actionLabelOf(state, actionId) {
   const a = actionsForRecord(state).find(x => x.id === actionId);
@@ -2553,16 +2569,16 @@ function renderPKCard(state) {
     <div class="card">
       <h3><span class="deco">◆</span> 本週雙貓PK</h3>
       <div class="pk-row">
-        <div class="pk-name">${catA.emoji} ${catA.name}${pk.winner === catA.id ? ' 🏆' : ''}</div>
+        <div class="pk-name">${esc(catA.emoji)} ${esc(catA.name)}${pk.winner === catA.id ? ' 🏆' : ''}</div>
         <div class="pk-bar"><div style="width:${Math.round(100 * pk.a.pos / max)}%"></div></div>
         <div class="pk-num">${pk.a.pos} 次</div>
       </div>
       <div class="pk-row">
-        <div class="pk-name">${catB.emoji} ${catB.name}${pk.winner === catB.id ? ' 🏆' : ''}</div>
+        <div class="pk-name">${esc(catB.emoji)} ${esc(catB.name)}${pk.winner === catB.id ? ' 🏆' : ''}</div>
         <div class="pk-bar"><div style="width:${Math.round(100 * pk.b.pos / max)}%"></div></div>
         <div class="pk-num">${pk.b.pos} 次</div>
       </div>
-      <div class="note" style="margin-top:8px">${winnerCat ? `${winnerCat.name} 本週正面互動較多，另一隻加把勁追返！` : '本週打成平手，勢均力敵！'}</div>
+      <div class="note" style="margin-top:8px">${winnerCat ? `${esc(winnerCat.name)} 本週正面互動較多，另一隻加把勁追返！` : '本週打成平手，勢均力敵！'}</div>
     </div>
   `;
 }
@@ -2575,7 +2591,7 @@ function renderAnalysis(state) {
   }
   if (!analysisCatId || !state.cats.some(c => c.id === analysisCatId)) analysisCatId = state.cats[0].id;
   const cat = state.cats.find(c => c.id === analysisCatId);
-  const switcherHtml = `<div class="switcher">${state.cats.map(c => `<div class="chip ${c.id === analysisCatId ? 'sel' : ''}" data-cat="${c.id}">${c.emoji} ${c.name}</div>`).join('')}</div>`;
+  const switcherHtml = `<div class="switcher" role="group" aria-label="選擇貓咪">${state.cats.map(c => `<div class="chip ${c.id === analysisCatId ? 'sel' : ''}" role="button" tabindex="0" aria-pressed="${c.id === analysisCatId}" data-cat="${esc(c.id)}">${esc(c.emoji)} ${esc(c.name)}</div>`).join('')}</div>`;
   const now = Date.now();
   const affection = Catnu.affectionScore(state.logs, cat.id, now);
   const weekly = Catnu.weeklyReport(state.logs, cat.id, now);
@@ -2594,7 +2610,7 @@ function renderAnalysis(state) {
     `;
     const earlyShare = document.getElementById('weekly-share');
     if (earlyShare) earlyShare.addEventListener('click', () => Catnu.shareWeeklyCard(state, cat, weekly));
-    el.querySelectorAll('[data-cat]').forEach(c => c.addEventListener('click', () => { analysisCatId = c.dataset.cat; renderAnalysis(state); }));
+    el.querySelectorAll('[data-cat]').forEach(c => onActivate(c, () => { analysisCatId = c.dataset.cat; renderAnalysis(state); }));
     return;
   }
 
@@ -2620,7 +2636,7 @@ function renderAnalysis(state) {
     ${renderWeeklyStoryCard(state, cat, story)}
     <div class="card">
       <div class="cat-row">
-        <div class="avatar">${cat.emoji}</div>
+        <div class="avatar" aria-hidden="true">${esc(cat.emoji)}</div>
         <div class="cat-meta"><div class="name">好感度指數</div><div class="breed">近 7 日正面反應加權比率</div></div>
         <div class="score">
           <div class="num">${affection.score}</div>
@@ -2634,12 +2650,12 @@ function renderAnalysis(state) {
     ${state.cats.length >= 2 ? renderPKCard(state) : ''}
     <div class="card">
       <h3><span class="deco">◆</span> 溝貓建議</h3>
-      ${insights.length ? insights.map(i => `<div class="insight"><span>${insightIcon(i)}</span><span>${mdBold(i.text)}</span></div>`).join('') : '<div class="note">暫時未有夠數據嘅發現，繼續記錄啦。</div>'}
+      ${insights.length ? insights.map(i => `<div class="insight"><span aria-hidden="true">${esc(insightIcon(i))}</span><span>${mdBold(i.text)}</span></div>`).join('') : '<div class="note">暫時未有夠數據嘅發現，繼續記錄啦。</div>'}
     </div>
   `;
   const weeklyShareBtn = document.getElementById('weekly-share');
   if (weeklyShareBtn) weeklyShareBtn.addEventListener('click', () => Catnu.shareWeeklyCard(state, cat, weekly));
-  el.querySelectorAll('[data-cat]').forEach(c => c.addEventListener('click', () => { analysisCatId = c.dataset.cat; renderAnalysis(state); }));
+  el.querySelectorAll('[data-cat]').forEach(c => onActivate(c, () => { analysisCatId = c.dataset.cat; renderAnalysis(state); }));
 }
 
 RENDERERS.analysis = renderAnalysis;
@@ -2779,12 +2795,12 @@ function renderQuizOverlay(state) {
   if (quizState.stepIndex === -1) {
     panel.innerHTML = `
       <div class="quiz-panel">
-        <button class="quiz-close" id="quiz-close">✕</button>
+        <button class="quiz-close" id="quiz-close" type="button" aria-label="關閉">✕</button>
         <h3><span class="deco">◆</span> 想幫邊隻貓搵新拍檔？</h3>
-        <div class="chips">${state.cats.map(c => `<span class="chip" data-existing-cat="${c.id}">${c.emoji} ${c.name}</span>`).join('')}</div>
+        <div class="chips">${state.cats.map(c => `<span class="chip" role="button" tabindex="0" data-existing-cat="${esc(c.id)}">${esc(c.emoji)} ${esc(c.name)}</span>`).join('')}</div>
       </div>
     `;
-    panel.querySelectorAll('[data-existing-cat]').forEach(c => c.addEventListener('click', () => {
+    panel.querySelectorAll('[data-existing-cat]').forEach(c => onActivate(c, () => {
       quizState.existingCatId = c.dataset.existingCat;
       quizState.stepIndex = 0;
       renderQuizOverlay(state);
@@ -2797,7 +2813,7 @@ function renderQuizOverlay(state) {
     const q = Catnu.QUIZ_QUESTIONS[quizState.stepIndex];
     panel.innerHTML = `
       <div class="quiz-panel">
-        <button class="quiz-close" id="quiz-close">✕</button>
+        <button class="quiz-close" id="quiz-close" type="button" aria-label="關閉">✕</button>
         <div class="note" style="margin-top:0">第 ${quizState.stepIndex + 1} / ${Catnu.QUIZ_QUESTIONS.length} 題</div>
         <h3>${q.text}</h3>
         <div class="chips">${q.options.map((opt, i) => `<span class="chip" data-answer="${i}">${opt.label}</span>`).join('')}</div>
@@ -2828,7 +2844,7 @@ function renderQuizOverlay(state) {
 
   panel.innerHTML = `
     <div class="quiz-panel">
-      <button class="quiz-close" id="quiz-close">✕</button>
+      <button class="quiz-close" id="quiz-close" type="button" aria-label="關閉">✕</button>
       <h3><span class="deco">◆</span> 最夾你嘅 3 個品種</h3>
       ${top3.map((r, i) => `
         <div class="breed-card" data-result-breed="${r.breed.id}">
@@ -2868,14 +2884,14 @@ function renderAnniBox(state, cat) {
     <div class="anni-box">
       ${days !== null ? `<div class="anni-days">🏡 相處第 <b>${days}</b> 日</div>` : '<div class="anni-item dim">填返「到家日」就會計相處日數＋解鎖相處里程碑</div>'}
       ${annis.map(a => `
-        <div class="anni-item">${a.emoji} ${a.label}${(a.key === 'gotcha' && a.years) ? `（${a.years} 周年）` : (a.key === 'birthday' && a.years) ? `（${a.years} 歲）` : ''}：${a.daysUntil === 0 ? '就係今日！🎉' : `仲有 ${a.daysUntil} 日（${a.date}）`}${a.key.startsWith('custom-') ? `<span class="anni-del" data-anni-del="${cat.id}:${a.key.slice(7)}">✕</span>` : ''}</div>
+        <div class="anni-item">${esc(a.emoji)} ${esc(a.label)}${(a.key === 'gotcha' && a.years) ? `（${a.years} 周年）` : (a.key === 'birthday' && a.years) ? `（${a.years} 歲）` : ''}：${a.daysUntil === 0 ? '就係今日！🎉' : `仲有 ${a.daysUntil} 日（${esc(a.date)}）`}${a.key.startsWith('custom-') ? `<span class="anni-del" role="button" tabindex="0" aria-label="刪除呢個紀念日" data-anni-del="${esc(cat.id + ':' + a.key.slice(7))}">✕</span>` : ''}</div>
       `).join('')}
       ${!cat.birthDate ? '<div class="anni-item dim">編輯 → 填「出生日期」就有生日倒數 🎂</div>' : ''}
       ${adding ? `
-        <div class="field" style="margin:10px 0 0"><input type="text" id="anni-new-label-${cat.id}" placeholder="紀念日名（例如：絕育紀念）"></div>
-        <div class="field" style="margin:8px 0 0"><input type="date" id="anni-new-date-${cat.id}"></div>
-        <button class="btn" type="button" data-anni-save="${cat.id}" style="margin-top:8px;padding:10px">加入</button>
-      ` : `<div class="anni-item" style="cursor:pointer;color:var(--terra)" data-anni-add="${cat.id}">＋加自訂紀念日</div>`}
+        <div class="field" style="margin:10px 0 0"><input type="text" id="anni-new-label-${esc(cat.id)}" placeholder="紀念日名（例如：絕育紀念）"></div>
+        <div class="field" style="margin:8px 0 0"><input type="date" id="anni-new-date-${esc(cat.id)}"></div>
+        <button class="btn" type="button" data-anni-save="${esc(cat.id)}" style="margin-top:8px;padding:10px">加入</button>
+      ` : `<div class="anni-item" role="button" tabindex="0" style="cursor:pointer;color:var(--terra)" data-anni-add="${esc(cat.id)}">＋加自訂紀念日</div>`}
     </div>
   `;
 }
@@ -2886,29 +2902,29 @@ function renderProfileCatCard(state, cat) {
     return `
       <div class="card">
         <div class="cat-row">
-          <div class="avatar">${cat.emoji}</div>
+          <div class="avatar" aria-hidden="true">${esc(cat.emoji)}</div>
           <div class="cat-meta">
-            <div class="name">${cat.name} ${breed ? `<span class="tag">${breed.name}</span>` : ''}</div>
-            <div class="breed">${cat.sex || '性別未填'} · ${cat.birthYM || '出生年月未填'} · ${cat.neutered === true ? '已絕育' : cat.neutered === false ? '未絕育' : '絕育狀態未填'}</div>
+            <div class="name">${esc(cat.name)} ${breed ? `<span class="tag">${esc(breed.name)}</span>` : ''}</div>
+            <div class="breed">${esc(cat.sex || '性別未填')} · ${esc(cat.birthYM || '出生年月未填')} · ${cat.neutered === true ? '已絕育' : cat.neutered === false ? '未絕育' : '絕育狀態未填'}</div>
           </div>
           <div class="score"><div class="num">${catAffectionLabel(state, cat.id)}</div><div class="lbl">好感度</div></div>
         </div>
         ${renderAnniBox(state, cat)}
-        ${cat.notes ? `<div class="note" style="margin-top:10px">${cat.notes}</div>` : ''}
-        <button class="btn ghost" type="button" data-edit-cat="${cat.id}" style="margin-top:10px">編輯</button>
-        <button class="btn ghost" type="button" data-personality-cat="${cat.id}" style="margin-top:8px">🔮 生成性格卡</button>
-        <span class="danger-btn" data-delete-cat="${cat.id}">刪除呢隻貓</span>
+        ${cat.notes ? `<div class="note" style="margin-top:10px">${esc(cat.notes)}</div>` : ''}
+        <button class="btn ghost" type="button" data-edit-cat="${esc(cat.id)}" style="margin-top:10px">編輯</button>
+        <button class="btn ghost" type="button" data-personality-cat="${esc(cat.id)}" style="margin-top:8px">🔮 生成性格卡</button>
+        <span class="danger-btn" role="button" tabindex="0" data-delete-cat="${esc(cat.id)}">刪除呢隻貓</span>
       </div>
     `;
   }
   return `
     <div class="card">
-      <div class="field"><label>名</label><input type="text" data-edit-field="name" value="${cat.name}"></div>
-      <div class="field"><label>Emoji</label><input type="text" data-edit-field="emoji" value="${cat.emoji}" maxlength="4" style="width:70px"></div>
+      <div class="field"><label>名</label><input type="text" data-edit-field="name" value="${esc(cat.name)}"></div>
+      <div class="field"><label>Emoji</label><input type="text" data-edit-field="emoji" value="${esc(cat.emoji)}" maxlength="4" style="width:70px"></div>
       <div class="field"><label>品種</label><select data-edit-field="breedId">${Catnu.BREEDS.map(b => `<option value="${b.id}" ${b.id === cat.breedId ? 'selected' : ''}>${b.emoji} ${b.name}</option>`).join('')}</select></div>
-      <div class="field"><label>性別</label><input type="text" data-edit-field="sex" value="${cat.sex || ''}" placeholder="公／母"></div>
-      <div class="field"><label>出生年月</label><input type="text" data-edit-field="birthYM" value="${cat.birthYM || ''}" placeholder="例如 2023-05"></div>
-      <div class="field"><label>出生日期（完整，先有生日倒數 🎂）</label><input type="date" data-edit-field="birthDate" value="${cat.birthDate || ''}"></div>
+      <div class="field"><label>性別</label><input type="text" data-edit-field="sex" value="${esc(cat.sex || '')}" placeholder="公／母"></div>
+      <div class="field"><label>出生年月</label><input type="text" data-edit-field="birthYM" value="${esc(cat.birthYM || '')}" placeholder="例如 2023-05"></div>
+      <div class="field"><label>出生日期（完整，先有生日倒數 🎂）</label><input type="date" data-edit-field="birthDate" value="${esc(cat.birthDate || '')}"></div>
       <div class="field"><label>已絕育？</label>
         <select data-edit-field="neutered">
           <option value="" ${cat.neutered == null ? 'selected' : ''}>未填</option>
@@ -2916,10 +2932,10 @@ function renderProfileCatCard(state, cat) {
           <option value="false" ${cat.neutered === false ? 'selected' : ''}>未絕育</option>
         </select>
       </div>
-      <div class="field"><label>到家日</label><input type="text" data-edit-field="homeDate" value="${cat.homeDate || ''}" placeholder="YYYY-MM-DD"></div>
-      <div class="field"><label>個性筆記</label><input type="text" data-edit-field="notes" value="${cat.notes || ''}"></div>
-      <button class="btn" type="button" data-save-cat="${cat.id}">儲存</button>
-      <button class="btn ghost" type="button" data-cancel-edit="${cat.id}">取消</button>
+      <div class="field"><label>到家日</label><input type="text" data-edit-field="homeDate" value="${esc(cat.homeDate || '')}" placeholder="YYYY-MM-DD"></div>
+      <div class="field"><label>個性筆記</label><input type="text" data-edit-field="notes" value="${esc(cat.notes || '')}"></div>
+      <button class="btn" type="button" data-save-cat="${esc(cat.id)}">儲存</button>
+      <button class="btn ghost" type="button" data-cancel-edit="${esc(cat.id)}">取消</button>
     </div>
   `;
 }
@@ -3029,7 +3045,7 @@ function renderProfile(state) {
     if (card.insufficient) { Catnu.showToast(`仲差 ${Catnu.PERSONALITY_MIN_LOGS - card.count} 條記錄先夠生成性格卡`); return; }
     Catnu.sharePersonalityCard(state, cat, card);
   }));
-  el.querySelectorAll('[data-anni-add]').forEach(b => b.addEventListener('click', () => { profileAnniAddingCatId = b.dataset.anniAdd; renderProfile(state); }));
+  el.querySelectorAll('[data-anni-add]').forEach(b => onActivate(b, () => { profileAnniAddingCatId = b.dataset.anniAdd; renderProfile(state); }));
   el.querySelectorAll('[data-anni-save]').forEach(b => b.addEventListener('click', () => {
     const catId = b.dataset.anniSave;
     const label = document.getElementById('anni-new-label-' + catId).value.trim();
@@ -3041,7 +3057,7 @@ function renderProfile(state) {
     profileAnniAddingCatId = null;
     renderProfile(state);
   }));
-  el.querySelectorAll('[data-anni-del]').forEach(b => b.addEventListener('click', () => {
+  el.querySelectorAll('[data-anni-del]').forEach(b => onActivate(b, () => {
     const [catId, annId] = b.dataset.anniDel.split(':');
     const cat = state.cats.find(c => c.id === catId);
     cat.anniversaries = (cat.anniversaries || []).filter(a => a.id !== annId);
@@ -3060,7 +3076,7 @@ function renderProfile(state) {
     profileEditingCatId = null;
     renderProfile(state);
   }));
-  el.querySelectorAll('[data-delete-cat]').forEach(b => b.addEventListener('click', () => {
+  el.querySelectorAll('[data-delete-cat]').forEach(b => onActivate(b, () => {
     const id = b.dataset.deleteCat;
     const cat = state.cats.find(c => c.id === id);
     if (!confirm(`確定刪除「${cat.name}」？佢嘅所有記錄都會一齊刪走，無法還原。`)) return;
@@ -3451,12 +3467,12 @@ let rTab='today', rActive='all', rAdding=false, rEditing=null, rDraft=null, rPer
 let rReact=null, rBubbleTimer=null;
 let rLogReactions=new Set(), rLogActions=new Set(), rLogDetailOpen=false, rFactPending=null, rRecapBanner=null;
 function rLogWidget(catId){
-  const reactions=Catnu.REACTIONS.map(r=>`<span class="chip ${r.polarity<0?'neg':''} ${rLogReactions.has(r.id)?'sel':''}" data-log-reaction="${r.id}">${r.label.split(' ')[0]} ${esc(rt(r.id))}</span>`).join('');
-  const actions=Catnu.ACTIONS.map(a=>`<span class="chip act ${rLogActions.has(a.id)?'sel':''}" data-log-action="${a.id}">${a.label.split(' ')[0]} ${esc(rt(a.id))}</span>`).join('');
+  const reactions=Catnu.REACTIONS.map(r=>`<span class="chip ${r.polarity<0?'neg':''} ${rLogReactions.has(r.id)?'sel':''}" role="button" tabindex="0" aria-pressed="${rLogReactions.has(r.id)}" data-log-reaction="${esc(r.id)}">${r.label.split(' ')[0]} ${esc(rt(r.id))}</span>`).join('');
+  const actions=Catnu.ACTIONS.map(a=>`<span class="chip act ${rLogActions.has(a.id)?'sel':''}" role="button" tabindex="0" aria-pressed="${rLogActions.has(a.id)}" data-log-action="${esc(a.id)}">${a.label.split(' ')[0]} ${esc(rt(a.id))}</span>`).join('');
   const heroCat=STATE.cats.find(c=>c.id===catId);
   const react=rReact&&rReact.catId===catId?rReact:null;
   const heroDays=heroCat?Catnu.daysTogether(heroCat.homeDate,Date.now()):null;
-  const hero=heroCat?`<div class="cat-hero"><span class="cat-hero-av ${react?(react.neg?'shy':'purr'):''}" id="r-hero-av">${rAvatar(heroCat,64,react?(react.neg?'shy':'purr'):'happy')}</span><div class="cat-hero-txt ${react?'hide':''}"><b>${esc(heroCat.name)}</b>${heroDays?`<small>${rt('heroDays').replace('{n}',heroDays)}</small>`:''}</div>${react?`<div class="cat-bubble" role="status">${esc(react.text)}</div>`:''}</div>`:'';
+  const hero=heroCat?`<div class="cat-hero"><span class="cat-hero-av ${react?(react.neg?'shy':'purr'):''}" id="r-hero-av">${rAvatar(heroCat,64,react?(react.neg?'shy':'purr'):'happy',true)}</span><div class="cat-hero-txt ${react?'hide':''}"><b>${esc(heroCat.name)}</b>${heroDays?`<small>${rt('heroDays').replace('{n}',heroDays)}</small>`:''}</div>${react?`<div class="cat-bubble" role="status">${esc(react.text)}</div>`:''}</div>`:'';
   return `<section class="r-card"><h2>${rt('quickLog')}</h2>${hero}<div class="tiles">${QUICK_PRESETS.map((p,i)=>`<button type="button" class="tile ${p.neg?'negt':''}" data-log-preset="${i}" data-log-cat="${esc(catId)}"><span class="em">${p.emoji}</span><span class="t">${esc(p.title)}</span><span class="s">${esc(p.sub)}</span></button>`).join('')}</div><button type="button" class="detail-toggle" data-log-detail-toggle>${rt(rLogDetailOpen?'logCollapse':'logExpand')}</button>${rLogDetailOpen?`<div><p style="font-weight:800;margin:10px 0 6px">${rt('logReactionsHeading')}</p><div class="chips">${reactions}</div><p style="font-weight:800;margin:10px 0 6px">${rt('logActionsHeading')}</p><div class="chips">${actions}</div><button type="button" class="btn" data-log-submit data-log-cat="${esc(catId)}">${rt('logSubmit')}</button></div>`:''}</section>`;
 }
 function announceMilestones(unlocked){
@@ -3501,7 +3517,7 @@ function rFactsWall(){
 }
 function rTimelineBlock(cat){
   const events=Catnu.timelineEvents(STATE,cat.id);
-  const body=events.length?`<div class="milestone-wall" style="flex-direction:column;align-items:stretch;gap:6px;margin-top:8px">${events.map(e=>`<span class="chip" style="text-align:left;display:flex;justify-content:space-between;gap:10px">${e.icon} ${esc(e.label)}<small style="color:var(--sub);font-weight:600">${e.date}</small></span>`).join('')}</div>`:`<div class="note">${rt('timelineEmpty')}</div>`;
+  const body=events.length?`<div class="milestone-wall" style="flex-direction:column;align-items:stretch;gap:6px;margin-top:8px">${events.map(e=>`<span class="chip" style="text-align:left;display:flex;justify-content:space-between;gap:10px">${esc(e.icon)} ${esc(e.label)}<small style="color:var(--sub);font-weight:600">${esc(e.date)}</small></span>`).join('')}</div>`:`<div class="note">${rt('timelineEmpty')}</div>`;
   return `<details style="margin-top:12px"><summary>${rt('timelineTitle')}</summary>${body}</details>`;
 }
 function rRecapMonthLabel(monthKey,locale){
@@ -3528,7 +3544,7 @@ function rRecapOpen(){
   const cat=STATE.cats.find(c=>c.id===catId);
   if(!cat)return;
   const monthLabel=rRecapMonthLabel(monthKey,STATE.settings.locale);
-  const dialog=document.createElement('dialog');dialog.className='r-dialog';dialog.setAttribute('aria-labelledby','r-recap-title');
+  const dialog=document.createElement('dialog');dialog.className='r-dialog';dialog.setAttribute('aria-modal','true');dialog.setAttribute('aria-labelledby','r-recap-title');
   dialog.innerHTML=`<h2 id="r-recap-title">${esc(cat.name)} · ${esc(monthLabel)}</h2><p>${rt('recapLogs')}: ${recap.totalLogs}</p><p>${rt('recapPosRate')}: ${recap.positiveRate==null?'--':recap.positiveRate+'%'}</p>${recap.topAction?`<p>${rt('recapTopAction')}: ${esc(actionLabelOf(STATE,recap.topAction))}</p>`:''}${recap.milestonesUnlocked.length?`<p>${rt('recapMilestones')}: ${recap.milestonesUnlocked.length}</p>`:''}${recap.daysTogetherDelta!=null?`<p>${rt('recapDays')}: +${recap.daysTogetherDelta}</p>`:''}<button class="r-primary" id="r-recap-generate">${rt('recapGenerate')}</button><button id="r-recap-close">${rt('close')}</button>`;
   document.getElementById('app').appendChild(dialog);
   dialog.querySelector('#r-recap-close').onclick=()=>dialog.close();
@@ -3538,15 +3554,15 @@ function rRecapOpen(){
 }
 Catnu.dailyQuestion=(state,date)=>['quiet-approach','toy-interest','settle-rest'][Math.floor(Math.floor(Date.parse(date+'T12:00:00Z')/86400000)/Math.max(1,state.cats.length))%3];
 function rt(key){const copy=Catnu.COPY[STATE.settings.locale];return copy[key]||copy.unknown;}
-function rAvatar(cat,size=110,mood='happy'){const name=cat?.name||'';const photo=cat?.avatarPhoto;const inner=photo?`<img src="${esc(photo)}" alt="">`:`<img class="art" src="${Catnu.catArt(cat?.avatarPreset,mood)}" alt="" data-preset="${esc(cat?.avatarPreset||'')}">`;return `<span class="r-avatar" role="img" aria-label="${esc(name)}" style="width:${size}px;height:${size}px">${inner}</span>`;}
+function rAvatar(cat,size=110,mood='happy',decorative){const name=cat?.name||'';const photo=safeDataImage(cat?.avatarPhoto);const inner=photo?`<img src="${esc(photo)}" alt="">`:`<img class="art" src="${Catnu.catArt(cat?.avatarPreset,mood)}" alt="" data-preset="${esc(cat?.avatarPreset||'')}">`;const a11y=decorative?'aria-hidden="true"':`role="img" aria-label="${esc(name)}"`;return `<span class="r-avatar" ${a11y} style="width:${size}px;height:${size}px">${inner}</span>`;}
 // Today hero: preset cats stand free (no circle) so the clay toy can breathe / squish / change face
-function rHeroCat(cat){if(cat?.avatarPhoto)return `<button type="button" class="hero-cat is-photo" data-hero-cat aria-label="${esc(cat.name)}">${rAvatar(cat,140)}</button>`;return `<button type="button" class="hero-cat" data-hero-cat data-preset="${esc(cat?.avatarPreset||'')}" aria-label="${esc(cat?.name||'')}"><img class="hero-art" src="${Catnu.catArt(cat?.avatarPreset,'happy')}" alt="" draggable="false"></button>`;}
+function rHeroCat(cat){if(safeDataImage(cat?.avatarPhoto))return `<button type="button" class="hero-cat is-photo" data-hero-cat aria-label="${esc(cat.name)}">${rAvatar(cat,140,'happy',true)}</button>`;return `<button type="button" class="hero-cat" data-hero-cat data-preset="${esc(cat?.avatarPreset||'')}" aria-label="${esc(cat?.name||'')}"><img class="hero-art" src="${Catnu.catArt(cat?.avatarPreset,'happy')}" alt="" draggable="false"></button>`;}
 function rLocaleControls(){return `<div class="r-fields"><label>${rt('region')}<select id="r-region">${['HK','TW','CN','OTHER'].map((v,i)=>`<option value="${v}" ${STATE.settings.region===v?'selected':''}>${rt(['hk','tw','cn','other'][i])}</option>`).join('')}</select></label><label>${rt('language')}<select id="r-locale">${Catnu.LOCALES.map((v,i)=>`<option value="${v}" ${STATE.settings.locale===v?'selected':''}>${['繁體中文（香港）','繁體中文（台灣）','简体中文','English'][i]}</option>`).join('')}</select></label></div>`;}
-function rCatForm(){const c=rDraft||STATE.cats.find(c=>c.id===rEditing);const photo=c?.avatarPhoto||null;const preset=(c?.avatarPreset&&Catnu.AVATAR_PRESETS.includes(c.avatarPreset))?c.avatarPreset:Catnu.AVATAR_PRESETS[0];return `<section class="r-card"><h2>${rt(rEditing?'edit':STATE.cats.length?'add':'promise')}</h2><p>${rt(rLoadBlocked?'damaged':'optional')}</p>${rLoadBlocked?`<button data-action="backup">${rt('backup')}</button>`:''}${rLocaleControls()}<form id="r-cat-form"><div class="r-avatar-upload">${rAvatar({name:c?.name||rt('cats'),avatarPhoto:photo,avatarPreset:preset},110)}<input type="file" id="r-avatar-file" accept="image/*" capture="environment" aria-label="${rt('changePhoto')}"><span class="r-avatar-edit" aria-hidden="true">📷</span></div><p>${rt('avatarPhoto')}</p>${!photo?`<small>${rt('startAvatar')}</small><div class="r-avatar-presets" role="group" aria-label="${rt('startAvatar')}">${Catnu.AVATAR_PRESETS.map(p=>`<button type="button" class="r-avatar-preset ${preset===p?'selected':''}" data-preset="${p}" aria-label="${p}"><img class="art" src="${Catnu.catArt(p)}" alt=""></button>`).join('')}</div>`:''}<label>${rt('name')}<input name="name" required maxlength="40" value="${esc(c?.name||'')}" autocomplete="off"></label><fieldset><legend>${rt('impression')}</legend>${['social','playful','quiet','independent'].map(k=>`<label class="r-check"><input type="checkbox" name="traits" value="${k}" ${c?.ownerPerception.includes(k)?'checked':''}>${rt(k)}</label>`).join('')}</fieldset><details><summary>${rt('details')}</summary><label>${rt('birthday')}<input type="date" name="birthDate" value="${esc(c?.birthDate||'')}"></label><label>${rt('home')}<input type="date" name="homeDate" value="${esc(c?.homeDate||'')}"></label></details><button class="r-primary">${rt(rEditing?'save':'start')}</button>${STATE.cats.length?`<button type="button" data-action="cancel">${rt('cancel')}</button>`:''}</form>${!STATE.cats.length?`<label>${rt('restore')}<input id="r-restore" type="file" accept="application/json"></label>`:''}</section>`;}
+function rCatForm(){const c=rDraft||STATE.cats.find(c=>c.id===rEditing);const photo=c?.avatarPhoto||null;const preset=(c?.avatarPreset&&Catnu.AVATAR_PRESETS.includes(c.avatarPreset))?c.avatarPreset:Catnu.AVATAR_PRESETS[0];return `<section class="r-card"><h2>${rt(rEditing?'edit':STATE.cats.length?'add':'promise')}</h2><p>${rt(rLoadBlocked?'damaged':'optional')}</p>${rLoadBlocked?`<button data-action="backup">${rt('backup')}</button>`:''}${rLocaleControls()}<form id="r-cat-form"><div class="r-avatar-upload">${rAvatar({name:c?.name||rt('cats'),avatarPhoto:photo,avatarPreset:preset},110)}<input type="file" id="r-avatar-file" accept="image/*" capture="environment" aria-label="${rt('changePhoto')}"><span class="r-avatar-edit" aria-hidden="true">📷</span></div><p>${rt('avatarPhoto')}</p>${!photo?`<small>${rt('startAvatar')}</small><div class="r-avatar-presets" role="group" aria-label="${rt('startAvatar')}">${Catnu.AVATAR_PRESETS.map(p=>`<button type="button" class="r-avatar-preset ${preset===p?'selected':''}" data-preset="${esc(p)}" aria-pressed="${preset===p}" aria-label="${esc(p)}"><img class="art" src="${Catnu.catArt(p)}" alt=""></button>`).join('')}</div>`:''}<label>${rt('name')}<input name="name" required maxlength="40" value="${esc(c?.name||'')}" autocomplete="off"></label><fieldset><legend>${rt('impression')}</legend>${['social','playful','quiet','independent'].map(k=>`<label class="r-check"><input type="checkbox" name="traits" value="${k}" ${c?.ownerPerception.includes(k)?'checked':''}>${rt(k)}</label>`).join('')}</fieldset><details><summary>${rt('details')}</summary><label>${rt('birthday')}<input type="date" name="birthDate" value="${esc(c?.birthDate||'')}"></label><label>${rt('home')}<input type="date" name="homeDate" value="${esc(c?.homeDate||'')}"></label></details><button class="r-primary">${rt(rEditing?'save':'start')}</button>${STATE.cats.length?`<button type="button" data-action="cancel">${rt('cancel')}</button>`:''}</form>${!STATE.cats.length?`<label>${rt('restore')}<input id="r-restore" type="file" accept="application/json"></label>`:''}</section>`;}
 function rMomentForm(){return `<section class="r-card"><h2>${rt('moment')}</h2><form id="r-moment"><label>${rt('note')}<textarea name="note" maxlength="500"></textarea></label><label>${rt('photo')}<input type="file" name="photo" accept="image/*" capture="environment"></label><fieldset><legend>${rt('linked')}</legend>${STATE.cats.map(c=>`<label class="r-check"><input type="checkbox" name="cats" value="${esc(c.id)}" ${rActive==='all'||rActive===c.id?'checked':''}>${esc(c.name)}</label>`).join('')}</fieldset><button class="r-primary">${rt('save')}</button></form></section>`;}
-function rToday(){const cat=Catnu.dailyCat(STATE,todayStr());const answered=STATE.observations.some(o=>o.date===todayStr());const question=Catnu.dailyQuestion(STATE,todayStr());return `<section class="r-hero" data-tilt><span class="r-kicker">${rt('promise')}</span>${rActive==='all'&&STATE.cats.length>1?`<div class="r-family-art">${STATE.cats.map(c=>rAvatar(c,100)).join('')}</div>`:rHeroCat(STATE.cats.find(c=>c.id===rActive)||cat)}<h2>${rActive==='all'&&STATE.cats.length>1?rt('family'):esc((STATE.cats.find(c=>c.id===rActive)||cat).name)}</h2><p>${rt('question')} · ${rt('turnOf').replace('{name}',esc(cat.name))}</p><button class="r-primary" data-action="blink">${rt('blink')}</button></section>${rRecapBanner?`<button type="button" class="backup-nudge" data-recap-open><span>📖</span><div>${esc(rt('recapReady').replace('{month}',rRecapMonthLabel(rRecapBanner.monthKey,STATE.settings.locale)))}<small>${rt('recapSub')}</small></div></button>`:''}${rLogWidget(rActive!=='all'?rActive:cat.id)}${rLabSuggest(rActive!=='all'?rActive:cat.id)}${rFactPending?`<section class="r-card" id="r-fact-card"><h2 style="font-size:16px">${rt('factTitle')}</h2><p>${esc(rFactPending.fact)}</p><button type="button" data-fact-dismiss>${rt('factDismiss')}</button></section>`:''}<section class="r-card"><div class="turn-row">${rAvatar(cat,40)}<div><b>${rt('turnOf').replace('{name}',esc(cat.name))}</b><small>${rt('rotate')}</small></div></div><h2>${rt(answered?'done':{'quiet-approach':'ask','toy-interest':'playAsk','settle-rest':'restAsk'}[question])}</h2>${answered?'':`<div class="r-answer">${['yes','no','skip'].map(k=>`<button data-answer="${k}">${rt(k==='no'&&question!=='quiet-approach'?'notToday':k)}</button>`).join('')}</div>`}</section>${rMomentForm()}`;}
+function rToday(){const cat=Catnu.dailyCat(STATE,todayStr());const answered=STATE.observations.some(o=>o.date===todayStr());const question=Catnu.dailyQuestion(STATE,todayStr());return `<section class="r-hero" data-tilt><span class="r-kicker">${rt('promise')}</span>${rActive==='all'&&STATE.cats.length>1?`<div class="r-family-art">${STATE.cats.map(c=>rAvatar(c,100)).join('')}</div>`:rHeroCat(STATE.cats.find(c=>c.id===rActive)||cat)}<h2>${rActive==='all'&&STATE.cats.length>1?rt('family'):esc((STATE.cats.find(c=>c.id===rActive)||cat).name)}</h2><p>${rt('question')} · ${rt('turnOf').replace('{name}',esc(cat.name))}</p><button class="r-primary" data-action="blink">${rt('blink')}</button></section>${rRecapBanner?`<button type="button" class="backup-nudge" data-recap-open><span>📖</span><div>${esc(rt('recapReady').replace('{month}',rRecapMonthLabel(rRecapBanner.monthKey,STATE.settings.locale)))}<small>${rt('recapSub')}</small></div></button>`:''}${rLogWidget(rActive!=='all'?rActive:cat.id)}${rLabSuggest(rActive!=='all'?rActive:cat.id)}${rFactPending?`<section class="r-card" id="r-fact-card"><h2 style="font-size:16px">${rt('factTitle')}</h2><p>${esc(rFactPending.fact)}</p><button type="button" data-fact-dismiss>${rt('factDismiss')}</button></section>`:''}<section class="r-card"><div class="turn-row">${rAvatar(cat,40,'happy',true)}<div><b>${rt('turnOf').replace('{name}',esc(cat.name))}</b><small>${rt('rotate')}</small></div></div><h2>${rt(answered?'done':{'quiet-approach':'ask','toy-interest':'playAsk','settle-rest':'restAsk'}[question])}</h2>${answered?'':`<div class="r-answer">${['yes','no','skip'].map(k=>`<button data-answer="${k}">${rt(k==='no'&&question!=='quiet-approach'?'notToday':k)}</button>`).join('')}</div>`}</section>${rMomentForm()}`;}
 function rMemories(){const moments=STATE.moments.filter(m=>rActive==='all'||m.catIds.includes(rActive));return `${rMomentForm()}${moments.slice().reverse().map(m=>{const asset=STATE.assets.find(a=>a.id===m.assetId);return `<article class="r-card">${asset&&/^data:image\/(jpeg|png|webp);base64,/.test(asset.data)?`<img class="r-photo" src="${esc(asset.data)}" alt="${esc(m.note)}">`:''}<p>${esc(m.note)}</p><small>${esc(m.date)} · ${m.catIds.map(id=>esc(STATE.cats.find(c=>c.id===id)?.name||'')).join(' · ')}</small></article>`;}).join('')||`<section class="r-hero">${rAvatar(STATE.cats[0])}<p>${rt('empty')}</p></section>`}<section class="r-card"><h2>${rt('legacy')}</h2>${STATE.logs.filter(l=>rActive==='all'||l.catId===rActive).slice().reverse().slice(0,rHistoryLimit).map(l=>`<p>${esc(l.note||l.notes||'')} <span>${esc([...(l.actions||[]),...(l.reactions||[])].map(id=>copyRows[id]?rt(id):STATE.customActions?.find(a=>a.id===id)?.label||id).join(' · '))}</span><small>${esc(new Date(l.ts||l.timestamp||Date.now()).toLocaleDateString(STATE.settings.locale))}</small></p>`).join('')}<small>${STATE.logs.length}</small>${STATE.logs.length>rHistoryLimit?`<button data-action="more">${rt('more')}</button>`:''}</section>`;}
-function rCatAnalysis(cat){const now=Date.now();const affection=Catnu.affectionScore(STATE.logs,cat.id,now);const level=affection.insufficient?null:Catnu.relationshipLevel(affection.score);const story=Catnu.weeklyStory(STATE.logs,cat.id,now);const insights=Catnu.generateInsights(STATE.logs,cat,now);return `<div class="minicard"><div><div class="mlbl">${rt('voiceTitle').replace('{name}',esc(cat.name))}</div><div class="voice-line">${esc(Catnu.catVoice(affection.insufficient?null:affection.score,todayStr(),STATE.settings.locale))}</div></div><div class="mheart">💗</div></div><div class="voice-sub">${affection.insufficient?`${rt('affectionLabel')} --`:`${rt('affectionLabel')} ${affection.score}${level?` · Lv.${level.lv} ${esc(level.title)}`:''}`}</div><div class="meter"><div style="width:${affection.insufficient?0:affection.score}%"></div></div>${affection.insufficient?`<div class="mlbl" style="margin-top:8px">${rt('affectionInsufficient')}</div>`:(level?`<div class="lvl-line"><span class="lvl-next" style="margin-left:0">${level.next?`仲差 ${level.next.pointsNeeded} 分升 Lv.${level.next.lv}「${esc(level.next.title)}」`:'頂級！繼續寵佢 👑'}</span></div>`:'')}<small class="voice-note">ⓘ ${rt('affectionNote')}</small>${renderWeeklyStoryCard(STATE,cat,story)}<div class="r-card" style="margin:12px 0 0;padding:14px"><h2 style="font-size:15px;margin:0 0 8px">${rt('insightsHeading')}</h2>${insights.length?insights.map(i=>`<div class="insight"><span>${insightIcon(i)}</span><span>${mdBold(i.text)}</span></div>`).join(''):`<div class="note">${rt('insightsEmpty')}</div>`}</div>${(()=>{const signal=Catnu.recentSignal(STATE.logs,cat.id,now);return signal?`<div class="r-card" style="margin:12px 0 0;padding:14px"><h2 style="font-size:15px;margin:0 0 6px">${rt('signalTitle')}</h2><p style="margin:0">${esc(signal.message)}</p><small>${rt('signalDisclaimer')}</small></div>`:'';})()}${rTimelineBlock(cat)}`;}
+function rCatAnalysis(cat){const now=Date.now();const affection=Catnu.affectionScore(STATE.logs,cat.id,now);const level=affection.insufficient?null:Catnu.relationshipLevel(affection.score);const story=Catnu.weeklyStory(STATE.logs,cat.id,now);const insights=Catnu.generateInsights(STATE.logs,cat,now);return `<div class="minicard"><div><div class="mlbl">${rt('voiceTitle').replace('{name}',esc(cat.name))}</div><div class="voice-line">${esc(Catnu.catVoice(affection.insufficient?null:affection.score,todayStr(),STATE.settings.locale))}</div></div><div class="mheart">💗</div></div><div class="voice-sub">${affection.insufficient?`${rt('affectionLabel')} --`:`${rt('affectionLabel')} ${affection.score}${level?` · Lv.${level.lv} ${esc(level.title)}`:''}`}</div><div class="meter"><div style="width:${affection.insufficient?0:affection.score}%"></div></div>${affection.insufficient?`<div class="mlbl" style="margin-top:8px">${rt('affectionInsufficient')}</div>`:(level?`<div class="lvl-line"><span class="lvl-next" style="margin-left:0">${level.next?`仲差 ${level.next.pointsNeeded} 分升 Lv.${level.next.lv}「${esc(level.next.title)}」`:'頂級！繼續寵佢 👑'}</span></div>`:'')}<small class="voice-note">ⓘ ${rt('affectionNote')}</small>${renderWeeklyStoryCard(STATE,cat,story)}<div class="r-card" style="margin:12px 0 0;padding:14px"><h2 style="font-size:15px;margin:0 0 8px">${rt('insightsHeading')}</h2>${insights.length?insights.map(i=>`<div class="insight"><span aria-hidden="true">${esc(insightIcon(i))}</span><span>${mdBold(i.text)}</span></div>`).join(''):`<div class="note">${rt('insightsEmpty')}</div>`}</div>${(()=>{const signal=Catnu.recentSignal(STATE.logs,cat.id,now);return signal?`<div class="r-card" style="margin:12px 0 0;padding:14px"><h2 style="font-size:15px;margin:0 0 6px">${rt('signalTitle')}</h2><p style="margin:0">${esc(signal.message)}</p><small>${rt('signalDisclaimer')}</small></div>`:'';})()}${rTimelineBlock(cat)}`;}
 let rOpenDetails=new Set();
 function rPunct(){const en=STATE.settings.locale==='en';return {list:en?', ':'、',colon:en?': ':'：',semi:en?'; ':'；',open:en?' (':'（',close:en?')':'）'};}
 function rDetailsAttr(key){return `data-details-key="${esc(key)}" ${rOpenDetails.has(key)?'open':''}`;}
@@ -3592,7 +3608,7 @@ function rLabSuggest(catId){
 }
 function rExperimentOpen(type,catId){
   const def=Catnu.EXPERIMENTS.find(e=>e.id===type);const cat=STATE.cats.find(c=>c.id===catId);if(!def||!cat)return;
-  const dialog=document.createElement('dialog');dialog.className='r-dialog';dialog.setAttribute('aria-labelledby','r-exp-title');
+  const dialog=document.createElement('dialog');dialog.className='r-dialog';dialog.setAttribute('aria-modal','true');dialog.setAttribute('aria-labelledby','r-exp-title');
   dialog.innerHTML=`<h2 id="r-exp-title">${def.emoji} ${rt('exp_'+type)} · ${esc(cat.name)}</h2><p class="lab-sci">${rt('exp_'+type+'_sci')}</p><p>${rt('exp_'+type+'_steps')}</p><p style="font-weight:800;margin-top:12px">${rt('labResultPrompt')}</p><div class="lab-results">${def.results.map(r=>`<button type="button" data-exp-result="${r}">${rt('res_'+r)}</button>`).join('')}</div><p class="lab-note">${rt('labNote')}</p><button type="button" data-exp-close>${rt('cancel')}</button>`;
   document.getElementById('app').appendChild(dialog);
   dialog.querySelector('[data-exp-close]').onclick=()=>dialog.close();
@@ -3625,7 +3641,7 @@ function rTouchSvg(cat){
   const next=Catnu.nextTouchZone(map);
   const shapes=TOUCH_SHAPES.map(([zone,tag,attrs])=>{const z=map[zone];const label=`${rt('zone_'+zone)}${rPunct().colon}${rt('verdict_'+z.verdict)}`;return `<${tag} ${attrs} class="tz tz-${z.verdict}${z.caution?' tz-caution':''}${zone===next?' tz-next':''}" data-touch-zone="${zone}" data-id="${esc(cat.id)}" tabindex="0" role="button" aria-label="${esc(label)}"><title>${esc(label)}</title></${tag}>`;}).join('');
   const marks=Catnu.TOUCH_ZONES.map(({id})=>{const v=map[id].verdict;if(v!=='loves'&&v!=='avoid')return '';const first=TOUCH_SHAPES.find(sh=>sh[0]===id);const cx=/cx="(\d+)"/.exec(first[2]),cy=/cy="(\d+)"/.exec(first[2]);return `<text class="tz-mark" x="${cx[1]}" y="${cy[1]}" aria-hidden="true">${v==='loves'?'💗':'✋'}</text>`;}).join('');
-  return `<svg class="touch-svg" viewBox="0 0 640 731" aria-label="${rt('touchTitle')}"><defs><filter id="tz-soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="9"/></filter><mask id="tz-cat" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="640" height="731"><image href="images/touch-cat.webp" width="640" height="731"/></mask></defs><image href="images/touch-cat.webp" width="640" height="731"/><g mask="url(#tz-cat)">${shapes}</g>${marks}</svg>`;
+  return `<svg class="touch-svg" viewBox="0 0 640 731" role="group" aria-label="${esc(rt('touchTitle'))}"><defs><filter id="tz-soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="9"/></filter><mask id="tz-cat" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="640" height="731"><image href="images/touch-cat.webp" width="640" height="731"/></mask></defs><image href="images/touch-cat.webp" width="640" height="731"/><g mask="url(#tz-cat)">${shapes}</g>${marks}</svg>`;
 }
 function rTouchChip(id,z){
   const P=rPunct();const dots='●'.repeat(Math.min(z.n,Catnu.TOUCH_MIN))+'○'.repeat(Math.max(0,Catnu.TOUCH_MIN-z.n));
@@ -3643,7 +3659,7 @@ function rTouchBlock(cat){
 }
 function rTouchOpen(zone,catId){
   if(!Catnu.TOUCH_ZONES.some(z=>z.id===zone)||!STATE.cats.some(c=>c.id===catId))return;
-  const dialog=document.createElement('dialog');dialog.className='r-dialog';dialog.setAttribute('aria-labelledby','r-touch-title');
+  const dialog=document.createElement('dialog');dialog.className='r-dialog';dialog.setAttribute('aria-modal','true');dialog.setAttribute('aria-labelledby','r-touch-title');
   dialog.innerHTML=`<h2 id="r-touch-title">${rt('touchAsk').replace('{zone}',rt('zone_'+zone))}</h2><div class="lab-results">${Catnu.TOUCH_REACTIONS.map(r=>`<button type="button" data-touch-reaction="${r}">${rt('touch_'+r)}</button>`).join('')}</div><p class="lab-note">${rt('touchHint')}</p><button type="button" data-touch-close>${rt('cancel')}</button>`;
   document.getElementById('app').appendChild(dialog);
   dialog.querySelector('[data-touch-close]').onclick=()=>dialog.close();
@@ -3679,7 +3695,7 @@ function rManualOpen(catId){
   const m=Catnu.catManual(STATE,catId,Date.now());
   const title=rt('manualTitle').replace('{name}',cat.name);
   const sections=rManualSections(m);
-  const dialog=document.createElement('dialog');dialog.className='r-dialog';dialog.setAttribute('aria-labelledby','r-manual-title');
+  const dialog=document.createElement('dialog');dialog.className='r-dialog';dialog.setAttribute('aria-modal','true');dialog.setAttribute('aria-labelledby','r-manual-title');
   dialog.innerHTML=`<h2 id="r-manual-title">📋 ${esc(title)}</h2>${m.ready?sections.map(([h,b])=>`<div class="manual-sec"><b>${esc(h)}</b><span>${esc(b)}</span></div>`).join(''):`<p>${rt('manualEmpty')}</p>`}<p class="lab-note">${rt('manualDisclaimer')}</p>${m.ready?`<button type="button" class="r-primary" data-manual-download>${rt('manualDownload')}</button>`:''}<button type="button" data-manual-close>${rt('close')}</button>`;
   document.getElementById('app').appendChild(dialog);
   dialog.querySelector('[data-manual-close]').onclick=()=>dialog.close();
@@ -3687,7 +3703,7 @@ function rManualOpen(catId){
   const dl=dialog.querySelector('[data-manual-download]');if(dl)dl.onclick=()=>Catnu.shareCatManualCard(cat,title,sections,rt('manualDisclaimer'));
   dialog.showModal();
 }
-function rCats(){return `${renderMilestoneWall(STATE)}${rFactsWall()}<p>${rt('compare')}</p>${STATE.cats.filter(c=>rActive==='all'||c.id===rActive).map(c=>{const i=Catnu.insight(STATE,c.id);return `<article class="r-card r-profile" data-cat-id="${esc(c.id)}">${rAvatar(c)}<h2>${esc(c.name)}</h2><p>${rt('original')} · ${c.ownerPerception.map(rt).join(' / ')||rt('pending')}</p><p>${rt('observed')} · ${i.revised?rt('revised'):Catnu.observedTraits(STATE,c.id).map(t=>rt(t.trait)).join(' / ')||rt('pending')}</p>${rCatAnalysis(c)}${rLabBlock(c)}${rTouchBlock(c)}<button type="button" class="r-primary" style="display:block;width:100%;margin:12px 0 8px" data-manual="${esc(c.id)}">${esc(rt('manualOpen').replace('{name}',c.name))}</button><small>${rt('confidence')}: ${rt(i.confidence)} (${i.count})</small>${i.count?`<p>${rt('feedback')}</p><div class="r-answer">${['accurate','unsure','inaccurate'].map(k=>`<button data-feedback="${k}" data-id="${esc(c.id)}">${rt(k)}</button>`).join('')}</div>`:''}${rRecordRows('observations',c)}<button data-edit="${esc(c.id)}">${rt('edit')}</button></article>`;}).join('')}<button class="r-primary" data-action="add">${rt('add')}</button>`;}
+function rCats(){return `${renderMilestoneWall(STATE)}${rFactsWall()}<p>${rt('compare')}</p>${STATE.cats.filter(c=>rActive==='all'||c.id===rActive).map(c=>{const i=Catnu.insight(STATE,c.id);return `<article class="r-card r-profile" data-cat-id="${esc(c.id)}">${rAvatar(c,110,'happy',true)}<h2>${esc(c.name)}</h2><p>${rt('original')} · ${c.ownerPerception.map(rt).join(' / ')||rt('pending')}</p><p>${rt('observed')} · ${i.revised?rt('revised'):Catnu.observedTraits(STATE,c.id).map(t=>rt(t.trait)).join(' / ')||rt('pending')}</p>${rCatAnalysis(c)}${rLabBlock(c)}${rTouchBlock(c)}<button type="button" class="r-primary" style="display:block;width:100%;margin:12px 0 8px" data-manual="${esc(c.id)}">${esc(rt('manualOpen').replace('{name}',c.name))}</button><small>${rt('confidence')}: ${rt(i.confidence)} (${i.count})</small>${i.count?`<p>${rt('feedback')}</p><div class="r-answer">${['accurate','unsure','inaccurate'].map(k=>`<button data-feedback="${k}" data-id="${esc(c.id)}">${rt(k)}</button>`).join('')}</div>`:''}${rRecordRows('observations',c)}<button data-edit="${esc(c.id)}">${rt('edit')}</button></article>`;}).join('')}<button class="r-primary" data-action="add">${rt('add')}</button>`;}
 function rSettings(){return `<section class="r-card"><h2>${rt('settings')}</h2>${rLocaleControls()}<p>${rt('local')}</p><button data-action="backup">${rt('backup')}</button><label>${rt('restore')}<input id="r-restore" type="file" accept="application/json"></label></section><section class="r-card"><h2>${rt('free')}</h2><p>${rt('future')}</p></section>`;}
 function rSave(){
  if(rLoadBlocked){Catnu.showToast(rt('damaged'));return false;}
@@ -3718,7 +3734,7 @@ function rBindMotion(app){
   const end=e=>{clearTimeout(pressT);if(purring){purring=false;cat.classList.remove('purring');rHeroMood('happy');rFloatHearts(e.clientX,e.clientY,undefined,8);return;}if(e.type!=='pointerup')return;const now=Date.now();taps=taps.filter(t=>now-t<1200);taps.push(now);squish();if(taps.length>=4){taps=[];rHeroMood('shy',1800);rFloatHearts(e.clientX,e.clientY,['💦','😳'],3);}else rFloatHearts(e.clientX,e.clientY);};
   cat.addEventListener('pointerup',end);cat.addEventListener('pointerleave',end);cat.addEventListener('pointercancel',end);
 }
-function rRender(){const rEnter=rTab!==rLastTab||rActive!==rLastActive;const rPop=rLastTab!==null&&rTab!==rLastTab;rLastTab=rTab;rLastActive=rActive;document.documentElement.lang=STATE.settings.locale;document.title=rt('brand');const app=document.getElementById('app');app.className='r-app';app.innerHTML=`<header class="r-header"><strong>${rt('brand')}</strong>${STATE.cats.length?`<span style="display:flex;align-items:center;gap:8px"><span class="r-streak">🔥 ${STATE.streak.current}</span><button data-tab="settings" aria-label="${rt('settings')}">⚙</button></span>`:''}</header>${!STATE.cats.length||rAdding||rEditing?rCatForm():`<div class="r-switch" aria-label="${rt('cats')}">${STATE.cats.length>1?`<button data-cat="all" class="${rActive==='all'?'selected':''}">${rt('all')}</button>`:''}${STATE.cats.map(c=>`<button data-cat="${esc(c.id)}" class="${rActive===c.id?'selected':''}">${rAvatar(c,36)}${esc(c.name)}</button>`).join('')}</div><main class="${rEnter?'enter':''}">${({today:rToday,memories:rMemories,cats:rCats,settings:rSettings}[rTab])()}</main><nav class="r-nav">${['today','memories','cats'].map((k,i)=>`<button data-tab="${k}" class="${rPop&&rTab===k?'pop':''}" aria-current="${rTab===k?'page':'false'}"><span aria-hidden="true">${['☀','▧','♡'][i]}</span>${rt(k)}</button>`).join('')}</nav>`}<div id="toast" class="toast" role="status"></div>`;
+function rRender(){const rEnter=rTab!==rLastTab||rActive!==rLastActive;const rPop=rLastTab!==null&&rTab!==rLastTab;rLastTab=rTab;rLastActive=rActive;document.documentElement.lang=STATE.settings.locale;document.title=rt('brand');const app=document.getElementById('app');app.className='r-app';app.innerHTML=`<header class="r-header"><strong>${rt('brand')}</strong>${STATE.cats.length?`<span style="display:flex;align-items:center;gap:8px"><span class="r-streak">🔥 ${STATE.streak.current}</span><button type="button" data-tab="settings" aria-label="${esc(rt('settings'))}">⚙</button></span>`:''}</header>${!STATE.cats.length||rAdding||rEditing?rCatForm():`<div class="r-switch" role="group" aria-label="${esc(rt('cats'))}">${STATE.cats.length>1?`<button type="button" data-cat="all" class="${rActive==='all'?'selected':''}" aria-pressed="${rActive==='all'}">${rt('all')}</button>`:''}${STATE.cats.map(c=>`<button type="button" data-cat="${esc(c.id)}" class="${rActive===c.id?'selected':''}" aria-pressed="${rActive===c.id}">${rAvatar(c,36,'happy',true)}${esc(c.name)}</button>`).join('')}</div><main class="${rEnter?'enter':''}">${({today:rToday,memories:rMemories,cats:rCats,settings:rSettings}[rTab])()}</main><nav class="r-nav" aria-label="${esc(rt('brand'))}">${['today','memories','cats'].map((k,i)=>`<button type="button" data-tab="${k}" class="${rPop&&rTab===k?'pop':''}" aria-current="${rTab===k?'page':'false'}"><span aria-hidden="true">${['☀','▧','♡'][i]}</span>${rt(k)}</button>`).join('')}</nav>`}<div id="toast" class="toast" role="status"></div>`;
 app.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{rTab=b.dataset.tab;rRender();});app.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{rActive=b.dataset.cat;STATE.settings.lastActiveCat=rActive;rSave();rRender();});
 const locale=app.querySelector('#r-locale');if(locale)locale.onchange=()=>{rCaptureDraft();STATE.settings.locale=locale.value;STATE.settings.localeChosen=true;if(rSave())rRender();};const region=app.querySelector('#r-region');if(region)region.onchange=()=>{rCaptureDraft();STATE.settings.region=region.value;if(!STATE.cats.length&&!STATE.settings.localeChosen)STATE.settings.locale={HK:'zh-HK',TW:'zh-TW',CN:'zh-CN',OTHER:'en'}[region.value];if(rSave())rRender();};
 app.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>{if(b.dataset.action==='more'){rHistoryLimit+=20;rRender();}if(b.dataset.action==='blink'){Catnu.showToast(rt('blinkDone'));rHeroMood('sleepy',1800,['💤','💗']);}if(b.dataset.action==='add'){rAdding=true;rDraft=null;rRender();}if(b.dataset.action==='cancel'){rAdding=false;rEditing=null;rDraft=null;rRender();}if(b.dataset.action==='backup')rBackup();});
@@ -3731,8 +3747,8 @@ app.querySelectorAll('[data-answer]').forEach(b=>b.onclick=()=>{if(STATE.observa
 app.querySelectorAll('[data-feedback]').forEach(b=>b.onclick=()=>{STATE.insightFeedback.push({catId:b.dataset.id,answer:b.dataset.feedback,ts:Date.now()});if(rSave()){rRender();Catnu.showToast(rt('saved'));}});
 app.querySelectorAll('[data-log-preset]').forEach(b=>b.onclick=()=>{const p=QUICK_PRESETS[+b.dataset.logPreset];rCommitLog({catId:b.dataset.logCat,reactions:p.reactions,actions:p.actions,neg:p.neg,tileId:p.id},b);});
 const logToggle=app.querySelector('[data-log-detail-toggle]');if(logToggle)logToggle.onclick=()=>{rLogDetailOpen=!rLogDetailOpen;rRender();};
-app.querySelectorAll('[data-log-reaction]').forEach(c=>c.onclick=()=>{const id=c.dataset.logReaction;rLogReactions.has(id)?rLogReactions.delete(id):rLogReactions.add(id);rRender();});
-app.querySelectorAll('[data-log-action]').forEach(c=>c.onclick=()=>{const id=c.dataset.logAction;rLogActions.has(id)?rLogActions.delete(id):rLogActions.add(id);rRender();});
+app.querySelectorAll('[data-log-reaction]').forEach(c=>{const toggle=()=>{const id=c.dataset.logReaction;rLogReactions.has(id)?rLogReactions.delete(id):rLogReactions.add(id);rRender();};c.onclick=toggle;c.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}};});
+app.querySelectorAll('[data-log-action]').forEach(c=>{const toggle=()=>{const id=c.dataset.logAction;rLogActions.has(id)?rLogActions.delete(id):rLogActions.add(id);rRender();};c.onclick=toggle;c.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}};});
 const logSubmit=app.querySelector('[data-log-submit]');if(logSubmit)logSubmit.onclick=()=>{const entry={catId:logSubmit.dataset.logCat,reactions:[...rLogReactions],actions:[...rLogActions]};rLogReactions=new Set();rLogActions=new Set();rLogDetailOpen=false;rCommitLog(entry,logSubmit);};
 app.querySelectorAll('.r-profile').forEach(art=>{const catId=art.dataset.catId;const shareBtn=art.querySelector('#weekly-share');if(shareBtn)shareBtn.onclick=()=>{const cat=STATE.cats.find(c=>c.id===catId);Catnu.shareWeeklyCard(STATE,cat,Catnu.weeklyReport(STATE.logs,catId,Date.now()));};});
 const factDismiss=app.querySelector('[data-fact-dismiss]');if(factDismiss)factDismiss.onclick=()=>{rFactPending=null;rRender();};
@@ -3751,12 +3767,12 @@ function rBackup(){
  if(!rLoadBlocked){STATE.settings.lastBackupAt=Date.now();rSave();}
  const json=rLoadBlocked?rOriginalRaw:JSON.stringify(STATE,null,2);
  const url=URL.createObjectURL(new Blob([json],{type:'application/json'}));
- const dialog=document.createElement('dialog');dialog.className='r-dialog';dialog.setAttribute('aria-labelledby','r-backup-title');
+ const dialog=document.createElement('dialog');dialog.className='r-dialog';dialog.setAttribute('aria-modal','true');dialog.setAttribute('aria-labelledby','r-backup-title');
  dialog.innerHTML=`<h2 id="r-backup-title">${rt('ready')}</h2><a class="r-download" href="${url}" download="catnu-backup-${todayStr()}.json">${rt('download')}</a><details><summary>${rt('manual')}</summary><textarea readonly aria-label="${rt('backup')}">${esc(json)}</textarea></details><button>${rt('close')}</button>`;
  document.getElementById('app').appendChild(dialog);dialog.querySelector('button').onclick=()=>dialog.close();dialog.onclose=()=>{URL.revokeObjectURL(url);dialog.remove();};dialog.showModal();
 }
 function rRestorePreview(state){
- const dialog=document.createElement('dialog');dialog.className='r-dialog';dialog.setAttribute('aria-labelledby','r-restore-title');
+ const dialog=document.createElement('dialog');dialog.className='r-dialog';dialog.setAttribute('aria-modal','true');dialog.setAttribute('aria-labelledby','r-restore-title');
  dialog.innerHTML=`<h2 id="r-restore-title">${rt('restore')}</h2><p>${rt('restoreCounts')}: ${state.cats.length} / ${state.logs.length} / ${state.moments.length}</p><p>${rt('confirmRestore')}</p><div class="r-answer"><button id="r-confirm-cancel">${rt('cancel')}</button><button id="r-confirm-save" class="r-primary">${rt('confirm')}</button></div>`;
  document.getElementById('app').appendChild(dialog);dialog.querySelector('#r-confirm-cancel').onclick=()=>dialog.close();dialog.onclose=()=>dialog.remove();dialog.querySelector('#r-confirm-save').onclick=()=>{try{Catnu.Store.save(state);STATE=state;rLoadBlocked=false;rPersisted=JSON.stringify(state);rActive=state.cats.length===1?state.cats[0].id:'all';dialog.close();rRender();}catch(e){Catnu.showToast(rt('error'));}};dialog.showModal();
 }
